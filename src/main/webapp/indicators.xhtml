@@ -43,7 +43,7 @@
 			<h:outputText value="#{result.stock.name}" style="font-size: 0.6em;" />
 		</p:column>
 		
-		<p:column headerText="Symbol" sortBy="#{result.stock.symbol}" filterBy="#{result.stock.symbol}" styleClass="text">
+		<p:column headerText="Symbol" sortBy="#{result.stock.symbol}" filterBy="#{result.stock.symbol}" filterMatchMode="exact" styleClass="text">
 			<h:outputText value="#{result.stock.symbol}" />
 		</p:column>
 		
