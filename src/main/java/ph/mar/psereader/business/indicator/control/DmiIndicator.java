@@ -27,6 +27,7 @@ import ph.mar.psereader.business.stock.entity.Stock;
 public class DmiIndicator {
 
 	private static final BigDecimal _100 = new BigDecimal("100");
+	private static final BigDecimal TREND_WARNING = new BigDecimal("5");
 	private static final BigDecimal TREND_SIGNAL = new BigDecimal("20");
 	private static final BigDecimal STRONG_TREND_SIGNAL = new BigDecimal("40");
 
@@ -220,9 +221,15 @@ public class DmiIndicator {
 			position = PositionType.ENTER;
 		} else if (_prevPlusDi.compareTo(_prevMinusDi) > 0 && _minusDi.compareTo(_plusDi) > 0) {
 			position = PositionType.EXIT;
-		} else if (_plusDi.compareTo(_prevPlusDi) > 0 && _minusDi.compareTo(_prevMinusDi) < 0) {
+		} else if (_prevMinusDi.compareTo(_prevPlusDi) > 0 && _prevMinusDi.compareTo(_minusDi) > 0 && _prevPlusDi.compareTo(_plusDi) < 0
+				&& _minusDi.subtract(_plusDi).compareTo(TREND_WARNING) <= 0) {
+			position = PositionType.UP_WARNING;
+		} else if (_prevPlusDi.compareTo(_prevMinusDi) > 0 && _prevPlusDi.compareTo(_plusDi) > 0 && _prevMinusDi.compareTo(_minusDi) < 0
+				&& _plusDi.subtract(_minusDi).compareTo(TREND_WARNING) <= 0) {
+			position = PositionType.DOWN_WARNING;
+		} else if (_plusDi.compareTo(_prevPlusDi) > 0) {
 			position = PositionType.RISING;
-		} else if (_plusDi.compareTo(_prevPlusDi) < 0 && _minusDi.compareTo(_prevMinusDi) > 0) {
+		} else if (_plusDi.compareTo(_prevPlusDi) < 0) {
 			position = PositionType.FALLING;
 		} else {
 			position = PositionType.HOLD;

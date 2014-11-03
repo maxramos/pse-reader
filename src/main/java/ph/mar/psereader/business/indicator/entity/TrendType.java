@@ -2,10 +2,10 @@ package ph.mar.psereader.business.indicator.entity;
 
 public enum TrendType {
 
-	UP("Up"),
 	STRONG_UP("Strong Up"),
-	DOWN("Down"),
 	STRONG_DOWN("Strong Down"),
+	UP("Up"),
+	DOWN("Down"),
 	SIDEWAYS("Sideways");
 
 	private String name;
