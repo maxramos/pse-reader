@@ -1,0 +1,91 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions"
+	template="/WEB-INF/template/template.xhtml">
+
+<ui:define name="content">
+<h:form id="stockForm">	
+	<p:dataTable id="stockDataTable" var="quote" value="#{stocksPage.quotes}">
+		<f:facet name="header">
+			<p:panelGrid id="header" styleClass="header">
+				<p:row>
+					<p:column styleClass="left">
+						<p:selectOneMenu id="selectedStockSymbol" value="#{stocksPage.selectedSymbol}" filter="true">
+							<p:ajax update="stockDataTable" listener="#{stocksPage.onSymbolChange}" />
+							<f:selectItems value="#{stocksPage.symbols}" />
+						</p:selectOneMenu>
+					</p:column>
+					<p:column styleClass="middle">
+						<h:outputText value="#{stocksPage.stock.name}" />
+						<br />
+						<h:outputText value="#{stocksPage.stock.sector.name} > #{stocksPage.stock.subSector.name}" styleClass="caption" rendered="#{not empty stocksPage.symbols}" />
+					</p:column>
+					<p:column styleClass="right">
+						<p:commandButton id="toggler" type="button" value="Columns" icon="ui-icon-calculator" />
+        				<p:columnToggler datasource="stockDataTable" trigger="toggler" />
+					</p:column>
+				</p:row>
+        	</p:panelGrid>
+		</f:facet>
+		
+		<p:column headerText="Date" sortBy="#{quote.date}" styleClass="text">
+			<h:outputText value="#{quote.date}">
+				<f:convertDateTime pattern="MMM dd, yyyy" />
+			</h:outputText>
+		</p:column>
+		
+		<p:column headerText="Bid" sortBy="#{quote.bid}" styleClass="numeric">
+			<h:outputText value="#{quote.bid}">
+				<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+			</h:outputText>
+		</p:column>
+		
+		<p:column headerText="Ask" sortBy="#{quote.ask}" styleClass="numeric">
+			<h:outputText value="#{quote.ask}">
+				<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+			</h:outputText>
+		</p:column>
+		
+		<p:column headerText="Open" sortBy="#{quote.open}" styleClass="numeric">
+			<h:outputText value="#{quote.open}">
+				<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+			</h:outputText>
+		</p:column>
+		
+		<p:column headerText="High" sortBy="#{quote.high}" styleClass="numeric">
+			<h:outputText value="#{quote.high}">
+				<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+			</h:outputText>
+		</p:column>
+		
+		<p:column headerText="Low" sortBy="#{quote.low}" styleClass="numeric">
+			<h:outputText value="#{quote.low}">
+				<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+			</h:outputText>
+		</p:column>
+		
+		<p:column headerText="Close" sortBy="#{quote.close}" styleClass="numeric">
+			<h:outputText value="#{quote.close}">
+				<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+			</h:outputText>
+		</p:column>
+		
+		<p:column headerText="Volume" sortBy="#{quote.volume}" styleClass="numeric">
+			<h:outputText value="#{quote.volume}">
+				<f:convertNumber type="number" groupingUsed="true" />
+			</h:outputText>
+		</p:column>
+		
+		<p:column headerText="Foreign Buy/Sell" sortBy="#{quote.foreignBuySell}" styleClass="numeric">
+			<h:outputText value="#{quote.foreignBuySell}">
+				<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+			</h:outputText>
+		</p:column>
+	</p:dataTable>
+</h:form>
+</ui:define>
+
+</ui:composition>

@@ -1,0 +1,30 @@
+@CHARSET "UTF-8";
+
+.BUY, .MUST_BUY, .UP, .STRONG_UP, .ENTER, .RISING { color: #008800; }
+.BUY_WARNING { color: #8BDD8B; }
+.SELL, .MUST_SELL, .DOWN, .STRONG_DOWN, .EXIT, .FALLING { color: #880000; }
+.SELL_WARNING { color: #DD8B8B; }
+.SIDEWAYS { color: #888800 }
+
+.action { text-align: left; font-size: 0.6em; font-weight: bold; white-space: nowrap; vertical-align: middle; }
+.main { color: #000088; }
+.signal, .negative { color: #880000; font-size: 0.6em; }
+.positive { color: #008800; font-size: 0.6em; }
+
+body { font-size: 0.8em !important; }
+
+.header, .header tr, .header td { background: none; border: none !important; padding: 0em !important; }
+.header .middle { width: 50%; text-align: center; color: #FFFFFF; }
+.header .left { width: 25%; text-align: left; }
+.header .right { width: 25%; text-align: right; }
+.header .caption { font-size: 0.6em; }
+
+.text { text-align: center; }
+.numeric { text-align: right; }
+.menu .selected { color: #FFFFFF; background: #6580A1; }
+
+.no-border, .no-border tr, .no-border td { border: none !important; }
+.no-border .ui-chkbox-label { margin-top: 0em !important; }
+.table { display: table; width: 100%; }
+.table-row { display: table-row; }
+.table-cell { display: table-cell; }

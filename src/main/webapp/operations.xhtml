@@ -1,0 +1,60 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/template/template.xhtml">
+
+<ui:define name="content">
+	<p:panelGrid styleClass="no-border" style="width: 30em;">
+		<f:facet name="header">
+			<p:row>
+				<p:column colspan="2">
+					<h:outputText value="Settings" />
+				</p:column>
+			</p:row>
+		</f:facet>
+		<p:row>
+			<p:column>
+				<h:outputLabel value="Indicators last run:" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{operationsPage.settings.lastProcessedDate}">
+					<f:convertDateTime pattern="MMM dd, yyyy" />
+				</h:outputText>
+			</p:column>
+		</p:row>
+		<p:row>
+			<p:column>
+				<h:outputLabel value="Suspended stocks as of:" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{operationsPage.settings.suspensionDate}">
+					<f:convertDateTime pattern="MMM dd, yyyy" />
+				</h:outputText>
+			</p:column>
+		</p:row>
+	</p:panelGrid>
+	
+	<h:form id="operationForm">
+		<p:panelGrid styleClass="no-border" style="width: 30em; text-align: center;">
+			<f:facet name="header">
+				<p:row>
+					<p:column>
+						<h:outputText value="Controls" />
+					</p:column>
+				</p:row>
+			</f:facet>
+			<p:row>
+				<p:column>
+					<p:commandButton id="run" value="Run" actionListener="#{operationsPage.run}" partialSubmit="true" />
+				</p:column>
+			</p:row>
+		</p:panelGrid>
+		
+		<p:blockUI block="@(html)" trigger="run">
+			<p:graphicImage library="img" name="loading.gif" />  
+		</p:blockUI>
+	</h:form>
+</ui:define>
+</ui:composition>
