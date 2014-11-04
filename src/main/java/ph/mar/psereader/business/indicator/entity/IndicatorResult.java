@@ -23,15 +23,11 @@ import ph.mar.psereader.business.stock.entity.Stock;
 @Table(name = "indicator_result", uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }))
 @NamedQueries({
 	@NamedQuery(name = IndicatorResult.ALL_BY_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.date = :date"),
-	@NamedQuery(name = IndicatorResult.ALL_DMI_RESULTS_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.DmiResult(ir.dmiResult.adx, ir.dmiResult.plusDi, ir.dmiResult.minusDi, ir.dmiResult.smoothedPlusDm, ir.dmiResult.smoothedMinusDm, ir.dmiResult.atr) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC"),
-	@NamedQuery(name = IndicatorResult.ALL_RSI_RESULTS_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.RsiResult(ir.rsiResult.rsi, ir.rsiResult.avgGain, ir.rsiResult.avgLoss) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC"),
-	@NamedQuery(name = IndicatorResult.ALL_SSTO_RESULTS_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.SstoResult(ir.sstoResult.slowK, ir.sstoResult.fastK) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.sstoResult, ir.rsiResult, ir.dmiResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
 public class IndicatorResult implements Serializable {
 
 	public static final String ALL_BY_DATE = "IndicatorResult.ALL_BY_DATE";
-	public static final String ALL_DMI_RESULTS_BY_STOCK = "IndicatorResult.ALL_DMI_RESULTS_BY_STOCK";
-	public static final String ALL_RSI_RESULTS_BY_STOCK = "IndicatorResult.ALL_RSI_RESULTS_BY_STOCK";
-	public static final String ALL_SSTO_RESULTS_BY_STOCK = "IndicatorResult.ALL_SSTO_RESULTS_BY_STOCK";
+	public static final String ALL_INDICATOR_DATA_BY_STOCK = "IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK";
 
 	private static final long serialVersionUID = 1L;
 
@@ -63,6 +59,15 @@ public class IndicatorResult implements Serializable {
 	public IndicatorResult(Stock stock, Date date) {
 		this.stock = stock;
 		this.date = date;
+	}
+
+	/**
+	 * Used for New jpql construct.
+	 */
+	public IndicatorResult(SstoResult sstoResult, RsiResult rsiResult, DmiResult dmiResult) {
+		this.sstoResult = sstoResult;
+		this.rsiResult = rsiResult;
+		this.dmiResult = dmiResult;
 	}
 
 	public Long getId() {

@@ -58,18 +58,6 @@ public class DmiResult implements Serializable {
 		this.atr = atr;
 	}
 
-	/**
-	 * Used for NEW jpql construct.
-	 */
-	public DmiResult(BigDecimal adx, BigDecimal plusDi, BigDecimal minusDi, BigDecimal smoothedPlusDm, BigDecimal smoothedMinusDm, BigDecimal atr) {
-		this.adx = adx;
-		this.plusDi = plusDi;
-		this.minusDi = minusDi;
-		this.smoothedPlusDm = smoothedPlusDm;
-		this.smoothedMinusDm = smoothedMinusDm;
-		this.atr = atr;
-	}
-
 	public BigDecimal getAdx() {
 		return adx;
 	}

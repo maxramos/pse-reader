@@ -37,14 +37,6 @@ public class SstoResult implements Serializable {
 		this.fastK = fastK;
 	}
 
-	/**
-	 * Used for NEW jpql construct.
-	 */
-	public SstoResult(BigDecimal slowK, BigDecimal fastK) {
-		this.slowK = slowK;
-		this.fastK = fastK;
-	}
-
 	public BigDecimal getSlowK() {
 		return slowK;
 	}

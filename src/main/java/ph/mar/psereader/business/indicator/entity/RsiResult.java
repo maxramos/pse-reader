@@ -39,15 +39,6 @@ public class RsiResult implements Serializable {
 		this.avgLoss = avgLoss;
 	}
 
-	/**
-	 * Used for New jpql construct.
-	 */
-	public RsiResult(BigDecimal rsi, BigDecimal avgGain, BigDecimal avgLoss) {
-		this.rsi = rsi;
-		this.avgGain = avgGain;
-		this.avgLoss = avgLoss;
-	}
-
 	public BigDecimal getRsi() {
 		return rsi;
 	}

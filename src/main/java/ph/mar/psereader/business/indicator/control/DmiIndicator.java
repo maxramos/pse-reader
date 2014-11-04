@@ -1,28 +1,56 @@
 package ph.mar.psereader.business.indicator.control;
 
-import static ph.mar.psereader.business.repository.control.QueryParameter.with;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.Singleton;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
 
 import ph.mar.psereader.business.indicator.entity.DmiResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.PositionType;
 import ph.mar.psereader.business.indicator.entity.TrendType;
-import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
-import ph.mar.psereader.business.stock.entity.Stock;
 
+/**
+ * This implements the Directional Movement Index (DMI) with Average Directional Index (ADX)
+ *
+ * Computations:
+ * n = look-back period
+ * TR_CANDIDATE_1 = CURRENT_HIGH - CURRENT_LOW
+ * TR_CANDIDATE_2 = ABS(CURRENT_HIGH - PREVIOUS_CLOSE)
+ * TR_CANDIDATE_3 = ABS(CURRENT_LOW - PREVIOUS_CLOSE)
+ * UP_MOVE = CURRENT_HIGH - PREVIOUS_HIGH
+ * DOWN_MOVE - PREVIOUS_LOW - CURRENT_LOW
+ * TR = MAX(TR_CANDIDATE_1, TR_CANDIDATE_2, TR_CANDIDATE_2)
+ *
+ * ATR = EMAn(TR)
+ * +DM = UP_MOVE > DOWN_MOVE && UP_MOVE > 0 ? UP_MOVE : 0
+ * -DM = DOWN_MOVE > UP_MOVE && DOWN_MOVE > 0 ? DOWN_MOVE : 0
+ * +DI = EMAn(+DM) / ATR * 100
+ * -DI = EMAn(-DM) / ATR * 100
+ * DX = ABS(+DI - -DI) / (+DI + -DI) * 100
+ * ADX = EMAn(DX)
+ *
+ * Trends:
+ * STRONG_UP_TREND --- ADX > 40 && +DI > -DI
+ * STRONG_DOWN_TREND --- ADX > 40 && -DI > +DI
+ * UP_TREND --- ADX > 20 && +DI > -DI
+ * DOWN_TREND --- ADX > 20 && -DI > +DI
+ * SIDEWAYS --- ADX <= 20
+ *
+ * Positions:
+ * ENTER --- PREV_-DI > PREV_+DI && +DI > -D
+ * EXIT --- PREV_+DI > PREV_-DI && -DI > +DI
+ * UP_TREND_WARNING --- PREV_-DI > PREV_+DI && PREV_-DI > -DI && PREV_+DI < +DI && -DI - +DI <= 5
+ * DOWN_TREND_WARNING --- PREV_+DI > PREV_-DI && PREV_+DI > +DI && PREV_-DI < -DI && +DI - -DI <= 5
+ * RISING_TREND --- +DI > PREV_+DI
+ * FALLING_TREND --- +DI < PREV_+DI
+ * HOLD --- Initial State
+ */
 @Singleton
 public class DmiIndicator {
 
@@ -31,35 +59,18 @@ public class DmiIndicator {
 	private static final BigDecimal TREND_SIGNAL = new BigDecimal("20");
 	private static final BigDecimal STRONG_TREND_SIGNAL = new BigDecimal("40");
 
-	@Inject
-	Logger log;
-
-	@Inject
-	Repository repository;
-
 	int lookBackPeriod = 14;
 
 	@Asynchronous
-	public Future<DmiResult> run(Stock stock, Date date) {
-		return stock.getIndicatorResults().isEmpty() ? initialDmi(stock, date) : succeedingDmi(stock, date);
+	public Future<DmiResult> run(List<Quote> quotes, List<IndicatorResult> results) {
+		return results.isEmpty() ? initialDmi(quotes) : succeedingDmi(quotes, results);
 	}
 
-	private Future<DmiResult> initialDmi(Stock stock, Date date) {
-		int minSize = lookBackPeriod + 1 + lookBackPeriod - 1;
-		List<Quote> quotes = repository.find(Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(),
-				Quote.class, minSize);
+	private Future<DmiResult> initialDmi(List<Quote> quotes) {
+		int size = lookBackPeriod + 1 + lookBackPeriod - 1; // 28
+		List<Quote> trimmedQuotes = quotes.subList(0, size);
 
-		if (quotes.size() < minSize) {
-			throw new IndicatorException(String.format("Not enough quotes: %s for %s.", quotes.size(), stock.getSymbol()));
-		}
-
-		Quote currentQuote = quotes.get(0);
-
-		if (date.compareTo(currentQuote.getDate()) != 0) {
-			throw new IndicatorException(String.format("No quote for date: %s for %s.", Quote.DATE_FORMAT.format(date), stock.getSymbol()));
-		}
-
-		DmiResult.Holder trAndDmDataList = trAndDmData(quotes, minSize - 1);
+		DmiResult.Holder trAndDmDataList = trAndDmData(trimmedQuotes, size - 1);
 		DmiResult.SmoothedHolder adxDataList = adxData(trAndDmDataList);
 		BigDecimal adx = IndicatorUtil.avg(adxDataList.getDxList(), 10);
 		BigDecimal plusDi = adxDataList.getLastPlusDi();
@@ -74,18 +85,10 @@ public class DmiIndicator {
 		return new AsyncResult<>(result);
 	}
 
-	private Future<DmiResult> succeedingDmi(Stock stock, Date date) {
-		List<Quote> quotes = repository.find(Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(),
-				Quote.class, 2);
-		Quote currentQuote = quotes.get(0);
-
-		if (date.compareTo(currentQuote.getDate()) != 0) {
-			throw new IndicatorException(String.format("No quote for date: %s for %s.", Quote.DATE_FORMAT.format(date), stock.getSymbol()));
-		}
-
-		List<DmiResult> dmiResults = repository.find(IndicatorResult.ALL_DMI_RESULTS_BY_STOCK, with("stock", stock).asParameters(), DmiResult.class,
-				1);
-		DmiResult previousDmiResult = dmiResults.get(0);
+	private Future<DmiResult> succeedingDmi(List<Quote> quotes, List<IndicatorResult> results) {
+		int size = 2;
+		List<Quote> trimmedQuotes = quotes.subList(0, size);
+		DmiResult previousDmiResult = results.get(0).getDmiResult();
 		BigDecimal previousAdx = previousDmiResult.getAdx();
 		BigDecimal previousPlusDi = previousDmiResult.getPlusDi();
 		BigDecimal previousMinusDi = previousDmiResult.getMinusDi();
@@ -93,7 +96,7 @@ public class DmiIndicator {
 		BigDecimal previousSmoothedMinusDm = previousDmiResult.getSmoothedMinusDm();
 		BigDecimal previousAtr = previousDmiResult.getAtr();
 
-		DmiResult.Holder trAndDmDataList = trAndDmData(quotes, 1);
+		DmiResult.Holder trAndDmDataList = trAndDmData(trimmedQuotes, 1);
 		BigDecimal currentTr = trAndDmDataList.getTrList().get(0);
 		BigDecimal currentPlusDm = trAndDmDataList.getPlusDmList().get(0);
 		BigDecimal currentMinusDm = trAndDmDataList.getMinusDmList().get(0);
@@ -133,7 +136,11 @@ public class DmiIndicator {
 			BigDecimal downMove = previousLow.subtract(currentLow);
 
 			BigDecimal tr = trCandidate1.max(trCandidate2).max(trCandidate3);
+
+			// +DM = UP_MOVE > DOWN_MOVE && UP_MOVE > 0 ? UP_MOVE : 0
 			BigDecimal plusDm = upMove.compareTo(downMove) > 0 && upMove.compareTo(BigDecimal.ZERO) > 0 ? upMove : BigDecimal.ZERO;
+
+			// -DM = DOWN_MOVE > UP_MOVE && DOWN_MOVE > 0 ? DOWN_MOVE : 0
 			BigDecimal minusDm = downMove.compareTo(upMove) > 0 && downMove.compareTo(BigDecimal.ZERO) > 0 ? downMove : BigDecimal.ZERO;
 
 			trAndDmDataList.add(tr, plusDm, minusDm);
@@ -189,7 +196,7 @@ public class DmiIndicator {
 	}
 
 	private BigDecimal dx(BigDecimal plusDi, BigDecimal minusDi) {
-		// abs(+DI - -DI) / (+DI + -DI) * 100
+		// ABS(+DI - -DI) / (+DI + -DI) * 100
 		return plusDi.subtract(minusDi).abs().divide(plusDi.add(minusDi), 12, RoundingMode.HALF_UP).multiply(_100);
 	}
 
@@ -200,10 +207,15 @@ public class DmiIndicator {
 		TrendType trend;
 
 		if (_adx.compareTo(STRONG_TREND_SIGNAL) > 0) {
+			// STRONG_UP_TREND --- ADX > 40 && +DI > -DI
+			// STRONG_DOWN_TREND --- ADX > 40 && -DI > +DI
 			trend = _plusDi.compareTo(_minusDi) > 0 ? TrendType.STRONG_UP : TrendType.STRONG_DOWN;
 		} else if (_adx.compareTo(TREND_SIGNAL) > 0) {
+			// UP_TREND --- ADX > 20 && +DI > -DI
+			// DOWN_TREND --- ADX > 20 && -DI > +DI
 			trend = _plusDi.compareTo(_minusDi) > 0 ? TrendType.UP : TrendType.DOWN;
 		} else {
+			// SIDEWAYS --- ADX <= 20
 			trend = TrendType.SIDEWAYS;
 		}
 
@@ -218,19 +230,19 @@ public class DmiIndicator {
 		PositionType position;
 
 		if (_prevMinusDi.compareTo(_prevPlusDi) > 0 && _plusDi.compareTo(_minusDi) > 0) {
-			position = PositionType.ENTER;
+			position = PositionType.ENTER; // PREV_-DI > PREV_+DI && +DI > -DI
 		} else if (_prevPlusDi.compareTo(_prevMinusDi) > 0 && _minusDi.compareTo(_plusDi) > 0) {
-			position = PositionType.EXIT;
+			position = PositionType.EXIT; // PREV_+DI > PREV_-DI && -DI > +DI
 		} else if (_prevMinusDi.compareTo(_prevPlusDi) > 0 && _prevMinusDi.compareTo(_minusDi) > 0 && _prevPlusDi.compareTo(_plusDi) < 0
 				&& _minusDi.subtract(_plusDi).compareTo(TREND_WARNING) <= 0) {
-			position = PositionType.UP_WARNING;
+			position = PositionType.UP_WARNING; // PREV_-DI > PREV_+DI && PREV_-DI > -DI && PREV_+DI < +DI && -DI - +DI <= 5
 		} else if (_prevPlusDi.compareTo(_prevMinusDi) > 0 && _prevPlusDi.compareTo(_plusDi) > 0 && _prevMinusDi.compareTo(_minusDi) < 0
 				&& _plusDi.subtract(_minusDi).compareTo(TREND_WARNING) <= 0) {
-			position = PositionType.DOWN_WARNING;
+			position = PositionType.DOWN_WARNING; // PREV_+DI > PREV_-DI && PREV_+DI > +DI && PREV_-DI < -DI && +DI - -DI <= 5
 		} else if (_plusDi.compareTo(_prevPlusDi) > 0) {
-			position = PositionType.RISING;
+			position = PositionType.RISING; // +DI > PREV_+DI
 		} else if (_plusDi.compareTo(_prevPlusDi) < 0) {
-			position = PositionType.FALLING;
+			position = PositionType.FALLING; // +DI < PREV_+DI
 		} else {
 			position = PositionType.HOLD;
 		}

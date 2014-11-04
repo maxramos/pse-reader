@@ -1,28 +1,20 @@
 package ph.mar.psereader.business.indicator.control;
 
-import static ph.mar.psereader.business.repository.control.QueryParameter.with;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.Singleton;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
 
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.RecommendationType;
 import ph.mar.psereader.business.indicator.entity.SstoResult;
-import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
-import ph.mar.psereader.business.stock.entity.Stock;
 
 /**
  * This implements the Slow Stochastic (SSto) indicator.
@@ -59,36 +51,18 @@ public class SstoIndicator {
 	private static final BigDecimal SELL_FLOOR = new BigDecimal("80");
 	private static final BigDecimal SELL_CEILING = new BigDecimal("100");
 
-	@Inject
-	Logger log;
-
-	@Inject
-	Repository repository;
-
 	int lookBackPeriod = 14;
 	int smaSmoothing = 3;
 
 	@Asynchronous
-	public Future<SstoResult> run(Stock stock, Date date) {
-		return stock.getIndicatorResults().size() < 2 ? initialSsto(stock, date) : succeedingSsto(stock, date);
+	public Future<SstoResult> run(List<Quote> quotes, List<IndicatorResult> results) {
+		return results.size() < 2 ? initialSsto(quotes) : succeedingSsto(quotes, results);
 	}
 
-	private Future<SstoResult> initialSsto(Stock stock, Date date) {
-		int minSize = lookBackPeriod + smaSmoothing * 2 - 1 - 1;
-		List<Quote> quotes = repository.find(Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(),
-				Quote.class, minSize);
-
-		if (quotes.size() < minSize) {
-			throw new IndicatorException(String.format("Not enough quotes: %s for %s.", quotes.size(), stock.getSymbol()));
-		}
-
-		Quote currentQuote = quotes.get(0);
-
-		if (date.compareTo(currentQuote.getDate()) != 0) {
-			throw new IndicatorException(String.format("No quote for date: %s for %s.", Quote.DATE_FORMAT.format(date), stock.getSymbol()));
-		}
-
-		List<SstoResult.Holder> kDataList = kData(quotes);
+	private Future<SstoResult> initialSsto(List<Quote> quotes) {
+		int size = lookBackPeriod + smaSmoothing * 2 - 1 - 1; // 18
+		List<Quote> trimmedQuotes = quotes.subList(0, size);
+		List<SstoResult.Holder> kDataList = kData(trimmedQuotes);
 		List<BigDecimal> fastKList = fastK(kDataList);
 		List<BigDecimal> fastDList = IndicatorUtil.sma(fastKList, smaSmoothing, 2);
 
@@ -101,22 +75,14 @@ public class SstoIndicator {
 		return new AsyncResult<>(result);
 	}
 
-	private Future<SstoResult> succeedingSsto(Stock stock, Date date) {
-		List<Quote> quotes = repository.find(Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(),
-				Quote.class, lookBackPeriod);
-		Quote currentQuote = quotes.get(0);
+	private Future<SstoResult> succeedingSsto(List<Quote> quotes, List<IndicatorResult> results) {
+		int size = lookBackPeriod;
+		List<Quote> trimmedQuotes = quotes.subList(0, size);
+		Quote currentQuote = trimmedQuotes.get(0);
+		SstoResult previousSstoResult = results.get(0).getSstoResult();
+		SstoResult previous2SstoResult = results.get(1).getSstoResult();
 
-		if (date.compareTo(currentQuote.getDate()) != 0) {
-			throw new IndicatorException(String.format("No quote for date: %s for %s.", Quote.DATE_FORMAT.format(date), stock.getSymbol()));
-		}
-
-		// Quick fix for issue with @Order By and Join Fetch.
-		List<SstoResult> sstoResults = repository.find(IndicatorResult.ALL_SSTO_RESULTS_BY_STOCK, with("stock", stock).asParameters(),
-				SstoResult.class, 2);
-		SstoResult previousSstoResult = sstoResults.get(0);
-		SstoResult previous2SstoResult = sstoResults.get(1);
-
-		BigDecimal fastK = fastK(currentQuote.getClose(), lowestLow(quotes), highestHigh(quotes));
+		BigDecimal fastK = fastK(currentQuote.getClose(), lowestLow(trimmedQuotes), highestHigh(trimmedQuotes));
 		List<BigDecimal> fastKList = Arrays.asList(new BigDecimal[] { fastK, previousSstoResult.getFastK(), previous2SstoResult.getFastK() });
 		BigDecimal slowK = IndicatorUtil.avg(fastKList, 2);
 		List<BigDecimal> fastDList = Arrays.asList(new BigDecimal[] { slowK, previousSstoResult.getSlowK(), previous2SstoResult.getSlowK() });

@@ -1,32 +1,26 @@
 package ph.mar.psereader.business.indicator.control;
 
-import static ph.mar.psereader.business.repository.control.QueryParameter.with;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.Singleton;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
 
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.RecommendationType;
 import ph.mar.psereader.business.indicator.entity.RsiResult;
-import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
-import ph.mar.psereader.business.stock.entity.Stock;
 
 /**
  * This implements the Relative Strength Index (RSI) indicator with SMA as smoothing.
  *
  * Computations:
  * PERIOD = look-back period
+ * if CURRENT_CLOSE > PREVIOUS_CLOSE then GAIN = CURRENT_CLOSE - PREVIOUS_CLOSE, LOSS = 0
+ * if PREVIOUS_CLOSE < CURRENT_CLOSE then GAIN = 0, LOSS = PREVIOUS_CLOSE - CURRENT_CLOSE
  *
  * initial AVG_GAIN = AVG(GAIN)
  * initial AVG_LOSS = AVG(LOSS)
@@ -58,62 +52,36 @@ public class RsiIndicator {
 	private static final BigDecimal SELL_FLOOR = new BigDecimal("70");
 	private static final BigDecimal SELL_CEILING = new BigDecimal("100");
 
-	@Inject
-	Logger log;
-
-	@Inject
-	Repository repository;
-
 	int lookBackPeriod = 14;
 
 	@Asynchronous
-	public Future<RsiResult> run(Stock stock, Date date) {
-		return stock.getIndicatorResults().isEmpty() ? initialRsi(stock, date) : succeedingRsi(stock, date);
+	public Future<RsiResult> run(List<Quote> quotes, List<IndicatorResult> results) {
+		return results.isEmpty() ? initialRsi(quotes) : succeedingRsi(quotes, results);
 	}
 
-	private Future<RsiResult> initialRsi(Stock stock, Date date) {
-		int minSize = lookBackPeriod + 1;
-		List<Quote> quotes = repository.find(Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(),
-				Quote.class, minSize);
+	private Future<RsiResult> initialRsi(List<Quote> quotes) {
+		int size = lookBackPeriod + 1; // 15
+		List<Quote> trimmedQuotes = quotes.subList(0, size);
 
-		if (quotes.size() < minSize) {
-			throw new IndicatorException(String.format("Not enough quotes: %s for %s.", quotes.size(), stock.getSymbol()));
-		}
-
-		Quote currentQuote = quotes.get(0);
-
-		if (date.compareTo(currentQuote.getDate()) != 0) {
-			throw new IndicatorException(String.format("No quote for date: %s for %s.", Quote.DATE_FORMAT.format(date), stock.getSymbol()));
-		}
-
-		RsiResult.Holder gainsAndLosses = gainsAndLosses(quotes, lookBackPeriod);
-
+		RsiResult.Holder gainsAndLosses = gainsAndLosses(trimmedQuotes, lookBackPeriod);
 		BigDecimal avgGain = IndicatorUtil.avg(gainsAndLosses.getGains(), 10);
 		BigDecimal avgLoss = IndicatorUtil.avg(gainsAndLosses.getLosses(), 10);
 		BigDecimal rsi = rsi(avgGain, avgLoss);
 		RecommendationType recommendation = determineRecommendation(rsi, null);
+
 		RsiResult result = new RsiResult(rsi, recommendation, avgGain, avgLoss);
 		return new AsyncResult<>(result);
 	}
 
-	private Future<RsiResult> succeedingRsi(Stock stock, Date date) {
-		List<Quote> quotes = repository.find(Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(),
-				Quote.class, 2);
-		Quote currentQuote = quotes.get(0);
-
-		if (date.compareTo(currentQuote.getDate()) != 0) {
-			throw new IndicatorException(String.format("No quote for date: %s for %s.", Quote.DATE_FORMAT.format(date), stock.getSymbol()));
-		}
-
-		// Quick fix for issue with @Order By and Join Fetch.
-		List<RsiResult> rsiResults = repository.find(IndicatorResult.ALL_RSI_RESULTS_BY_STOCK, with("stock", stock).asParameters(), RsiResult.class,
-				1);
-		RsiResult previousRsiResult = rsiResults.get(0);
+	private Future<RsiResult> succeedingRsi(List<Quote> quotes, List<IndicatorResult> results) {
+		int size = 2;
+		List<Quote> trimmedQuotes = quotes.subList(0, size);
+		RsiResult previousRsiResult = results.get(0).getRsiResult();
 		BigDecimal previousRsi = previousRsiResult.getRsi();
 		BigDecimal previousAvgGain = previousRsiResult.getAvgGain();
 		BigDecimal previousAvgLoss = previousRsiResult.getAvgLoss();
 
-		RsiResult.Holder gainsAndLosses = gainsAndLosses(quotes, 1);
+		RsiResult.Holder gainsAndLosses = gainsAndLosses(trimmedQuotes, 1);
 		BigDecimal currentGain = gainsAndLosses.getGains().get(0);
 		BigDecimal currentLoss = gainsAndLosses.getLosses().get(0);
 		BigDecimal period = new BigDecimal(lookBackPeriod);
@@ -122,6 +90,7 @@ public class RsiIndicator {
 		BigDecimal avgLoss = IndicatorUtil.ema(previousAvgLoss, currentLoss, period, 10);
 		BigDecimal rsi = rsi(avgGain, avgLoss);
 		RecommendationType recommendation = determineRecommendation(rsi, previousRsi);
+
 		RsiResult result = new RsiResult(rsi, recommendation, avgGain, avgLoss);
 		return new AsyncResult<>(result);
 	}
@@ -136,9 +105,11 @@ public class RsiIndicator {
 			BigDecimal loss;
 
 			if (currentClose.compareTo(previousClose) > 0) {
+				// if CURRENT_CLOSE > PREVIOUS_CLOSE then GAIN = CURRENT_CLOSE - PREVIOUS_CLOSE, LOSS = 0
 				gain = currentClose.subtract(previousClose);
 				loss = BigDecimal.ZERO;
 			} else {
+				// if PREVIOUS_CLOSE < CURRENT_CLOSE then GAIN = 0, LOSS = PREVIOUS_CLOSE - CURRENT_CLOSE
 				loss = previousClose.subtract(currentClose);
 				gain = BigDecimal.ZERO;
 			}
