@@ -108,11 +108,6 @@ public class PseReportManager {
 	}
 
 	private boolean add(Stock stock) {
-		List<Quote> quotes = stock.getQuotes();
-		Quote lastQuote = quotes.get(quotes.size() - 1);
-		stock.setLastQuoteDate(lastQuote.getDate());
-		stock.setQuoteCount(quotes.size());
-
 		if (stock.getId() == null) {
 			repository.add(stock);
 			log.info("Stock {} processed.", stock.getSymbol());

@@ -18,7 +18,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 
 import ph.mar.psereader.business.indicator.control.DmiIndicator;
-import ph.mar.psereader.business.indicator.control.IndicatorException;
 import ph.mar.psereader.business.indicator.control.RsiIndicator;
 import ph.mar.psereader.business.indicator.control.SstoIndicator;
 import ph.mar.psereader.business.indicator.entity.DmiResult;
@@ -54,8 +53,7 @@ public class IndicatorManager {
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void process(Date date) {
-		List<Stock> stocks = repository.find(Stock.ALL_WOWO_INDICATOR_RESULTS_BY_QUOTE_COUNT_AND_DATE, with("date", date).and("quoteCount", minQuoteSize)
-				.asParameters(), Stock.class);
+		List<Stock> stocks = repository.find(Stock.ALL_WOWO_INDICATOR_RESULTS, Stock.class);
 
 		for (Stock stock : stocks) {
 			try {
@@ -94,8 +92,20 @@ public class IndicatorManager {
 	}
 
 	private List<Quote> findAllQuotesByStockAndDate(Stock stock, Date date) {
-		return repository.find(Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(), Quote.class,
-				minQuoteSize);
+		List<Quote> quotes = repository.find(Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(),
+				Quote.class, minQuoteSize);
+
+		if (quotes.size() < minQuoteSize) {
+			throw new IndicatorException(String.format("Not enough quotes: %s for %s.", quotes.size(), stock.getSymbol()));
+		}
+
+		Quote currentQuote = quotes.get(0);
+
+		if (date.compareTo(currentQuote.getDate()) != 0) {
+			throw new IndicatorException(String.format("No quote for date: %s for %s.", Quote.DATE_FORMAT.format(date), stock.getSymbol()));
+		}
+
+		return quotes;
 	}
 
 	private List<IndicatorResult> findAllIndicatorResultsByStock(Stock stock) {

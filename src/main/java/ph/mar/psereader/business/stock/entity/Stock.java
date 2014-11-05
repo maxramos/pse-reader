@@ -3,7 +3,6 @@ package ph.mar.psereader.business.stock.entity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -27,7 +26,7 @@ import ph.mar.psereader.business.report.entity.PseReportRow;
 	@NamedQuery(name = Stock.ALL, query = "SELECT s FROM Stock s ORDER BY s.symbol"),
 	@NamedQuery(name = Stock.ALL_SYMBOLS, query = "SELECT s.symbol FROM Stock s ORDER BY s.symbol"),
 	@NamedQuery(name = Stock.ALL_WITH_QUOTES_BY_SYMBOL, query = "SELECT DISTINCT s FROM Stock s JOIN FETCH s.quotes WHERE s.symbol = :symbol"),
-	@NamedQuery(name = Stock.ALL_WOWO_INDICATOR_RESULTS_BY_QUOTE_COUNT_AND_DATE, query = "SELECT DISTINCT s FROM Stock s LEFT JOIN FETCH s.indicatorResults WHERE s.suspended = FALSE AND s.quoteCount >= :quoteCount AND s.lastQuoteDate = :date ORDER BY s.symbol"),
+	@NamedQuery(name = Stock.ALL_WOWO_INDICATOR_RESULTS, query = "SELECT DISTINCT s FROM Stock s LEFT JOIN FETCH s.indicatorResults WHERE s.suspended = FALSE ORDER BY s.symbol"),
 	@NamedQuery(name = Stock.BY_SYMBOL, query = "SELECT s FROM Stock s WHERE s.symbol = :symbol ORDER BY s.symbol") })
 public class Stock implements Serializable {
 
@@ -35,7 +34,7 @@ public class Stock implements Serializable {
 	public static final String ALL_SYMBOLS = "Stock.ALL_SYMBOLS";
 	public static final String ALL_WITH_QUOTES_BY_SYMBOL = "Stock.ALL_WITH_QUOTES_BY_SYMBOL";
 	// WOWO means with or without
-	public static final String ALL_WOWO_INDICATOR_RESULTS_BY_QUOTE_COUNT_AND_DATE = "Stock.ALL_WOWO_INDICATOR_RESULTS_BY_QUOTE_COUNT_AND_DATE";
+	public static final String ALL_WOWO_INDICATOR_RESULTS = "Stock.ALL_WOWO_INDICATOR_RESULTS";
 	public static final String BY_SYMBOL = "Stock.BY_SYMBOL";
 
 	private static final long serialVersionUID = 1L;
@@ -69,12 +68,6 @@ public class Stock implements Serializable {
 
 	@Column(nullable = false)
 	private boolean suspended;
-
-	@Column(name = "last_quote_date", nullable = false)
-	private Date lastQuoteDate;
-
-	@Column(name = "quote_count", nullable = false)
-	private int quoteCount;
 
 	public Stock() {
 		super();
@@ -147,27 +140,10 @@ public class Stock implements Serializable {
 		this.suspended = suspended;
 	}
 
-	public Date getLastQuoteDate() {
-		return lastQuoteDate;
-	}
-
-	public void setLastQuoteDate(Date lastQuoteDate) {
-		this.lastQuoteDate = lastQuoteDate;
-	}
-
-	public int getQuoteCount() {
-		return quoteCount;
-	}
-
-	public void setQuoteCount(int quoteCount) {
-		this.quoteCount = quoteCount;
-	}
-
 	@Override
 	public String toString() {
-		return String
-				.format("Stock [id=%s, symbol=%s, name=%s, sector=%s, subSector=%s, quotes=%s, indicatorResults=%s, suspended=%s, lastQuoteDate=%s, quoteCount=%s]",
-						id, symbol, name, sector, subSector, quotes, indicatorResults, suspended, lastQuoteDate, quoteCount);
+		return String.format("Stock [id=%s, symbol=%s, name=%s, sector=%s, subSector=%s, quotes=%s, indicatorResults=%s, suspended=%s]", id, symbol,
+				name, sector, subSector, quotes, indicatorResults, suspended);
 	}
 
 }
