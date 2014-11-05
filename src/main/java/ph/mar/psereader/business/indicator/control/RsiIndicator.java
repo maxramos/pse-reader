@@ -3,15 +3,14 @@ package ph.mar.psereader.business.indicator.control;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
 
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
-import javax.ejb.Singleton;
+import javax.inject.Inject;
 
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.RecommendationType;
 import ph.mar.psereader.business.indicator.entity.RsiResult;
+import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
 
 /**
@@ -42,8 +41,7 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * SELL --- RSI <= 100
  * HOLD --- Everything Else
  */
-@Singleton
-public class RsiIndicator {
+public class RsiIndicator implements Callable<RsiResult> {
 
 	private static final BigDecimal _100 = new BigDecimal("100");
 	private static final BigDecimal BUY_CEILING = new BigDecimal("30");
@@ -52,14 +50,25 @@ public class RsiIndicator {
 	private static final BigDecimal SELL_FLOOR = new BigDecimal("70");
 	private static final BigDecimal SELL_CEILING = new BigDecimal("100");
 
+	@Inject
+	Repository repository;
+
 	int lookBackPeriod = 14;
 
-	@Asynchronous
-	public Future<RsiResult> run(List<Quote> quotes, List<IndicatorResult> results) {
-		return results.isEmpty() ? initialRsi(quotes) : succeedingRsi(quotes, results);
+	private List<Quote> _quotes;
+	private List<IndicatorResult> _results;
+
+	public RsiIndicator(List<Quote> quotes, List<IndicatorResult> results) {
+		_quotes = quotes;
+		_results = results;
 	}
 
-	private Future<RsiResult> initialRsi(List<Quote> quotes) {
+	@Override
+	public RsiResult call() throws Exception {
+		return _results.isEmpty() ? initialRsi(_quotes) : succeedingRsi(_quotes, _results);
+	}
+
+	private RsiResult initialRsi(List<Quote> quotes) {
 		int size = lookBackPeriod + 1; // 15
 		List<Quote> trimmedQuotes = quotes.subList(0, size);
 
@@ -70,10 +79,10 @@ public class RsiIndicator {
 		RecommendationType recommendation = determineRecommendation(rsi, null);
 
 		RsiResult result = new RsiResult(rsi, recommendation, avgGain, avgLoss);
-		return new AsyncResult<>(result);
+		return result;
 	}
 
-	private Future<RsiResult> succeedingRsi(List<Quote> quotes, List<IndicatorResult> results) {
+	private RsiResult succeedingRsi(List<Quote> quotes, List<IndicatorResult> results) {
 		int size = 2;
 		List<Quote> trimmedQuotes = quotes.subList(0, size);
 		RsiResult previousRsiResult = results.get(0).getRsiResult();
@@ -92,7 +101,7 @@ public class RsiIndicator {
 		RecommendationType recommendation = determineRecommendation(rsi, previousRsi);
 
 		RsiResult result = new RsiResult(rsi, recommendation, avgGain, avgLoss);
-		return new AsyncResult<>(result);
+		return result;
 	}
 
 	private RsiResult.Holder gainsAndLosses(List<Quote> quotes, int period) {
@@ -167,4 +176,5 @@ public class RsiIndicator {
 
 		return recommendation;
 	}
+
 }

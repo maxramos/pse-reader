@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -22,7 +23,7 @@ import javax.persistence.UniqueConstraint;
 import ph.mar.psereader.business.report.entity.PseReportRow;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
 	@NamedQuery(name = Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, query = "SELECT NEW ph.mar.psereader.business.stock.entity.Quote(q.date, q.open, q.high, q.low, q.close, q.volume) FROM Quote q WHERE q.stock = :stock AND q.date <= :date ORDER BY q.date DESC"),
 	@NamedQuery(name = Quote.BY_STOCK, query = "SELECT q FROM Quote q WHERE q.stock = :stock ORDER BY q.date DESC") })

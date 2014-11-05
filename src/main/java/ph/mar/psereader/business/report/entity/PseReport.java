@@ -11,6 +11,7 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -22,11 +23,11 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 @Entity
-@Table(name = "pse_report")
+@Table(name = "pse_report", indexes = @Index(columnList = "date"))
 @NamedQueries({ @NamedQuery(name = PseReport.ALL, query = "SELECT pr FROM PseReport pr ORDER BY pr.date DESC"),
-		@NamedQuery(name = PseReport.ALL_DATES, query = "SELECT pr.date FROM PseReport pr ORDER BY pr.date DESC"),
-		@NamedQuery(name = PseReport.ALL_DATES_BY_DATE, query = "SELECT pr.date FROM PseReport pr WHERE pr.date > :date ORDER BY pr.date"),
-		@NamedQuery(name = PseReport.BY_DATE, query = "SELECT pr FROM PseReport pr WHERE pr.date = :date") })
+	@NamedQuery(name = PseReport.ALL_DATES, query = "SELECT pr.date FROM PseReport pr ORDER BY pr.date DESC"),
+	@NamedQuery(name = PseReport.ALL_DATES_BY_DATE, query = "SELECT pr.date FROM PseReport pr WHERE pr.date > :date ORDER BY pr.date"),
+	@NamedQuery(name = PseReport.BY_DATE, query = "SELECT pr FROM PseReport pr WHERE pr.date = :date") })
 public class PseReport implements Serializable {
 
 	public static final String ALL = "PseReport.ALL";

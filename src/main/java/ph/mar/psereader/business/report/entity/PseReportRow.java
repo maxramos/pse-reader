@@ -9,6 +9,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -22,7 +23,7 @@ import ph.mar.psereader.business.stock.entity.SectorType;
 import ph.mar.psereader.business.stock.entity.SubSectorType;
 
 @Entity
-@Table(name = "pse_report_row", uniqueConstraints = @UniqueConstraint(columnNames = { "symbol", "report_id" }))
+@Table(name = "pse_report_row", uniqueConstraints = @UniqueConstraint(columnNames = { "symbol", "report_id" }), indexes = @Index(columnList = "report_id,symbol"))
 @NamedQueries({ @NamedQuery(name = PseReportRow.BY_DATE, query = "SELECT prr FROM PseReportRow prr WHERE prr.report.date = :date ORDER BY prr.report.date DESC"), })
 public class PseReportRow implements Serializable {
 

@@ -3,16 +3,15 @@ package ph.mar.psereader.business.indicator.control;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
 
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
-import javax.ejb.Singleton;
+import javax.inject.Inject;
 
 import ph.mar.psereader.business.indicator.entity.DmiResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.PositionType;
 import ph.mar.psereader.business.indicator.entity.TrendType;
+import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
 
 /**
@@ -51,22 +50,32 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * FALLING_TREND --- +DI < PREV_+DI
  * HOLD --- Initial State
  */
-@Singleton
-public class DmiIndicator {
+public class DmiIndicator implements Callable<DmiResult> {
 
 	private static final BigDecimal _100 = new BigDecimal("100");
 	private static final BigDecimal TREND_WARNING = new BigDecimal("5");
 	private static final BigDecimal TREND_SIGNAL = new BigDecimal("20");
 	private static final BigDecimal STRONG_TREND_SIGNAL = new BigDecimal("40");
 
+	@Inject
+	Repository repository;
+
 	int lookBackPeriod = 14;
 
-	@Asynchronous
-	public Future<DmiResult> run(List<Quote> quotes, List<IndicatorResult> results) {
-		return results.isEmpty() ? initialDmi(quotes) : succeedingDmi(quotes, results);
+	private List<Quote> _quotes;
+	private List<IndicatorResult> _results;
+
+	public DmiIndicator(List<Quote> quotes, List<IndicatorResult> results) {
+		_quotes = quotes;
+		_results = results;
 	}
 
-	private Future<DmiResult> initialDmi(List<Quote> quotes) {
+	@Override
+	public DmiResult call() throws Exception {
+		return _results.isEmpty() ? initialDmi(_quotes) : succeedingDmi(_quotes, _results);
+	}
+
+	private DmiResult initialDmi(List<Quote> quotes) {
 		int size = lookBackPeriod + 1 + lookBackPeriod - 1; // 28
 		List<Quote> trimmedQuotes = quotes.subList(0, size);
 
@@ -82,10 +91,11 @@ public class DmiIndicator {
 		BigDecimal atr = adxDataList.getLastAtr();
 
 		DmiResult result = new DmiResult(adx, plusDi, minusDi, trend, position, smoothedPlusDm, smoothedMinusDm, atr);
-		return new AsyncResult<>(result);
+		// return new AsyncResult<>(result);
+		return result;
 	}
 
-	private Future<DmiResult> succeedingDmi(List<Quote> quotes, List<IndicatorResult> results) {
+	private DmiResult succeedingDmi(List<Quote> quotes, List<IndicatorResult> results) {
 		int size = 2;
 		List<Quote> trimmedQuotes = quotes.subList(0, size);
 		DmiResult previousDmiResult = results.get(0).getDmiResult();
@@ -113,7 +123,8 @@ public class DmiIndicator {
 		PositionType position = determinePosition(plusDi, minusDi, previousPlusDi, previousMinusDi);
 
 		DmiResult result = new DmiResult(adx, plusDi, minusDi, trend, position, smoothedPlusDm, smoothedMinusDm, atr);
-		return new AsyncResult<>(result);
+		// return new AsyncResult<>(result);
+		return result;
 	}
 
 	private DmiResult.Holder trAndDmData(List<Quote> quotes, int period) {
@@ -249,4 +260,5 @@ public class DmiIndicator {
 
 		return position;
 	}
+
 }

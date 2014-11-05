@@ -12,21 +12,24 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.report.entity.PseReportRow;
 
 @Entity
+@Table(indexes = @Index(columnList = "symbol"))
 @NamedQueries({
 	@NamedQuery(name = Stock.ALL, query = "SELECT s FROM Stock s ORDER BY s.symbol"),
 	@NamedQuery(name = Stock.ALL_SYMBOLS, query = "SELECT s.symbol FROM Stock s ORDER BY s.symbol"),
 	@NamedQuery(name = Stock.ALL_WITH_QUOTES_BY_SYMBOL, query = "SELECT DISTINCT s FROM Stock s JOIN FETCH s.quotes WHERE s.symbol = :symbol"),
-	@NamedQuery(name = Stock.ALL_WOWO_INDICATOR_RESULTS, query = "SELECT DISTINCT s FROM Stock s LEFT JOIN FETCH s.indicatorResults WHERE s.suspended = FALSE ORDER BY s.symbol"),
+	@NamedQuery(name = Stock.ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT, query = "SELECT DISTINCT s FROM Stock s LEFT JOIN FETCH s.indicatorResults WHERE EXISTS (SELECT q FROM Quote q WHERE q.stock = s AND q.date = :date) AND (SELECT COUNT(q) FROM Quote q WHERE q.stock = s AND q.date <= :date) >= :count AND s.suspended = FALSE ORDER BY s.symbol"),
 	@NamedQuery(name = Stock.BY_SYMBOL, query = "SELECT s FROM Stock s WHERE s.symbol = :symbol ORDER BY s.symbol") })
 public class Stock implements Serializable {
 
@@ -34,7 +37,7 @@ public class Stock implements Serializable {
 	public static final String ALL_SYMBOLS = "Stock.ALL_SYMBOLS";
 	public static final String ALL_WITH_QUOTES_BY_SYMBOL = "Stock.ALL_WITH_QUOTES_BY_SYMBOL";
 	// WOWO means with or without
-	public static final String ALL_WOWO_INDICATOR_RESULTS = "Stock.ALL_WOWO_INDICATOR_RESULTS";
+	public static final String ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT = "Stock.ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT";
 	public static final String BY_SYMBOL = "Stock.BY_SYMBOL";
 
 	private static final long serialVersionUID = 1L;

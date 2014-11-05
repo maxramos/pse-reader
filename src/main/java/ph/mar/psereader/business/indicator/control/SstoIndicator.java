@@ -5,11 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Future;
-
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
-import javax.ejb.Singleton;
+import java.util.concurrent.Callable;
 
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.RecommendationType;
@@ -41,8 +37,7 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * SELL --- %K <= 100
  * HOLD --- Everything Else
  */
-@Singleton
-public class SstoIndicator {
+public class SstoIndicator implements Callable<SstoResult> {
 
 	private static final BigDecimal _100 = new BigDecimal("100");
 	private static final BigDecimal BUY_CEILING = new BigDecimal("20");
@@ -54,14 +49,23 @@ public class SstoIndicator {
 	int lookBackPeriod = 14;
 	int smaSmoothing = 3;
 
-	@Asynchronous
-	public Future<SstoResult> run(List<Quote> quotes, List<IndicatorResult> results) {
-		return results.size() < 2 ? initialSsto(quotes) : succeedingSsto(quotes, results);
+	private List<Quote> _quotes;
+	private List<IndicatorResult> _results;
+
+	public SstoIndicator(List<Quote> quotes, List<IndicatorResult> results) {
+		_quotes = quotes;
+		_results = results;
 	}
 
-	private Future<SstoResult> initialSsto(List<Quote> quotes) {
+	@Override
+	public SstoResult call() throws Exception {
+		return _results.size() < 2 ? initialSsto(_quotes) : succeedingSsto(_quotes, _results);
+	}
+
+	private SstoResult initialSsto(List<Quote> quotes) {
 		int size = lookBackPeriod + smaSmoothing * 2 - 1 - 1; // 18
 		List<Quote> trimmedQuotes = quotes.subList(0, size);
+
 		List<SstoResult.Holder> kDataList = kData(trimmedQuotes);
 		List<BigDecimal> fastKList = fastK(kDataList);
 		List<BigDecimal> fastDList = IndicatorUtil.sma(fastKList, smaSmoothing, 2);
@@ -72,25 +76,25 @@ public class SstoIndicator {
 		BigDecimal fastK = fastKList.get(0);
 
 		SstoResult result = new SstoResult(slowK, slowD, recommendation, fastK);
-		return new AsyncResult<>(result);
+		return result;
 	}
 
-	private Future<SstoResult> succeedingSsto(List<Quote> quotes, List<IndicatorResult> results) {
+	private SstoResult succeedingSsto(List<Quote> quotes, List<IndicatorResult> results) {
 		int size = lookBackPeriod;
 		List<Quote> trimmedQuotes = quotes.subList(0, size);
 		Quote currentQuote = trimmedQuotes.get(0);
-		SstoResult previousSstoResult = results.get(0).getSstoResult();
+		SstoResult previous1SstoResult = results.get(0).getSstoResult();
 		SstoResult previous2SstoResult = results.get(1).getSstoResult();
 
 		BigDecimal fastK = fastK(currentQuote.getClose(), lowestLow(trimmedQuotes), highestHigh(trimmedQuotes));
-		List<BigDecimal> fastKList = Arrays.asList(new BigDecimal[] { fastK, previousSstoResult.getFastK(), previous2SstoResult.getFastK() });
+		List<BigDecimal> fastKList = Arrays.asList(new BigDecimal[] { fastK, previous1SstoResult.getFastK(), previous2SstoResult.getFastK() });
 		BigDecimal slowK = IndicatorUtil.avg(fastKList, 2);
-		List<BigDecimal> fastDList = Arrays.asList(new BigDecimal[] { slowK, previousSstoResult.getSlowK(), previous2SstoResult.getSlowK() });
+		List<BigDecimal> fastDList = Arrays.asList(new BigDecimal[] { slowK, previous1SstoResult.getSlowK(), previous2SstoResult.getSlowK() });
 		BigDecimal slowD = IndicatorUtil.avg(fastDList, 2);
-		RecommendationType recommendation = determineRecommendation(slowK, slowD, previousSstoResult.getSlowK());
+		RecommendationType recommendation = determineRecommendation(slowK, slowD, previous1SstoResult.getSlowK());
 
 		SstoResult result = new SstoResult(slowK, slowD, recommendation, fastK);
-		return new AsyncResult<>(result);
+		return result;
 	}
 
 	private List<SstoResult.Holder> kData(List<Quote> quotes) {
