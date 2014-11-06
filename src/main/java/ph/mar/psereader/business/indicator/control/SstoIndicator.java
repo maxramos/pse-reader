@@ -13,11 +13,11 @@ import ph.mar.psereader.business.indicator.entity.SstoResult;
 import ph.mar.psereader.business.stock.entity.Quote;
 
 /**
- * This implements the Slow Stochastic (SSto) indicator.
+ * This implements the Slow Stochastic (SSto).
  *
  * Computations:
- * m = smoothing period
  * n = look-back period
+ * m = smoothing period
  *
  * FAST_%K = (LAST_CLOSING - LOWEST_LOW(n)) / (HIGHEST_HIGH(n) - LOWEST_LOW(n)) * 100
  * FAST_%D = SMAm(FAST_%K)

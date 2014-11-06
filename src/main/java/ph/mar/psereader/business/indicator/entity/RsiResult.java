@@ -22,10 +22,10 @@ public class RsiResult implements Serializable {
 	@Column(name = "rsi_reco", nullable = false, length = 12)
 	private RecommendationType recommendation;
 
-	@Column(name = "rsi_avg_gain", nullable = false, precision = 14, scale = 10)
+	@Column(name = "rsi_avg_gain", nullable = false, precision = 13, scale = 10)
 	private BigDecimal avgGain;
 
-	@Column(name = "rsi_avg_loss", nullable = false, precision = 14, scale = 10)
+	@Column(name = "rsi_avg_loss", nullable = false, precision = 13, scale = 10)
 	private BigDecimal avgLoss;
 
 	public RsiResult() {

@@ -36,7 +36,7 @@ public class IndicatorManager {
 	@Inject
 	IndicatorContainer indicatorContainer;
 
-	int minQuoteSize = 28;
+	int minQuoteSize = 34;
 	int minIndicatorResultSize = 2;
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)

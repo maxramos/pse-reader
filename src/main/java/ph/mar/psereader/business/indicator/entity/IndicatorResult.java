@@ -24,17 +24,11 @@ import ph.mar.psereader.business.stock.entity.Stock;
 @Table(name = "indicator_result", uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
 	@NamedQuery(name = IndicatorResult.ALL_BY_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.date = :date"),
-	@NamedQuery(name = IndicatorResult.ALL_DMI_RESULTS_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.DmiResult(ir.dmiResult.adx, ir.dmiResult.plusDi, ir.dmiResult.minusDi, ir.dmiResult.smoothedPlusDm, ir.dmiResult.smoothedMinusDm, ir.dmiResult.atr) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.sstoResult, ir.rsiResult, ir.dmiResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC"),
-	@NamedQuery(name = IndicatorResult.ALL_RSI_RESULTS_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.RsiResult(ir.rsiResult.rsi, ir.rsiResult.avgGain, ir.rsiResult.avgLoss) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC"),
-	@NamedQuery(name = IndicatorResult.ALL_SSTO_RESULTS_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.SstoResult(ir.sstoResult.slowK, ir.sstoResult.fastK) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.sstoResult, ir.rsiResult, ir.dmiResult, ir.macdResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
 public class IndicatorResult implements Serializable {
 
 	public static final String ALL_BY_DATE = "IndicatorResult.ALL_BY_DATE";
-	public static final String ALL_DMI_RESULTS_BY_STOCK = "IndicatorResult.ALL_DMI_RESULTS_BY_STOCK";
 	public static final String ALL_INDICATOR_DATA_BY_STOCK = "IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK";
-	public static final String ALL_RSI_RESULTS_BY_STOCK = "IndicatorResult.ALL_RSI_RESULTS_BY_STOCK";
-	public static final String ALL_SSTO_RESULTS_BY_STOCK = "IndicatorResult.ALL_SSTO_RESULTS_BY_STOCK";
 
 	private static final long serialVersionUID = 1L;
 
@@ -56,6 +50,9 @@ public class IndicatorResult implements Serializable {
 	@Embedded
 	private DmiResult dmiResult;
 
+	@Embedded
+	private MacdResult macdResult;
+
 	@ManyToOne
 	private Stock stock;
 
@@ -71,10 +68,11 @@ public class IndicatorResult implements Serializable {
 	/**
 	 * Used for NEW jpql construct.
 	 */
-	public IndicatorResult(SstoResult sstoResult, RsiResult rsiResult, DmiResult dmiResult) {
+	public IndicatorResult(SstoResult sstoResult, RsiResult rsiResult, DmiResult dmiResult, MacdResult macdResult) {
 		this.sstoResult = sstoResult;
 		this.rsiResult = rsiResult;
 		this.dmiResult = dmiResult;
+		this.macdResult = macdResult;
 	}
 
 	public Long getId() {
@@ -113,10 +111,18 @@ public class IndicatorResult implements Serializable {
 		this.dmiResult = dmiResult;
 	}
 
+	public MacdResult getMacdResult() {
+		return macdResult;
+	}
+
+	public void setMacdResult(MacdResult macdResult) {
+		this.macdResult = macdResult;
+	}
+
 	@Override
 	public String toString() {
-		return String.format("IndicatorResult [id=%s, date=%s, sstoResult=%s, rsiResult=%s, dmiResult=%s, stock.id=%s]", id, date, sstoResult,
-				rsiResult, dmiResult, stock == null ? null : stock.getId());
+		return String.format("IndicatorResult [id=%s, date=%s, sstoResult=%s, rsiResult=%s, dmiResult=%s, macdResult=%s, stock.id=%s]", id, date,
+				sstoResult, rsiResult, dmiResult, macdResult, stock == null ? null : stock.getId());
 	}
 
 }

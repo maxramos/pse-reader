@@ -5,17 +5,14 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import javax.inject.Inject;
-
 import ph.mar.psereader.business.indicator.entity.DmiResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.PositionType;
 import ph.mar.psereader.business.indicator.entity.TrendType;
-import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
 
 /**
- * This implements the Directional Movement Index (DMI) with Average Directional Index (ADX)
+ * This implements the Directional Movement Index (DMI) with Average Directional Index (ADX).
  *
  * Computations:
  * n = look-back period
@@ -26,13 +23,13 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * DOWN_MOVE - PREVIOUS_LOW - CURRENT_LOW
  * TR = MAX(TR_CANDIDATE_1, TR_CANDIDATE_2, TR_CANDIDATE_2)
  *
- * ATR = EMAn(TR)
+ * ATR = SMAn(TR)
  * +DM = UP_MOVE > DOWN_MOVE && UP_MOVE > 0 ? UP_MOVE : 0
  * -DM = DOWN_MOVE > UP_MOVE && DOWN_MOVE > 0 ? DOWN_MOVE : 0
- * +DI = EMAn(+DM) / ATR * 100
- * -DI = EMAn(-DM) / ATR * 100
+ * +DI = SMAn(+DM) / ATR * 100
+ * -DI = SMAn(-DM) / ATR * 100
  * DX = ABS(+DI - -DI) / (+DI + -DI) * 100
- * ADX = EMAn(DX)
+ * ADX = SMAn(DX)
  *
  * Trends:
  * STRONG_UP_TREND --- ADX > 40 && +DI > -DI
@@ -56,9 +53,6 @@ public class DmiIndicator implements Callable<DmiResult> {
 	private static final BigDecimal TREND_WARNING = new BigDecimal("5");
 	private static final BigDecimal TREND_SIGNAL = new BigDecimal("20");
 	private static final BigDecimal STRONG_TREND_SIGNAL = new BigDecimal("40");
-
-	@Inject
-	Repository repository;
 
 	int lookBackPeriod = 14;
 
@@ -112,13 +106,13 @@ public class DmiIndicator implements Callable<DmiResult> {
 		BigDecimal currentMinusDm = trAndDmDataList.getMinusDmList().get(0);
 		BigDecimal period = new BigDecimal(lookBackPeriod);
 
-		BigDecimal atr = IndicatorUtil.ema(previousAtr, currentTr, period, 10);
-		BigDecimal smoothedPlusDm = IndicatorUtil.ema(previousSmoothedPlusDm, currentPlusDm, period, 10);
-		BigDecimal smoothedMinusDm = IndicatorUtil.ema(previousSmoothedMinusDm, currentMinusDm, period, 10);
+		BigDecimal atr = IndicatorUtil.sma(previousAtr, currentTr, period, 10);
+		BigDecimal smoothedPlusDm = IndicatorUtil.sma(previousSmoothedPlusDm, currentPlusDm, period, 10);
+		BigDecimal smoothedMinusDm = IndicatorUtil.sma(previousSmoothedMinusDm, currentMinusDm, period, 10);
 		BigDecimal plusDi = di(smoothedPlusDm, atr);
 		BigDecimal minusDi = di(smoothedMinusDm, atr);
 		BigDecimal dx = dx(plusDi, minusDi);
-		BigDecimal adx = IndicatorUtil.ema(previousAdx, dx, period, 10);
+		BigDecimal adx = IndicatorUtil.sma(previousAdx, dx, period, 10);
 		TrendType trend = determineTrend(adx, plusDi, minusDi);
 		PositionType position = determinePosition(plusDi, minusDi, previousPlusDi, previousMinusDi);
 
@@ -180,15 +174,15 @@ public class DmiIndicator implements Callable<DmiResult> {
 			} else {
 				BigDecimal currentTr = trList.get(lookBackPeriod - 1);
 				BigDecimal previousAtr = adxDataList.getLastAtr();
-				atr = IndicatorUtil.ema(previousAtr, currentTr, period, 10);
+				atr = IndicatorUtil.sma(previousAtr, currentTr, period, 10);
 
 				BigDecimal currentPlusDm = plusDmList.get(lookBackPeriod - 1);
 				BigDecimal previousSmoothedPlusDm = adxDataList.getLastSmoothedPlusDm();
-				smoothedPlusDm = IndicatorUtil.ema(previousSmoothedPlusDm, currentPlusDm, period, 10);
+				smoothedPlusDm = IndicatorUtil.sma(previousSmoothedPlusDm, currentPlusDm, period, 10);
 
 				BigDecimal currentMinusDm = minusDmList.get(lookBackPeriod - 1);
 				BigDecimal previousSmoothedMinusDm = adxDataList.getLastSmoothedMinusDm();
-				smoothedMinusDm = IndicatorUtil.ema(previousSmoothedMinusDm, currentMinusDm, period, 10);
+				smoothedMinusDm = IndicatorUtil.sma(previousSmoothedMinusDm, currentMinusDm, period, 10);
 			}
 
 			BigDecimal plusDi = di(smoothedPlusDm, atr);
@@ -201,8 +195,8 @@ public class DmiIndicator implements Callable<DmiResult> {
 	}
 
 	private BigDecimal di(BigDecimal smoothedDm, BigDecimal atr) {
-		// +DI = EMA(+DM) / ATR * 100
-		// -DI = EMA(-DM) / ATR * 100
+		// +DI = SMA(+DM) / ATR * 100
+		// -DI = SMA(-DM) / ATR * 100
 		return smoothedDm.divide(atr, 12, RoundingMode.HALF_UP).multiply(_100);
 	}
 

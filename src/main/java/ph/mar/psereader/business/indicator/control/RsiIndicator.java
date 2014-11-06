@@ -5,26 +5,23 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import javax.inject.Inject;
-
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.RecommendationType;
 import ph.mar.psereader.business.indicator.entity.RsiResult;
-import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
 
 /**
- * This implements the Relative Strength Index (RSI) indicator with SMA as smoothing.
+ * This implements the Relative Strength Index (RSI) with SMA as smoothing.
  *
  * Computations:
- * PERIOD = look-back period
+ * n = look-back period
  * if CURRENT_CLOSE > PREVIOUS_CLOSE then GAIN = CURRENT_CLOSE - PREVIOUS_CLOSE, LOSS = 0
  * if PREVIOUS_CLOSE < CURRENT_CLOSE then GAIN = 0, LOSS = PREVIOUS_CLOSE - CURRENT_CLOSE
  *
  * initial AVG_GAIN = AVG(GAIN)
  * initial AVG_LOSS = AVG(LOSS)
- * succeeding AVG_GAIN = (PREV_AVG_GAIN * (PERIOD - 1) + CURRENT_GAIN) / PERIOD
- * succeeding AVG_LOSS = (PREV_AVG_LOSS * (PERIOD - 1) + CURRENT_LOSS) / PERIOD
+ * succeeding AVG_GAIN = SMAn(GAIN)
+ * succeeding AVG_LOSS = SMAn(LOSS)
  *
  * RS = AVG_GAIN / AVG_LOSS
  * RSI = 100 - 100 / (RS + 1)
@@ -49,9 +46,6 @@ public class RsiIndicator implements Callable<RsiResult> {
 	private static final BigDecimal HOLD_CEILING = new BigDecimal("65");
 	private static final BigDecimal SELL_FLOOR = new BigDecimal("70");
 	private static final BigDecimal SELL_CEILING = new BigDecimal("100");
-
-	@Inject
-	Repository repository;
 
 	int lookBackPeriod = 14;
 
@@ -95,8 +89,8 @@ public class RsiIndicator implements Callable<RsiResult> {
 		BigDecimal currentLoss = gainsAndLosses.getLosses().get(0);
 		BigDecimal period = new BigDecimal(lookBackPeriod);
 
-		BigDecimal avgGain = IndicatorUtil.ema(previousAvgGain, currentGain, period, 10);
-		BigDecimal avgLoss = IndicatorUtil.ema(previousAvgLoss, currentLoss, period, 10);
+		BigDecimal avgGain = IndicatorUtil.sma(previousAvgGain, currentGain, period, 10);
+		BigDecimal avgLoss = IndicatorUtil.sma(previousAvgLoss, currentLoss, period, 10);
 		BigDecimal rsi = rsi(avgGain, avgLoss);
 		RecommendationType recommendation = determineRecommendation(rsi, previousRsi);
 

@@ -33,13 +33,13 @@ public class DmiResult implements Serializable {
 	@Column(name = "dmi_position", nullable = false, length = 12)
 	private PositionType position;
 
-	@Column(name = "dmi_smoothed_plus_dm", nullable = false, precision = 14, scale = 10)
+	@Column(name = "dmi_smoothed_plus_dm", nullable = false, precision = 13, scale = 10)
 	private BigDecimal smoothedPlusDm;
 
-	@Column(name = "dmi_smoothed_minus_dm", nullable = false, precision = 14, scale = 10)
+	@Column(name = "dmi_smoothed_minus_dm", nullable = false, precision = 13, scale = 10)
 	private BigDecimal smoothedMinusDm;
 
-	@Column(name = "dmi_atr", nullable = false, precision = 14, scale = 10)
+	@Column(name = "dmi_atr", nullable = false, precision = 13, scale = 10)
 	private BigDecimal atr;
 
 	public DmiResult() {
