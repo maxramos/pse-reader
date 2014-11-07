@@ -54,7 +54,7 @@ public class DmiIndicator implements Callable<DmiResult> {
 	private static final BigDecimal TREND_SIGNAL = new BigDecimal("20");
 	private static final BigDecimal STRONG_TREND_SIGNAL = new BigDecimal("40");
 
-	int lookBackPeriod = 14;
+	private static final int LOOK_BACK_PERIOD = 14;
 
 	private List<Quote> _quotes;
 	private List<IndicatorResult> _results;
@@ -70,7 +70,7 @@ public class DmiIndicator implements Callable<DmiResult> {
 	}
 
 	private DmiResult initialDmi(List<Quote> quotes) {
-		int size = lookBackPeriod + 1 + lookBackPeriod - 1; // 28
+		int size = LOOK_BACK_PERIOD + 1 + LOOK_BACK_PERIOD - 1; // 28
 		List<Quote> trimmedQuotes = quotes.subList(0, size);
 
 		DmiResult.Holder trAndDmDataList = trAndDmData(trimmedQuotes, size - 1);
@@ -85,7 +85,6 @@ public class DmiIndicator implements Callable<DmiResult> {
 		BigDecimal atr = adxDataList.getLastAtr();
 
 		DmiResult result = new DmiResult(adx, plusDi, minusDi, trend, position, smoothedPlusDm, smoothedMinusDm, atr);
-		// return new AsyncResult<>(result);
 		return result;
 	}
 
@@ -104,7 +103,7 @@ public class DmiIndicator implements Callable<DmiResult> {
 		BigDecimal currentTr = trAndDmDataList.getTrList().get(0);
 		BigDecimal currentPlusDm = trAndDmDataList.getPlusDmList().get(0);
 		BigDecimal currentMinusDm = trAndDmDataList.getMinusDmList().get(0);
-		BigDecimal period = new BigDecimal(lookBackPeriod);
+		BigDecimal period = new BigDecimal(LOOK_BACK_PERIOD);
 
 		BigDecimal atr = IndicatorUtil.sma(previousAtr, currentTr, period, 10);
 		BigDecimal smoothedPlusDm = IndicatorUtil.sma(previousSmoothedPlusDm, currentPlusDm, period, 10);
@@ -117,7 +116,6 @@ public class DmiIndicator implements Callable<DmiResult> {
 		PositionType position = determinePosition(plusDi, minusDi, previousPlusDi, previousMinusDi);
 
 		DmiResult result = new DmiResult(adx, plusDi, minusDi, trend, position, smoothedPlusDm, smoothedMinusDm, atr);
-		// return new AsyncResult<>(result);
 		return result;
 	}
 
@@ -156,10 +154,10 @@ public class DmiIndicator implements Callable<DmiResult> {
 
 	private DmiResult.SmoothedHolder adxData(DmiResult.Holder dataList) {
 		dataList.reverse();
-		DmiResult.SmoothedHolder adxDataList = new DmiResult.SmoothedHolder(lookBackPeriod);
-		BigDecimal period = new BigDecimal(lookBackPeriod);
+		DmiResult.SmoothedHolder adxDataList = new DmiResult.SmoothedHolder(LOOK_BACK_PERIOD);
+		BigDecimal period = new BigDecimal(LOOK_BACK_PERIOD);
 
-		for (int i = 0, start = 0, end = lookBackPeriod; i < lookBackPeriod; i++, start++, end++) {
+		for (int i = 0, start = 0, end = LOOK_BACK_PERIOD; i < LOOK_BACK_PERIOD; i++, start++, end++) {
 			List<BigDecimal> trList = dataList.getTrList().subList(start, end);
 			List<BigDecimal> plusDmList = dataList.getPlusDmList().subList(start, end);
 			List<BigDecimal> minusDmList = dataList.getMinusDmList().subList(start, end);
@@ -172,15 +170,15 @@ public class DmiIndicator implements Callable<DmiResult> {
 				smoothedPlusDm = IndicatorUtil.avg(plusDmList, 10);
 				smoothedMinusDm = IndicatorUtil.avg(minusDmList, 10);
 			} else {
-				BigDecimal currentTr = trList.get(lookBackPeriod - 1);
+				BigDecimal currentTr = trList.get(LOOK_BACK_PERIOD - 1);
 				BigDecimal previousAtr = adxDataList.getLastAtr();
 				atr = IndicatorUtil.sma(previousAtr, currentTr, period, 10);
 
-				BigDecimal currentPlusDm = plusDmList.get(lookBackPeriod - 1);
+				BigDecimal currentPlusDm = plusDmList.get(LOOK_BACK_PERIOD - 1);
 				BigDecimal previousSmoothedPlusDm = adxDataList.getLastSmoothedPlusDm();
 				smoothedPlusDm = IndicatorUtil.sma(previousSmoothedPlusDm, currentPlusDm, period, 10);
 
-				BigDecimal currentMinusDm = minusDmList.get(lookBackPeriod - 1);
+				BigDecimal currentMinusDm = minusDmList.get(LOOK_BACK_PERIOD - 1);
 				BigDecimal previousSmoothedMinusDm = adxDataList.getLastSmoothedMinusDm();
 				smoothedMinusDm = IndicatorUtil.sma(previousSmoothedMinusDm, currentMinusDm, period, 10);
 			}

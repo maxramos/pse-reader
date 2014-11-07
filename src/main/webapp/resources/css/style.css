@@ -9,7 +9,7 @@
 .action { text-align: left; font-size: 0.6em; font-weight: bold; white-space: nowrap; vertical-align: middle; }
 .main { color: #000088; }
 .signal, .negative { color: #880000; font-size: 0.6em; }
-.positive { color: #008800; font-size: 0.6em; }
+.gauge, .positive { color: #008800; font-size: 0.6em; }
 
 body { font-size: 0.8em !important; }
 

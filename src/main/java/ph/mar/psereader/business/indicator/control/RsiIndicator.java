@@ -47,7 +47,7 @@ public class RsiIndicator implements Callable<RsiResult> {
 	private static final BigDecimal SELL_FLOOR = new BigDecimal("70");
 	private static final BigDecimal SELL_CEILING = new BigDecimal("100");
 
-	int lookBackPeriod = 14;
+	private static final int LOOK_BACK_PERIOD = 14;
 
 	private List<Quote> _quotes;
 	private List<IndicatorResult> _results;
@@ -63,10 +63,10 @@ public class RsiIndicator implements Callable<RsiResult> {
 	}
 
 	private RsiResult initialRsi(List<Quote> quotes) {
-		int size = lookBackPeriod + 1; // 15
+		int size = LOOK_BACK_PERIOD + 1; // 15
 		List<Quote> trimmedQuotes = quotes.subList(0, size);
 
-		RsiResult.Holder gainsAndLosses = gainsAndLosses(trimmedQuotes, lookBackPeriod);
+		RsiResult.Holder gainsAndLosses = gainsAndLosses(trimmedQuotes, LOOK_BACK_PERIOD);
 		BigDecimal avgGain = IndicatorUtil.avg(gainsAndLosses.getGains(), 10);
 		BigDecimal avgLoss = IndicatorUtil.avg(gainsAndLosses.getLosses(), 10);
 		BigDecimal rsi = rsi(avgGain, avgLoss);
@@ -87,7 +87,7 @@ public class RsiIndicator implements Callable<RsiResult> {
 		RsiResult.Holder gainsAndLosses = gainsAndLosses(trimmedQuotes, 1);
 		BigDecimal currentGain = gainsAndLosses.getGains().get(0);
 		BigDecimal currentLoss = gainsAndLosses.getLosses().get(0);
-		BigDecimal period = new BigDecimal(lookBackPeriod);
+		BigDecimal period = new BigDecimal(LOOK_BACK_PERIOD);
 
 		BigDecimal avgGain = IndicatorUtil.sma(previousAvgGain, currentGain, period, 10);
 		BigDecimal avgLoss = IndicatorUtil.sma(previousAvgLoss, currentLoss, period, 10);

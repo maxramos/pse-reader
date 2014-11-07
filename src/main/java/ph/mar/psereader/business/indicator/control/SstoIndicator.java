@@ -46,8 +46,8 @@ public class SstoIndicator implements Callable<SstoResult> {
 	private static final BigDecimal SELL_FLOOR = new BigDecimal("80");
 	private static final BigDecimal SELL_CEILING = new BigDecimal("100");
 
-	int lookBackPeriod = 14;
-	int smaSmoothing = 3;
+	private static final int LOOK_BACK_PERIOD = 14;
+	private static final int SMA_SMOOTHING = 3;
 
 	private List<Quote> _quotes;
 	private List<IndicatorResult> _results;
@@ -63,12 +63,12 @@ public class SstoIndicator implements Callable<SstoResult> {
 	}
 
 	private SstoResult initialSsto(List<Quote> quotes) {
-		int size = lookBackPeriod + smaSmoothing * 2 - 1 - 1; // 18
+		int size = LOOK_BACK_PERIOD + SMA_SMOOTHING * 2 - 1 - 1; // 18
 		List<Quote> trimmedQuotes = quotes.subList(0, size);
 
 		List<SstoResult.Holder> kDataList = kData(trimmedQuotes);
 		List<BigDecimal> fastKList = fastK(kDataList);
-		List<BigDecimal> fastDList = IndicatorUtil.sma(fastKList, smaSmoothing, 2);
+		List<BigDecimal> fastDList = IndicatorUtil.sma(fastKList, SMA_SMOOTHING, 2);
 
 		BigDecimal slowK = fastDList.get(0);
 		BigDecimal slowD = IndicatorUtil.avg(fastDList, 2);
@@ -80,7 +80,7 @@ public class SstoIndicator implements Callable<SstoResult> {
 	}
 
 	private SstoResult succeedingSsto(List<Quote> quotes, List<IndicatorResult> results) {
-		int size = lookBackPeriod;
+		int size = LOOK_BACK_PERIOD;
 		List<Quote> trimmedQuotes = quotes.subList(0, size);
 		Quote currentQuote = trimmedQuotes.get(0);
 		SstoResult previous1SstoResult = results.get(0).getSstoResult();
@@ -98,10 +98,10 @@ public class SstoIndicator implements Callable<SstoResult> {
 	}
 
 	private List<SstoResult.Holder> kData(List<Quote> quotes) {
-		int size = smaSmoothing * 2 - 1;
+		int size = SMA_SMOOTHING * 2 - 1;
 		List<SstoResult.Holder> kDataList = new ArrayList<>(size);
 
-		for (int i = 0, start = 0, end = lookBackPeriod; i < size; i++, start++, end++) {
+		for (int i = 0, start = 0, end = LOOK_BACK_PERIOD; i < size; i++, start++, end++) {
 			List<Quote> period = quotes.subList(start, end);
 			BigDecimal lastClosing = period.get(0).getClose();
 			BigDecimal lowestLow = lowestLow(period);

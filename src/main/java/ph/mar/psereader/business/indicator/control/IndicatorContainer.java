@@ -46,7 +46,7 @@ public class IndicatorContainer {
 		Future<SstoResult> sstoResult = executorService.submit(new SstoIndicator(quotes, results));
 		Future<RsiResult> rsiResult = executorService.submit(new RsiIndicator(quotes, results));
 		Future<DmiResult> dmiResult = executorService.submit(new DmiIndicator(quotes, results));
-		Future<MacdResult> macdResult = executorService.submit(new MacdIndicator(quotes, results));
+		Future<MacdResult> macdResult = executorService.submit(new MacdIndicator(stock, quotes, results));
 
 		while (!sstoResult.isDone() || !rsiResult.isDone() || !dmiResult.isDone() || !macdResult.isDone()) {
 			continue;
