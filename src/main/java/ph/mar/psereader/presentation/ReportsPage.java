@@ -15,6 +15,7 @@ import javax.inject.Named;
 
 import org.slf4j.Logger;
 
+import ph.mar.psereader.business.market.boundary.MarketManager;
 import ph.mar.psereader.business.report.boundary.PseReportManager;
 import ph.mar.psereader.business.report.entity.PseReportRow;
 
@@ -29,6 +30,9 @@ public class ReportsPage implements Serializable {
 	Logger log;
 
 	@Inject
+	MarketManager marketManager;
+
+	@Inject
 	PseReportManager pseReportManager;
 
 	private List<String> dates;
@@ -40,7 +44,7 @@ public class ReportsPage implements Serializable {
 	void init() {
 		dates = new ArrayList<>();
 
-		for (Date date : pseReportManager.findAllDates()) {
+		for (Date date : marketManager.findAllDates()) {
 			dates.add(DATE_FORMAT.format(date));
 		}
 

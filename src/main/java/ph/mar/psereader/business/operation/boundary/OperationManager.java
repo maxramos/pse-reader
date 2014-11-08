@@ -17,8 +17,8 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 
 import ph.mar.psereader.business.indicator.boundary.IndicatorManager;
+import ph.mar.psereader.business.market.entity.MarketSummary;
 import ph.mar.psereader.business.operation.entity.Settings;
-import ph.mar.psereader.business.report.entity.PseReport;
 import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
 
@@ -55,7 +55,7 @@ public class OperationManager {
 		stopWatch.start();
 		log.info("Operation started.");
 		Settings settings = findLatestSettings();
-		List<Date> reportDates = repository.find(PseReport.ALL_DATES_BY_DATE, with("date", settings.getLastProcessedDate()).asParameters(),
+		List<Date> reportDates = repository.find(MarketSummary.ALL_DATES_BY_DATE, with("date", settings.getLastProcessedDate()).asParameters(),
 				Date.class);
 
 		for (Date date : reportDates) {

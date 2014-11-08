@@ -15,9 +15,10 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
+import ph.mar.psereader.business.index.entity.PseIndex;
+import ph.mar.psereader.business.market.entity.MarketSummary;
 import ph.mar.psereader.business.operation.entity.Settings;
 import ph.mar.psereader.business.report.control.PseReportReader;
-import ph.mar.psereader.business.report.entity.PseIndex;
 import ph.mar.psereader.business.report.entity.PseReport;
 import ph.mar.psereader.business.report.entity.PseReportRow;
 import ph.mar.psereader.business.repository.control.Repository;
@@ -40,12 +41,8 @@ public class PseReportManager {
 	private transient Map<String, Stock> tempStockMap;
 	private transient Map<PseIndex.Type, PseIndex> tempPseIndexMap;
 
-	public List<Date> findAllDates() {
-		return repository.find(PseReport.ALL_DATES, Date.class);
-	}
-
 	public List<PseReportRow> findAllRowsByDate(Date date) {
-		return repository.find(PseReportRow.BY_DATE, with("date", date).asParameters(), PseReportRow.class);
+		return repository.find(Quote.ALL_REPORT_ROW_BY_DATE, with("date", date).asParameters(), PseReportRow.class);
 	}
 
 	public Map<String, Integer> addAll(List<byte[]> files) {
@@ -85,21 +82,11 @@ public class PseReportManager {
 		return results;
 	}
 
-	public PseReport findLatestReport() {
-		List<PseReport> reports = repository.find(PseReport.ALL, PseReport.class, 1);
-
-		if (reports.isEmpty()) {
-			return null;
-		}
-
-		return reports.get(0);
-	}
-
 	private boolean add(PseReport report) {
 		if (!isExisting(report)) {
-			repository.add(report);
+			repository.add(report.getMarketSummary());
 			log.info("Report {} processed.", Quote.DATE_FORMAT.format(report.getDate()));
-			processStocks(report);
+			processStocks(report.getRows());
 			processPseIndeces(report.getIndeces());
 			return true;
 		}
@@ -161,12 +148,12 @@ public class PseReportManager {
 	}
 
 	private boolean isExisting(PseReport report) {
-		List<PseReport> reports = repository.find(PseReport.BY_DATE, with("date", report.getDate()).asParameters(), PseReport.class);
+		List<MarketSummary> reports = repository.find(MarketSummary.BY_DATE, with("date", report.getDate()).asParameters(), MarketSummary.class, 1);
 		return !reports.isEmpty();
 	}
 
-	private void processStocks(PseReport report) {
-		for (PseReportRow row : report.getRows()) {
+	private void processStocks(List<PseReportRow> reportRows) {
+		for (PseReportRow row : reportRows) {
 			String symbol = row.getSymbol();
 			Stock stock = tempStockMap.get(symbol);
 			Quote quote = Quote.convert(row);

@@ -23,11 +23,11 @@ public class MacdResult implements Serializable {
 	private BigDecimal histogram;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "macd_trend", nullable = false, length = 11)
-	private TrendType trend;
+	@Column(name = "macd_momentum", nullable = false, length = 7)
+	private MomentumType momentum;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "macd_position", nullable = false, length = 12)
+	@Column(name = "macd_position", nullable = false, length = 13)
 	private PositionType position;
 
 	@Column(name = "macd_fast_ema", nullable = false, precision = 14, scale = 10)
@@ -40,12 +40,12 @@ public class MacdResult implements Serializable {
 		super();
 	}
 
-	public MacdResult(BigDecimal macd, BigDecimal signalLine, BigDecimal histogram, TrendType trend, PositionType position, BigDecimal fastEma,
+	public MacdResult(BigDecimal macd, BigDecimal signalLine, BigDecimal histogram, MomentumType momentum, PositionType position, BigDecimal fastEma,
 			BigDecimal slowEma) {
 		this.macd = macd;
 		this.signalLine = signalLine;
 		this.histogram = histogram;
-		this.trend = trend;
+		this.momentum = momentum;
 		this.position = position;
 		this.fastEma = fastEma;
 		this.slowEma = slowEma;
@@ -63,8 +63,8 @@ public class MacdResult implements Serializable {
 		return histogram;
 	}
 
-	public TrendType getTrend() {
-		return trend;
+	public MomentumType getMomentum() {
+		return momentum;
 	}
 
 	public PositionType getPosition() {
@@ -81,8 +81,8 @@ public class MacdResult implements Serializable {
 
 	@Override
 	public String toString() {
-		return String.format("MacdResult [macd=%s, signalLine=%s, histogram=%s, trend=%s, position=%s, fastEma=%s, slowEma=%s]", macd, signalLine,
-				histogram, trend, position, fastEma, slowEma);
+		return String.format("MacdResult [macd=%s, signalLine=%s, histogram=%s, momentum=%s, position=%s, fastEma=%s, slowEma=%s]", macd, signalLine,
+				histogram, momentum, position, fastEma, slowEma);
 	}
 
 }

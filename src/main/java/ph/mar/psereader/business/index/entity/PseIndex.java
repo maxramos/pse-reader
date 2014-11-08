@@ -1,4 +1,4 @@
-package ph.mar.psereader.business.report.entity;
+package ph.mar.psereader.business.index.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;

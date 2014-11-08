@@ -6,13 +6,13 @@
 	template="/WEB-INF/template/template.xhtml">
 
 <ui:define name="content">
-	<p:panelGrid columns="2" styleClass="no-border" rendered="#{indexPage.report ne null}">
+	<p:panelGrid columns="2" styleClass="no-border" rendered="#{indexPage.marketSummary ne null}">
 		<f:facet name="header">
 			<h:outputText value="Market Statistics" />
 		</f:facet>
 	
 		<h:outputText value="As of:" />
-		<h:outputText value="#{indexPage.report.date}">
+		<h:outputText value="#{indexPage.marketSummary.date}">
 			<f:convertDateTime pattern="MMM dd, yyyy" />
 		</h:outputText>
 	

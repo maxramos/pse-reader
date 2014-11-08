@@ -9,9 +9,8 @@ import javax.inject.Named;
 
 import org.slf4j.Logger;
 
-import ph.mar.psereader.business.report.boundary.PseReportManager;
-import ph.mar.psereader.business.report.entity.PseMarketSummary;
-import ph.mar.psereader.business.report.entity.PseReport;
+import ph.mar.psereader.business.market.boundary.MarketManager;
+import ph.mar.psereader.business.market.entity.MarketSummary;
 
 @Named
 @ViewScoped
@@ -23,25 +22,16 @@ public class IndexPage implements Serializable {
 	Logger log;
 
 	@Inject
-	PseReportManager pseReportManager;
+	MarketManager marketManager;
 
-	private PseReport report;
-	private PseMarketSummary marketSummary;
+	private MarketSummary marketSummary;
 
 	@PostConstruct
 	void init() {
-		report = pseReportManager.findLatestReport();
-		
-		if (report != null) {			
-			marketSummary = report.getMarketSummary();
-		}
+		marketSummary = marketManager.findLatestSummary();
 	}
 
-	public PseReport getReport() {
-		return report;
-	}
-
-	public PseMarketSummary getMarketSummary() {
+	public MarketSummary getMarketSummary() {
 		return marketSummary;
 	}
 

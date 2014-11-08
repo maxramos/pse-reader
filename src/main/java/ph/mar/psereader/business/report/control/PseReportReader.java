@@ -23,9 +23,9 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.slf4j.Logger;
 
-import ph.mar.psereader.business.report.entity.PseIndex;
-import ph.mar.psereader.business.report.entity.PseIndexQuote;
-import ph.mar.psereader.business.report.entity.PseMarketSummary;
+import ph.mar.psereader.business.index.entity.PseIndex;
+import ph.mar.psereader.business.index.entity.PseIndexQuote;
+import ph.mar.psereader.business.market.entity.MarketSummary;
 import ph.mar.psereader.business.report.entity.PseReport;
 import ph.mar.psereader.business.report.entity.PseReportRow;
 import ph.mar.psereader.business.stock.entity.SectorType;
@@ -169,7 +169,7 @@ public class PseReportReader {
 		String totalForeignBuy = extractSummaryData(TOTAL_FOREIGN_BUY, marketSummaryData);
 		String totalForeignSell = extractSummaryData(TOTAL_FOREIGN_SELL, marketSummaryData);
 
-		PseMarketSummary marketSummary = new PseMarketSummary();
+		MarketSummary marketSummary = new MarketSummary(report.getDate());
 		marketSummary.setAdvancesCount(Integer.parseInt(advancesCount));
 		marketSummary.setDeclinesCount(Integer.parseInt(declinesCount));
 		marketSummary.setUnchangedCount(Integer.parseInt(unchangedCount));

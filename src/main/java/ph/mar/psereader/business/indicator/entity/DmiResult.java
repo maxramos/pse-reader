@@ -30,7 +30,7 @@ public class DmiResult implements Serializable {
 	private TrendType trend;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "dmi_position", nullable = false, length = 12)
+	@Column(name = "dmi_position", nullable = false, length = 13)
 	private PositionType position;
 
 	@Column(name = "dmi_smoothed_plus_dm", nullable = false, precision = 13, scale = 10)

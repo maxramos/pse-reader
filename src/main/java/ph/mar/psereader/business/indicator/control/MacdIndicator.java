@@ -9,8 +9,8 @@ import java.util.concurrent.Callable;
 
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.MacdResult;
+import ph.mar.psereader.business.indicator.entity.MomentumType;
 import ph.mar.psereader.business.indicator.entity.PositionType;
-import ph.mar.psereader.business.indicator.entity.TrendType;
 import ph.mar.psereader.business.stock.entity.Quote;
 import ph.mar.psereader.business.stock.entity.Stock;
 
@@ -59,12 +59,12 @@ public class MacdIndicator implements Callable<MacdResult> {
 		BigDecimal signalLine = IndicatorUtil.avg(macdList, 10);
 		BigDecimal macd = macdList.get(macdList.size() - 1);
 		BigDecimal histogram = macd.subtract(signalLine);
-		TrendType trend = determineTrend(histogram);
+		MomentumType momentum = determineMomentum(macd, histogram);
 		PositionType position = PositionType.HOLD;
 		BigDecimal fastEma = fastEmaList.get(fastEmaList.size() - 1);
 		BigDecimal slowEma = slowEmaList.get(slowEmaList.size() - 1);
 
-		return new MacdResult(macd, signalLine, histogram, trend, position, fastEma, slowEma);
+		return new MacdResult(macd, signalLine, histogram, momentum, position, fastEma, slowEma);
 	}
 
 	private MacdResult succeedingMacd(List<Quote> quotes, List<IndicatorResult> results) {
@@ -73,6 +73,7 @@ public class MacdIndicator implements Callable<MacdResult> {
 		BigDecimal previousFastEma = previousMacdResult.getFastEma();
 		BigDecimal previousSlowEma = previousMacdResult.getSlowEma();
 		BigDecimal previousSignalLine = previousMacdResult.getSignalLine();
+		BigDecimal previousMacd = previousMacdResult.getMacd();
 		BigDecimal previousHistogram = previousMacdResult.getHistogram();
 		BigDecimal currentClose = currentQuote.getClose();
 
@@ -81,10 +82,10 @@ public class MacdIndicator implements Callable<MacdResult> {
 		BigDecimal macd = macd(fastEma, slowEma);
 		BigDecimal signalLine = IndicatorUtil.ema(previousSignalLine, macd, SIGNAL_LINE_EMA_FACTOR, 10);
 		BigDecimal histogram = macd.subtract(signalLine);
-		TrendType trend = determineTrend(histogram);
-		PositionType position = determinePosition(histogram, previousHistogram);
+		MomentumType momentum = determineMomentum(macd, histogram);
+		PositionType position = determinePosition(macd, previousMacd, histogram, previousHistogram);
 
-		return new MacdResult(macd, signalLine, histogram, trend, position, fastEma, slowEma);
+		return new MacdResult(macd, signalLine, histogram, momentum, position, fastEma, slowEma);
 	}
 
 	private List<BigDecimal> extractCloseValues(List<Quote> quotes) {
@@ -112,30 +113,30 @@ public class MacdIndicator implements Callable<MacdResult> {
 		return fastEma.subtract(slowEma);
 	}
 
-	private TrendType determineTrend(BigDecimal histogram) {
-		TrendType trend;
+	private MomentumType determineMomentum(BigDecimal macd, BigDecimal histogram) {
+		MomentumType momentum;
 
-		if (histogram.compareTo(BigDecimal.ZERO) > 0) {
-			trend = TrendType.UP;
-		} else if (histogram.compareTo(BigDecimal.ZERO) < 0) {
-			trend = TrendType.DOWN;
+		if (histogram.compareTo(BigDecimal.ZERO) > 0 && macd.compareTo(BigDecimal.ZERO) > 0) {
+			momentum = MomentumType.BULLISH;
+		} else if (histogram.compareTo(BigDecimal.ZERO) < 0 && macd.compareTo(BigDecimal.ZERO) < 0) {
+			momentum = MomentumType.BEARISH;
 		} else {
-			trend = TrendType.SIDEWAYS;
+			momentum = MomentumType.NEUTRAL;
 		}
 
-		return trend;
+		return momentum;
 	}
 
-	private PositionType determinePosition(BigDecimal histogram, BigDecimal prevHistogram) {
+	private PositionType determinePosition(BigDecimal macd, BigDecimal prevMacd, BigDecimal histogram, BigDecimal prevHistogram) {
 		PositionType position;
 
 		if (prevHistogram.compareTo(BigDecimal.ZERO) < 0 && histogram.compareTo(BigDecimal.ZERO) > 0) {
 			position = PositionType.ENTER;
 		} else if (prevHistogram.compareTo(BigDecimal.ZERO) > 0 && histogram.compareTo(BigDecimal.ZERO) < 0) {
 			position = PositionType.EXIT;
-		} else if (prevHistogram.compareTo(BigDecimal.ZERO) > 0 && histogram.compareTo(prevHistogram) > 0) {
+		} else if (macd.compareTo(prevMacd) > 0) {
 			position = PositionType.RISING;
-		} else if (prevHistogram.compareTo(BigDecimal.ZERO) < 0 && histogram.compareTo(prevHistogram) < 0) {
+		} else if (macd.compareTo(prevMacd) < 0) {
 			position = PositionType.FALLING;
 		} else {
 			position = PositionType.HOLD;

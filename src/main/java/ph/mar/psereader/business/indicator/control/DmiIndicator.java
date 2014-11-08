@@ -236,12 +236,12 @@ public class DmiIndicator implements Callable<DmiResult> {
 			position = PositionType.ENTER; // PREV_-DI > PREV_+DI && +DI > -DI
 		} else if (_prevPlusDi.compareTo(_prevMinusDi) > 0 && _minusDi.compareTo(_plusDi) > 0) {
 			position = PositionType.EXIT; // PREV_+DI > PREV_-DI && -DI > +DI
-		} else if (_prevMinusDi.compareTo(_prevPlusDi) > 0 && _prevMinusDi.compareTo(_minusDi) > 0 && _prevPlusDi.compareTo(_plusDi) < 0
+		} else if (_minusDi.compareTo(_plusDi) > 0 && _prevMinusDi.compareTo(_minusDi) > 0 && _prevPlusDi.compareTo(_plusDi) < 0
 				&& _minusDi.subtract(_plusDi).compareTo(TREND_WARNING) <= 0) {
-			position = PositionType.UP_WARNING; // PREV_-DI > PREV_+DI && PREV_-DI > -DI && PREV_+DI < +DI && -DI - +DI <= 5
-		} else if (_prevPlusDi.compareTo(_prevMinusDi) > 0 && _prevPlusDi.compareTo(_plusDi) > 0 && _prevMinusDi.compareTo(_minusDi) < 0
+			position = PositionType.ENTER_WARNING; // PREV_-DI > PREV_+DI && PREV_-DI > -DI && PREV_+DI < +DI && -DI - +DI <= 5
+		} else if (_plusDi.compareTo(_minusDi) > 0 && _prevPlusDi.compareTo(_plusDi) > 0 && _prevMinusDi.compareTo(_minusDi) < 0
 				&& _plusDi.subtract(_minusDi).compareTo(TREND_WARNING) <= 0) {
-			position = PositionType.DOWN_WARNING; // PREV_+DI > PREV_-DI && PREV_+DI > +DI && PREV_-DI < -DI && +DI - -DI <= 5
+			position = PositionType.EXIT_WARNING; // PREV_+DI > PREV_-DI && PREV_+DI > +DI && PREV_-DI < -DI && +DI - -DI <= 5
 		} else if (_plusDi.compareTo(_prevPlusDi) > 0) {
 			position = PositionType.RISING; // +DI > PREV_+DI
 		} else if (_plusDi.compareTo(_prevPlusDi) < 0) {

@@ -25,11 +25,13 @@ import ph.mar.psereader.business.report.entity.PseReportRow;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
-	@NamedQuery(name = Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, query = "SELECT NEW ph.mar.psereader.business.stock.entity.Quote(q.date, q.open, q.high, q.low, q.close, q.volume) FROM Quote q WHERE q.stock = :stock AND q.date <= :date ORDER BY q.date DESC"),
-	@NamedQuery(name = Quote.BY_STOCK, query = "SELECT q FROM Quote q WHERE q.stock = :stock ORDER BY q.date DESC") })
+		@NamedQuery(name = Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, query = "SELECT NEW ph.mar.psereader.business.stock.entity.Quote(q.date, q.open, q.high, q.low, q.close, q.volume) FROM Quote q WHERE q.stock = :stock AND q.date <= :date ORDER BY q.date DESC"),
+		@NamedQuery(name = Quote.ALL_REPORT_ROW_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.report.entity.PseReportRow(q.stock.name, q.stock.symbol, q.bid, q.ask, q.open, q.high, q.low, q.close, q.volume, q.value, q.foreignBuySell, q.stock.sector, q.stock.subSector) FROM Quote q WHERE q.date = :date ORDER BY q.stock.symbol"),
+		@NamedQuery(name = Quote.BY_STOCK, query = "SELECT q FROM Quote q WHERE q.stock = :stock ORDER BY q.date DESC") })
 public class Quote implements Serializable {
 
 	public static final String ALL_INDICATOR_DATA_BY_STOCK_AND_DATE = "Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE";
+	public static final String ALL_REPORT_ROW_BY_DATE = "Quote.ALL_REPORT_ROW_BY_DATE";
 	public static final String BY_STOCK = "Quote.BY_STOCK";
 
 	public static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -65,6 +67,9 @@ public class Quote implements Serializable {
 
 	@Column(nullable = false)
 	private Long volume;
+
+	@Column(nullable = false)
+	private BigDecimal value;
 
 	@Column(name = "foreign_buy_sell", precision = 16, scale = 4)
 	private BigDecimal foreignBuySell;
@@ -102,6 +107,7 @@ public class Quote implements Serializable {
 		quote.setLow(row.getLow());
 		quote.setClose(row.getClose());
 		quote.setVolume(row.getVolume());
+		quote.setValue(row.getValue());
 		quote.setForeignBuySell(row.getForeignBuySell());
 		return quote;
 	}
@@ -174,6 +180,14 @@ public class Quote implements Serializable {
 		this.volume = volume;
 	}
 
+	public BigDecimal getValue() {
+		return value;
+	}
+
+	public void setValue(BigDecimal value) {
+		this.value = value;
+	}
+
 	public BigDecimal getForeignBuySell() {
 		return foreignBuySell;
 	}
@@ -192,8 +206,9 @@ public class Quote implements Serializable {
 
 	@Override
 	public String toString() {
-		return String.format("Quote [id=%s, date=%s, bid=%s, ask=%s, open=%s, high=%s, low=%s, close=%s, volume=%s, foreignBuySell=%s, stock.id=%s]",
-				id, date, bid, ask, open, high, low, close, volume, foreignBuySell, stock == null ? null : stock.getId());
+		return String.format(
+				"Quote [id=%s, date=%s, bid=%s, ask=%s, open=%s, high=%s, low=%s, close=%s, volume=%s, value=%s, foreignBuySell=%s, stock.id=%s]",
+				id, date, bid, ask, open, high, low, close, volume, value, foreignBuySell, stock == null ? null : stock.getId());
 	}
 
 }

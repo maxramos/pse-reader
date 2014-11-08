@@ -122,8 +122,7 @@
 			<div class="table">
 				<div class="table-row">
 					<div class="table-cell action" style="width: 45%;">
-						<h:outputText value="#{result.macdResult.trend.name}" styleClass="#{result.macdResult.trend}" />
-						<p:graphicImage library="img" name="strong.gif" width="15" rendered="#{result.macdResult.trend eq 'STRONG_UP' or result.macdResult.trend eq 'STRONG_DOWN'}" />
+						<h:outputText value="#{result.macdResult.momentum.name}" styleClass="#{result.macdResult.momentum}" rendered="#{result.macdResult.momentum ne 'NEUTRAL'}" />
 						<br />
 						<h:outputText value="#{result.macdResult.position.name}" styleClass="#{result.macdResult.position}" rendered="#{result.macdResult.position ne 'HOLD'}" />
 					</div>

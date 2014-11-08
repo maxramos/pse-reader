@@ -4,8 +4,8 @@ public enum PositionType {
 
 	ENTER("Enter"),
 	EXIT("Exit"),
-	UP_WARNING("Up Warning"),
-	DOWN_WARNING("Down Warning"),
+	ENTER_WARNING("Enter Warning"),
+	EXIT_WARNING("Exit Warning"),
 	RISING("Rising"),
 	FALLING("Falling"),
 	HOLD("Hold");

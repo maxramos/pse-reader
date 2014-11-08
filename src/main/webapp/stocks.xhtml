@@ -79,6 +79,12 @@
 			</h:outputText>
 		</p:column>
 		
+		<p:column headerText="Value" sortBy="#{quote.value}" styleClass="numeric">
+			<h:outputText value="#{quote.value}">
+				<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+			</h:outputText>
+		</p:column>
+		
 		<p:column headerText="Foreign Buy/Sell" sortBy="#{quote.foreignBuySell}" styleClass="numeric">
 			<h:outputText value="#{quote.foreignBuySell}">
 				<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />

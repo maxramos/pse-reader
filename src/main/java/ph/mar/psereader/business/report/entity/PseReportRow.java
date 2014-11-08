@@ -3,90 +3,51 @@ package ph.mar.psereader.business.report.entity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-
 import ph.mar.psereader.business.stock.entity.SectorType;
 import ph.mar.psereader.business.stock.entity.SubSectorType;
 
-@Entity
-@Table(name = "pse_report_row", uniqueConstraints = @UniqueConstraint(columnNames = { "symbol", "report_id" }), indexes = @Index(columnList = "report_id,symbol"))
-@NamedQueries({ @NamedQuery(name = PseReportRow.BY_DATE, query = "SELECT prr FROM PseReportRow prr WHERE prr.report.date = :date ORDER BY prr.report.date DESC"), })
 public class PseReportRow implements Serializable {
-
-	public static final String BY_DATE = "PseReportRow.BY_DATE";
 
 	private static final long serialVersionUID = 1L;
 
-	@Id
-	@SequenceGenerator(name = "seq_pse_report_row", sequenceName = "seq_pse_report_row", allocationSize = 1)
-	@GeneratedValue(generator = "seq_pse_report_row")
-	private Long id;
-
-	@Column(nullable = false, length = 5)
+	private String companyName; // 10 - N
 	private String symbol; // 9
-
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, length = 4)
-	private SectorType sector;
-
-	@Enumerated(EnumType.STRING)
-	@Column(name = "sub_sector", nullable = false, length = 5)
-	private SubSectorType subSector;
-
-	@Column(precision = 8, scale = 4)
 	private BigDecimal bid; // 8
-
-	@Column(precision = 8, scale = 4)
 	private BigDecimal ask; // 7
-
-	@Column(nullable = false, precision = 8, scale = 4)
 	private BigDecimal open; // 6
-
-	@Column(nullable = false, precision = 8, scale = 4)
 	private BigDecimal high; // 5
-
-	@Column(nullable = false, precision = 8, scale = 4)
 	private BigDecimal low; // 4
-
-	@Column(nullable = false, precision = 8, scale = 4)
 	private BigDecimal close; // 3
-
-	@Column(nullable = false)
 	private Long volume; // 2
-
-	@Column(nullable = false, precision = 16, scale = 4)
 	private BigDecimal value; // 1
-
-	@Column(name = "foreign_buy_sell", precision = 16, scale = 4)
 	private BigDecimal foreignBuySell; // 0
 
-	@ManyToOne
-	@JoinColumn(name = "report_id")
-	private PseReport report; // 10 - N
-
-	@Transient
-	private String companyName;
-
-	public PseReportRow() {
-		super();
-	}
+	private PseReport report;
+	private SectorType sector;
+	private SubSectorType subSector;
 
 	public PseReportRow(String symbol, SectorType sector, SubSectorType subSector) {
 		this.symbol = symbol;
+		this.sector = sector;
+		this.subSector = subSector;
+	}
+
+	/**
+	 * Used for NEW jpql construct.
+	 */
+	public PseReportRow(String companyName, String symbol, BigDecimal bid, BigDecimal ask, BigDecimal open, BigDecimal high, BigDecimal low,
+			BigDecimal close, Long volume, BigDecimal value, BigDecimal foreignBuySell, SectorType sector, SubSectorType subSector) {
+		this.companyName = companyName;
+		this.symbol = symbol;
+		this.bid = bid;
+		this.ask = ask;
+		this.open = open;
+		this.high = high;
+		this.low = low;
+		this.close = close;
+		this.volume = volume;
+		this.value = value;
+		this.foreignBuySell = foreignBuySell;
 		this.sector = sector;
 		this.subSector = subSector;
 	}
@@ -95,20 +56,16 @@ public class PseReportRow implements Serializable {
 		return open != null && high != null && low != null && close != null && volume != null;
 	}
 
-	public Long getId() {
-		return id;
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
 	}
 
 	public String getSymbol() {
 		return symbol;
-	}
-
-	public SectorType getSector() {
-		return sector;
-	}
-
-	public SubSectorType getSubSector() {
-		return subSector;
 	}
 
 	public BigDecimal getBid() {
@@ -183,6 +140,14 @@ public class PseReportRow implements Serializable {
 		this.foreignBuySell = foreignBuySell;
 	}
 
+	public SectorType getSector() {
+		return sector;
+	}
+
+	public SubSectorType getSubSector() {
+		return subSector;
+	}
+
 	public PseReport getReport() {
 		return report;
 	}
@@ -191,20 +156,11 @@ public class PseReportRow implements Serializable {
 		this.report = report;
 	}
 
-	public String getCompanyName() {
-		return companyName;
-	}
-
-	public void setCompanyName(String companyName) {
-		this.companyName = companyName;
-	}
-
 	@Override
 	public String toString() {
 		return String
-				.format("PseReportRow [id=%s, symbol=%s, sector=%s, subSector=%s, bid=%s, ask=%s, open=%s, high=%s, low=%s, close=%s, volume=%s, value=%s, foreignBuySell=%s, report.id=%s]",
-						id, symbol, sector, subSector, bid, ask, open, high, low, close, volume, value, foreignBuySell, report == null ? null
-								: report.getId());
+				.format("PseReportRow [companyName=%s, symbol=%s, bid=%s, ask=%s, open=%s, high=%s, low=%s, close=%s, volume=%s, value=%s, foreignBuySell=%s, report=%s, sector=%s, subSector=%s]",
+						companyName, symbol, bid, ask, open, high, low, close, volume, value, foreignBuySell, report, sector, subSector);
 	}
 
 }

@@ -13,7 +13,7 @@
 				<p:row>
 					<p:column styleClass="left">
 						<p:selectOneMenu id="selectedReportDate" value="#{reportsPage.selectedDate}">
-							<p:ajax update="reportDataTable" listener="#{reportsPage.onDateChange}" partialSubmit="true" />
+							<p:ajax update="reportDataTable" listener="#{reportsPage.onDateChange}" />
 							<f:selectItems value="#{reportsPage.dates}" />
 						</p:selectOneMenu>
 					</p:column>
@@ -81,6 +81,12 @@
 		<p:column headerText="Volume" sortBy="#{row.volume}" styleClass="numeric">
 			<h:outputText value="#{row.volume}">
 				<f:convertNumber type="number" groupingUsed="true" />
+			</h:outputText>
+		</p:column>
+		
+		<p:column headerText="Value" sortBy="#{row.value}" styleClass="numeric">
+			<h:outputText value="#{row.value}">
+				<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 			</h:outputText>
 		</p:column>
 		
