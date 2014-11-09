@@ -19,9 +19,9 @@ import javax.persistence.TemporalType;
 @Entity
 @Table(name = "market_summary", indexes = @Index(columnList = "date"))
 @NamedQueries({ @NamedQuery(name = MarketSummary.ALL, query = "SELECT ms FROM MarketSummary ms ORDER BY ms.date DESC"),
-	@NamedQuery(name = MarketSummary.ALL_DATES, query = "SELECT ms.date FROM MarketSummary ms ORDER BY ms.date DESC"),
-	@NamedQuery(name = MarketSummary.ALL_DATES_BY_DATE, query = "SELECT ms.date FROM MarketSummary ms WHERE ms.date > :date ORDER BY ms.date"),
-	@NamedQuery(name = MarketSummary.BY_DATE, query = "SELECT ms FROM MarketSummary ms WHERE ms.date = :date") })
+		@NamedQuery(name = MarketSummary.ALL_DATES, query = "SELECT ms.date FROM MarketSummary ms ORDER BY ms.date DESC"),
+		@NamedQuery(name = MarketSummary.ALL_DATES_BY_DATE, query = "SELECT ms.date FROM MarketSummary ms WHERE ms.date > :date ORDER BY ms.date"),
+		@NamedQuery(name = MarketSummary.BY_DATE, query = "SELECT ms FROM MarketSummary ms WHERE ms.date = :date") })
 public class MarketSummary implements Serializable {
 
 	public static final String ALL = "MarketSummary.ALL";
@@ -76,6 +76,10 @@ public class MarketSummary implements Serializable {
 
 	public BigDecimal getTotalForeign() {
 		return totalForeignBuy.add(totalForeignSell);
+	}
+
+	public Date getDate() {
+		return date;
 	}
 
 	public int getAdvancesCount() {
