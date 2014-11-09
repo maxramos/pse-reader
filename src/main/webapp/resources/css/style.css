@@ -4,7 +4,7 @@
 .BUY_WARNING, .ENTER_WARNING { color: #8BDD8B; }
 .SELL, .MUST_SELL, .DOWN, .STRONG_DOWN, .EXIT, .FALLING, .BEARISH { color: #880000; }
 .SELL_WARNING, .EXIT_WARNING { color: #DD8B8B; }
-.HOLD, .SIDEWAYS, .NEUTRAL { color: #888800 }
+.HOLD, .SIDEWAYS, .NEUTRAL, .UNCHANGED { color: #888800 }
 
 .action { text-align: left; font-size: 0.6em; font-weight: bold; white-space: nowrap; vertical-align: middle; }
 .main { color: #000088; }

@@ -12,7 +12,6 @@ import ph.mar.psereader.business.indicator.entity.MacdResult;
 import ph.mar.psereader.business.indicator.entity.MomentumType;
 import ph.mar.psereader.business.indicator.entity.PositionType;
 import ph.mar.psereader.business.stock.entity.Quote;
-import ph.mar.psereader.business.stock.entity.Stock;
 
 /**
  * This implements the Moving Average Convergence/Divergence (MACD).
@@ -59,12 +58,10 @@ public class MacdIndicator implements Callable<MacdResult> {
 
 	private List<Quote> _quotes;
 	private List<IndicatorResult> _results;
-	Stock stock;
 
-	public MacdIndicator(Stock stock, List<Quote> quotes, List<IndicatorResult> results) {
+	public MacdIndicator(List<Quote> quotes, List<IndicatorResult> results) {
 		_quotes = quotes;
 		_results = results;
-		this.stock = stock;
 	}
 
 	@Override

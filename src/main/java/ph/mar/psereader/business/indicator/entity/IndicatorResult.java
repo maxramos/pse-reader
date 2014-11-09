@@ -24,7 +24,7 @@ import ph.mar.psereader.business.stock.entity.Stock;
 @Table(name = "indicator_result", uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
 	@NamedQuery(name = IndicatorResult.ALL_BY_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.date = :date"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.sstoResult, ir.rsiResult, ir.dmiResult, ir.macdResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.sstoResult, ir.rsiResult, ir.dmiResult, ir.macdResult, ir.obvResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
 public class IndicatorResult implements Serializable {
 
 	public static final String ALL_BY_DATE = "IndicatorResult.ALL_BY_DATE";
@@ -53,6 +53,9 @@ public class IndicatorResult implements Serializable {
 	@Embedded
 	private MacdResult macdResult;
 
+	@Embedded
+	private ObvResult obvResult;
+
 	@ManyToOne
 	private Stock stock;
 
@@ -68,11 +71,12 @@ public class IndicatorResult implements Serializable {
 	/**
 	 * Used for NEW jpql construct.
 	 */
-	public IndicatorResult(SstoResult sstoResult, RsiResult rsiResult, DmiResult dmiResult, MacdResult macdResult) {
+	public IndicatorResult(SstoResult sstoResult, RsiResult rsiResult, DmiResult dmiResult, MacdResult macdResult, ObvResult obvResult) {
 		this.sstoResult = sstoResult;
 		this.rsiResult = rsiResult;
 		this.dmiResult = dmiResult;
 		this.macdResult = macdResult;
+		this.obvResult = obvResult;
 	}
 
 	public Long getId() {
@@ -119,10 +123,18 @@ public class IndicatorResult implements Serializable {
 		this.macdResult = macdResult;
 	}
 
+	public ObvResult getObvResult() {
+		return obvResult;
+	}
+
+	public void setObvResult(ObvResult obvResult) {
+		this.obvResult = obvResult;
+	}
+
 	@Override
 	public String toString() {
-		return String.format("IndicatorResult [id=%s, date=%s, sstoResult=%s, rsiResult=%s, dmiResult=%s, macdResult=%s, stock.id=%s]", id, date,
-				sstoResult, rsiResult, dmiResult, macdResult, stock == null ? null : stock.getId());
+		return String.format("IndicatorResult [id=%s, date=%s, sstoResult=%s, rsiResult=%s, dmiResult=%s, macdResult=%s, obvResult=%s, stock.id=%s]",
+				id, date, sstoResult, rsiResult, dmiResult, macdResult, obvResult, stock == null ? null : stock.getId());
 	}
 
 }

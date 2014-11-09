@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import ph.mar.psereader.business.indicator.entity.DmiResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.MacdResult;
+import ph.mar.psereader.business.indicator.entity.ObvResult;
 import ph.mar.psereader.business.indicator.entity.RsiResult;
 import ph.mar.psereader.business.indicator.entity.SstoResult;
 import ph.mar.psereader.business.repository.control.Repository;
@@ -46,9 +47,10 @@ public class IndicatorContainer {
 		Future<SstoResult> sstoResult = executorService.submit(new SstoIndicator(quotes, results));
 		Future<RsiResult> rsiResult = executorService.submit(new RsiIndicator(quotes, results));
 		Future<DmiResult> dmiResult = executorService.submit(new DmiIndicator(quotes, results));
-		Future<MacdResult> macdResult = executorService.submit(new MacdIndicator(stock, quotes, results));
+		Future<MacdResult> macdResult = executorService.submit(new MacdIndicator(quotes, results));
+		Future<ObvResult> obvResult = executorService.submit(new ObvIndicator(quotes, results));
 
-		while (!sstoResult.isDone() || !rsiResult.isDone() || !dmiResult.isDone() || !macdResult.isDone()) {
+		while (!sstoResult.isDone() || !rsiResult.isDone() || !dmiResult.isDone() || !macdResult.isDone() || !obvResult.isDone()) {
 			continue;
 		}
 
@@ -59,6 +61,7 @@ public class IndicatorContainer {
 			indicatorResult.setRsiResult(rsiResult.get());
 			indicatorResult.setDmiResult(dmiResult.get());
 			indicatorResult.setMacdResult(macdResult.get());
+			indicatorResult.setObvResult(obvResult.get());
 		} catch (ExecutionException | InterruptedException e) {
 			throw new EJBException(e);
 		}
