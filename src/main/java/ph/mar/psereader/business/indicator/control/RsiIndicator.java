@@ -11,18 +11,16 @@ import ph.mar.psereader.business.indicator.entity.RsiResult;
 import ph.mar.psereader.business.stock.entity.Quote;
 
 /**
- * This implements the Relative Strength Index (RSI) with SMA as smoothing.
+ * This implements the Relative Strength Index (RSI).
  *
  * Computations:
- * n = look-back period
+ * n = look-back period (14)
  * if CURRENT_CLOSE > PREVIOUS_CLOSE then GAIN = CURRENT_CLOSE - PREVIOUS_CLOSE, LOSS = 0
  * if PREVIOUS_CLOSE < CURRENT_CLOSE then GAIN = 0, LOSS = PREVIOUS_CLOSE - CURRENT_CLOSE
+ * SMA = (PREV_AVG * (PERIOD - 1) + CURRENT_VAL) / PERIOD
  *
- * initial AVG_GAIN = AVG(GAIN)
- * initial AVG_LOSS = AVG(LOSS)
- * succeeding AVG_GAIN = SMAn(GAIN)
- * succeeding AVG_LOSS = SMAn(LOSS)
- *
+ * AVG_GAIN = SMAn(GAIN)
+ * AVG_LOSS = SMAn(LOSS)
  * RS = AVG_GAIN / AVG_LOSS
  * RSI = 100 - 100 / (RS + 1)
  *

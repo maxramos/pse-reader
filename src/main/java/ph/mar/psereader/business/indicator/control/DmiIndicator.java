@@ -15,13 +15,14 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * This implements the Directional Movement Index (DMI) with Average Directional Index (ADX).
  *
  * Computations:
- * n = look-back period
+ * n = look-back period (14)
  * TR_CANDIDATE_1 = CURRENT_HIGH - CURRENT_LOW
  * TR_CANDIDATE_2 = ABS(CURRENT_HIGH - PREVIOUS_CLOSE)
  * TR_CANDIDATE_3 = ABS(CURRENT_LOW - PREVIOUS_CLOSE)
  * UP_MOVE = CURRENT_HIGH - PREVIOUS_HIGH
  * DOWN_MOVE - PREVIOUS_LOW - CURRENT_LOW
  * TR = MAX(TR_CANDIDATE_1, TR_CANDIDATE_2, TR_CANDIDATE_2)
+ * SMA = (PREV_AVG * (PERIOD - 1) + CURRENT_VAL) / PERIOD
  *
  * ATR = SMAn(TR)
  * +DM = UP_MOVE > DOWN_MOVE && UP_MOVE > 0 ? UP_MOVE : 0
@@ -32,19 +33,19 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * ADX = SMAn(DX)
  *
  * Trends:
- * STRONG_UP_TREND --- ADX > 40 && +DI > -DI
- * STRONG_DOWN_TREND --- ADX > 40 && -DI > +DI
- * UP_TREND --- ADX > 20 && +DI > -DI
- * DOWN_TREND --- ADX > 20 && -DI > +DI
+ * STRONG_UP --- ADX > 40 && +DI > -DI
+ * STRONG_DOWN --- ADX > 40 && -DI > +DI
+ * UP --- ADX > 20 && +DI > -DI
+ * DOWN --- ADX > 20 && -DI > +DI
  * SIDEWAYS --- ADX <= 20
  *
  * Positions:
  * ENTER --- PREV_-DI > PREV_+DI && +DI > -D
  * EXIT --- PREV_+DI > PREV_-DI && -DI > +DI
- * UP_TREND_WARNING --- PREV_-DI > PREV_+DI && PREV_-DI > -DI && PREV_+DI < +DI && -DI - +DI <= 5
- * DOWN_TREND_WARNING --- PREV_+DI > PREV_-DI && PREV_+DI > +DI && PREV_-DI < -DI && +DI - -DI <= 5
- * RISING_TREND --- +DI > PREV_+DI
- * FALLING_TREND --- +DI < PREV_+DI
+ * ENTER_WARNING --- PREV_-DI > PREV_+DI && PREV_-DI > -DI && PREV_+DI < +DI && -DI - +DI <= 5
+ * EXIT_WARNING --- PREV_+DI > PREV_-DI && PREV_+DI > +DI && PREV_-DI < -DI && +DI - -DI <= 5
+ * RISING --- +DI > PREV_+DI
+ * FALLING --- +DI < PREV_+DI
  * HOLD --- Initial State
  */
 public class DmiIndicator implements Callable<DmiResult> {

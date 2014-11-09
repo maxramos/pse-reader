@@ -16,8 +16,8 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * This implements the Slow Stochastic (SSto).
  *
  * Computations:
- * n = look-back period
- * m = smoothing period
+ * n = look-back period (14)
+ * m = smoothing period (3)
  *
  * FAST_%K = (LAST_CLOSING - LOWEST_LOW(n)) / (HIGHEST_HIGH(n) - LOWEST_LOW(n)) * 100
  * FAST_%D = SMAm(FAST_%K)

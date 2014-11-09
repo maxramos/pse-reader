@@ -16,6 +16,33 @@ import ph.mar.psereader.business.stock.entity.Stock;
 
 /**
  * This implements the Moving Average Convergence/Divergence (MACD).
+ *
+ * Computations:
+ * m = fast ema look-back period (12)
+ * n = slow ema look-back period (26)
+ * o = signal line look-back period (9)
+ * FAST_EMA_FACTOR = 2 / (m + 1)
+ * SLOW_EMA_FACTOR = 2 / (n + 1)
+ * SIGNAL_LINE_FACTOR = 2 / (o + 1)
+ * EMA = (CURRENT_VAL - PREV_AVG) * FACTOR + PREV_AVG
+ *
+ * FAST_EMA = EMAm(CLOSE)
+ * SLOW_EMA = EMAn(CLOSE)
+ * MACD = FAST_EMA - SLOW_EMA
+ * SIGNAL_LINE = EMAo(MACD)
+ * HISTOGRAM = MACD - SIGNAL_LINE
+ *
+ * Momentums:
+ * BULLISH --- HISTOGRAM > 0 && MACD > 0
+ * BEARISH --- HISTOGRAM < 0 && MACD < 0
+ * NEUTRAL --- Everything Else
+ *
+ * Positions:
+ * ENTER --- PREV_HISTOGRAM < 0 && HISTOGRAM > 0
+ * EXIT --- PREV_HISTOGRAM > 0 && HISTOGRAM < 0
+ * RISING --- MACD > PREV_MACD
+ * FALLING --- MACD < PREV_MACD
+ * HOLD --- Initial State
  */
 public class MacdIndicator implements Callable<MacdResult> {
 
@@ -117,9 +144,9 @@ public class MacdIndicator implements Callable<MacdResult> {
 		MomentumType momentum;
 
 		if (histogram.compareTo(BigDecimal.ZERO) > 0 && macd.compareTo(BigDecimal.ZERO) > 0) {
-			momentum = MomentumType.BULLISH;
+			momentum = MomentumType.BULLISH; // HISTOGRAM > 0 && MACD > 0
 		} else if (histogram.compareTo(BigDecimal.ZERO) < 0 && macd.compareTo(BigDecimal.ZERO) < 0) {
-			momentum = MomentumType.BEARISH;
+			momentum = MomentumType.BEARISH; // HISTOGRAM < 0 && MACD < 0
 		} else {
 			momentum = MomentumType.NEUTRAL;
 		}
@@ -131,13 +158,13 @@ public class MacdIndicator implements Callable<MacdResult> {
 		PositionType position;
 
 		if (prevHistogram.compareTo(BigDecimal.ZERO) < 0 && histogram.compareTo(BigDecimal.ZERO) > 0) {
-			position = PositionType.ENTER;
+			position = PositionType.ENTER; // PREV_HISTOGRAM < 0 && HISTOGRAM > 0
 		} else if (prevHistogram.compareTo(BigDecimal.ZERO) > 0 && histogram.compareTo(BigDecimal.ZERO) < 0) {
-			position = PositionType.EXIT;
+			position = PositionType.EXIT; // PREV_HISTOGRAM > 0 && HISTOGRAM < 0
 		} else if (macd.compareTo(prevMacd) > 0) {
-			position = PositionType.RISING;
+			position = PositionType.RISING; // MACD > PREV_MACD
 		} else if (macd.compareTo(prevMacd) < 0) {
-			position = PositionType.FALLING;
+			position = PositionType.FALLING; // MACD < PREV_MACD
 		} else {
 			position = PositionType.HOLD;
 		}
