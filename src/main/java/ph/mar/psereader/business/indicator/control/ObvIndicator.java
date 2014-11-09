@@ -11,6 +11,15 @@ import ph.mar.psereader.business.stock.entity.Quote;
 
 /**
  * This implements the On Balance Volume (OBV).
+ *
+ * Computations:
+ * Initial OBV = 0
+ * OBV = if CLOSE > PREV_CLOSE then +VOLUME else if CLOSE < PREV_CLOSE then -VOLUME else PREV_OBV
+ *
+ * Movements:
+ * UP --- OBV > PREV_OBV
+ * DOWN --- OBV < PREV_OBV
+ * UNCHANGED --- OBV == PREV_OBV
  */
 public class ObvIndicator implements Callable<ObvResult> {
 
@@ -52,12 +61,12 @@ public class ObvIndicator implements Callable<ObvResult> {
 	}
 
 	private Long obv(BigDecimal close, BigDecimal prevClose, Long volume, Long prevObv) {
-		Long obv = prevObv;
+		Long obv = prevObv; // if CLOSE == PREV_CLOSE then PREV_OBV
 
 		if (close.compareTo(prevClose) > 0) {
-			obv += volume;
+			obv += volume; // if CLOSE > PREV_CLOSE then +VOLUME
 		} else if (close.compareTo(prevClose) < 0) {
-			obv -= volume;
+			obv -= volume; // if CLOSE < PREV_CLOSE then -VOLUME
 		}
 
 		return obv;
@@ -67,11 +76,11 @@ public class ObvIndicator implements Callable<ObvResult> {
 		MovementType movement;
 
 		if (obv.compareTo(prevObv) > 0) {
-			movement = MovementType.UP;
+			movement = MovementType.UP; // OBV > PREV_OBV
 		} else if (obv.compareTo(prevObv) < 0) {
-			movement = MovementType.DOWN;
+			movement = MovementType.DOWN; // OBV < PREV_OBV
 		} else {
-			movement = MovementType.UNCHANGED;
+			movement = MovementType.UNCHANGED; // OBV == PREV_OBV
 		}
 
 		return movement;
