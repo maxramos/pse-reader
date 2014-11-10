@@ -24,7 +24,7 @@ import ph.mar.psereader.business.stock.entity.Stock;
 @Table(name = "indicator_result", uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
 	@NamedQuery(name = IndicatorResult.ALL_BY_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.date = :date"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.sstoResult, ir.rsiResult, ir.dmiResult, ir.macdResult, ir.obvResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.sstoResult, ir.rsiResult, ir.dmiResult, ir.macdResult, ir.obvResult, ir.vrResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
 public class IndicatorResult implements Serializable {
 
 	public static final String ALL_BY_DATE = "IndicatorResult.ALL_BY_DATE";
@@ -56,6 +56,9 @@ public class IndicatorResult implements Serializable {
 	@Embedded
 	private ObvResult obvResult;
 
+	@Embedded
+	private VrResult vrResult;
+
 	@ManyToOne
 	private Stock stock;
 
@@ -71,12 +74,14 @@ public class IndicatorResult implements Serializable {
 	/**
 	 * Used for NEW jpql construct.
 	 */
-	public IndicatorResult(SstoResult sstoResult, RsiResult rsiResult, DmiResult dmiResult, MacdResult macdResult, ObvResult obvResult) {
+	public IndicatorResult(SstoResult sstoResult, RsiResult rsiResult, DmiResult dmiResult, MacdResult macdResult, ObvResult obvResult,
+			VrResult vrResult) {
 		this.sstoResult = sstoResult;
 		this.rsiResult = rsiResult;
 		this.dmiResult = dmiResult;
 		this.macdResult = macdResult;
 		this.obvResult = obvResult;
+		this.vrResult = vrResult;
 	}
 
 	public Long getId() {
@@ -131,10 +136,19 @@ public class IndicatorResult implements Serializable {
 		this.obvResult = obvResult;
 	}
 
+	public VrResult getVrResult() {
+		return vrResult;
+	}
+
+	public void setVrResult(VrResult vrResult) {
+		this.vrResult = vrResult;
+	}
+
 	@Override
 	public String toString() {
-		return String.format("IndicatorResult [id=%s, date=%s, sstoResult=%s, rsiResult=%s, dmiResult=%s, macdResult=%s, obvResult=%s, stock.id=%s]",
-				id, date, sstoResult, rsiResult, dmiResult, macdResult, obvResult, stock == null ? null : stock.getId());
+		return String.format(
+				"IndicatorResult [id=%s, date=%s, sstoResult=%s, rsiResult=%s, dmiResult=%s, macdResult=%s, obvResult=%s, vrResult=%s, stock.id=%s]",
+				id, date, sstoResult, rsiResult, dmiResult, macdResult, obvResult, vrResult, stock == null ? null : stock.getId());
 	}
 
 }

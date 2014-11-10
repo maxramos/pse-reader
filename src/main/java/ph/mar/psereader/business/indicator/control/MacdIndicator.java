@@ -88,7 +88,8 @@ public class MacdIndicator implements Callable<MacdResult> {
 		BigDecimal fastEma = fastEmaList.get(fastEmaList.size() - 1);
 		BigDecimal slowEma = slowEmaList.get(slowEmaList.size() - 1);
 
-		return new MacdResult(macd, signalLine, histogram, momentum, position, fastEma, slowEma);
+		MacdResult result = new MacdResult(macd, signalLine, histogram, momentum, position, fastEma, slowEma);
+		return result;
 	}
 
 	private MacdResult succeedingMacd(List<Quote> quotes, List<IndicatorResult> results) {
@@ -109,7 +110,8 @@ public class MacdIndicator implements Callable<MacdResult> {
 		MomentumType momentum = determineMomentum(macd, histogram);
 		PositionType position = determinePosition(macd, previousMacd, histogram, previousHistogram);
 
-		return new MacdResult(macd, signalLine, histogram, momentum, position, fastEma, slowEma);
+		MacdResult result = new MacdResult(macd, signalLine, histogram, momentum, position, fastEma, slowEma);
+		return result;
 	}
 
 	private List<BigDecimal> extractCloseValues(List<Quote> quotes) {

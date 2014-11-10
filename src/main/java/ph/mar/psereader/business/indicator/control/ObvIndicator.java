@@ -45,7 +45,8 @@ public class ObvIndicator implements Callable<ObvResult> {
 
 		Long obv = obv(currentClose, previousClose, volume, initialObv);
 		MovementType movement = determineMovement(obv, initialObv);
-		return new ObvResult(obv, movement);
+		ObvResult result = new ObvResult(obv, movement);
+		return result;
 	}
 
 	private ObvResult succeedingObv(List<Quote> quotes, List<IndicatorResult> results) {
@@ -57,7 +58,8 @@ public class ObvIndicator implements Callable<ObvResult> {
 
 		Long obv = obv(currentClose, previousClose, volume, prevObv);
 		MovementType movement = determineMovement(obv, prevObv);
-		return new ObvResult(obv, movement);
+		ObvResult result = new ObvResult(obv, movement);
+		return result;
 	}
 
 	private Long obv(BigDecimal close, BigDecimal prevClose, Long volume, Long prevObv) {

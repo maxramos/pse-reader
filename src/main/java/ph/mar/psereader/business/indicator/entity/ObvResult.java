@@ -13,7 +13,7 @@ public class ObvResult implements Serializable {
 	@Column(nullable = false)
 	private Long obv;
 
-	@Column(nullable = false, length = 9)
+	@Column(name = "obv_movement", nullable = false, length = 9)
 	private MovementType movement;
 
 	public ObvResult() {
