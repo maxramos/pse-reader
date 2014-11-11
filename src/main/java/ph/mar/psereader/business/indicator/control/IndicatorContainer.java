@@ -23,7 +23,6 @@ import ph.mar.psereader.business.indicator.entity.MacdResult;
 import ph.mar.psereader.business.indicator.entity.ObvResult;
 import ph.mar.psereader.business.indicator.entity.RsiResult;
 import ph.mar.psereader.business.indicator.entity.SstoResult;
-import ph.mar.psereader.business.indicator.entity.VrResult;
 import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
 import ph.mar.psereader.business.stock.entity.Stock;
@@ -50,10 +49,8 @@ public class IndicatorContainer {
 		Future<DmiResult> dmiResult = executorService.submit(new DmiIndicator(quotes, results));
 		Future<MacdResult> macdResult = executorService.submit(new MacdIndicator(quotes, results));
 		Future<ObvResult> obvResult = executorService.submit(new ObvIndicator(quotes, results));
-		Future<VrResult> vrResult = executorService.submit(new VrIndicator(stock, quotes, results));
 
-		while (!sstoResult.isDone() || !rsiResult.isDone() || !dmiResult.isDone() || !macdResult.isDone() || !obvResult.isDone()
-				|| !vrResult.isDone()) {
+		while (!sstoResult.isDone() || !rsiResult.isDone() || !dmiResult.isDone() || !macdResult.isDone() || !obvResult.isDone()) {
 			continue;
 		}
 
@@ -65,7 +62,6 @@ public class IndicatorContainer {
 			indicatorResult.setDmiResult(dmiResult.get());
 			indicatorResult.setMacdResult(macdResult.get());
 			indicatorResult.setObvResult(obvResult.get());
-			indicatorResult.setVrResult(vrResult.get());
 		} catch (ExecutionException | InterruptedException e) {
 			throw new EJBException(e);
 		}

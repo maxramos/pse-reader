@@ -159,22 +159,6 @@
 				</div>
 			</div>
 		</p:column>
-		
-		<p:column headerText="VR" sortBy="#{result.vrResult.vr}" styleClass="numeric">
-			<div class="table">
-				<div class="table-row">
-					<div class="table-cell action" style="width: 75%">
-						<h:outputText value="#{result.vrResult.volatility.name}" styleClass="#{result.vrResult.volatility}" rendered="#{result.vrResult.volatility ne 'NORMAL'}" />
-						<p:graphicImage library="img" name="strong.gif" width="15" rendered="#{result.vrResult.volatility eq 'WIDE_RANGING'}" />
-					</div>
-					<div class="table-cell" style="width: 25%">
-						<h:outputText value="#{result.vrResult.vr}" styleClass="main">
-							<f:convertNumber type="number" groupingUsed="true" />
-						</h:outputText>
-					</div>
-				</div>
-			</div>
-		</p:column>
 	</p:dataTable>
 </h:form>
 </ui:define>
