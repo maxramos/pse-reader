@@ -20,8 +20,8 @@ public class SstoResult implements Serializable {
 	private BigDecimal slowD;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "ssto_reco", nullable = false, length = 12)
-	private RecommendationType recommendation;
+	@Column(name = "ssto_action", nullable = false, length = 12)
+	private ActionType action;
 
 	@Column(name = "ssto_fast_k", nullable = false, precision = 5, scale = 2)
 	private BigDecimal fastK;
@@ -30,10 +30,10 @@ public class SstoResult implements Serializable {
 		super();
 	}
 
-	public SstoResult(BigDecimal slowK, BigDecimal slowD, RecommendationType recommendation, BigDecimal fastK) {
+	public SstoResult(BigDecimal slowK, BigDecimal slowD, ActionType action, BigDecimal fastK) {
 		this.slowK = slowK;
 		this.slowD = slowD;
-		this.recommendation = recommendation;
+		this.action = action;
 		this.fastK = fastK;
 	}
 
@@ -45,8 +45,8 @@ public class SstoResult implements Serializable {
 		return slowD;
 	}
 
-	public RecommendationType getRecommendation() {
-		return recommendation;
+	public ActionType getAction() {
+		return action;
 	}
 
 	public BigDecimal getFastK() {
@@ -55,7 +55,7 @@ public class SstoResult implements Serializable {
 
 	@Override
 	public String toString() {
-		return String.format("SstoResult [slowK=%s, slowD=%s, recommendation=%s, fastK=%s]", slowK, slowD, recommendation, fastK);
+		return String.format("SstoResult [slowK=%s, slowD=%s, action=%s, fastK=%s]", slowK, slowD, action, fastK);
 	}
 
 	public static class Holder {

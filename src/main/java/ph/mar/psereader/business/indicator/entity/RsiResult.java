@@ -19,8 +19,8 @@ public class RsiResult implements Serializable {
 	private BigDecimal rsi;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "rsi_reco", nullable = false, length = 12)
-	private RecommendationType recommendation;
+	@Column(name = "rsi_action", nullable = false, length = 12)
+	private ActionType action;
 
 	@Column(name = "rsi_avg_gain", nullable = false, precision = 13, scale = 10)
 	private BigDecimal avgGain;
@@ -32,9 +32,9 @@ public class RsiResult implements Serializable {
 		super();
 	}
 
-	public RsiResult(BigDecimal rsi, RecommendationType recommendation, BigDecimal avgGain, BigDecimal avgLoss) {
+	public RsiResult(BigDecimal rsi, ActionType action, BigDecimal avgGain, BigDecimal avgLoss) {
 		this.rsi = rsi;
-		this.recommendation = recommendation;
+		this.action = action;
 		this.avgGain = avgGain;
 		this.avgLoss = avgLoss;
 	}
@@ -43,8 +43,8 @@ public class RsiResult implements Serializable {
 		return rsi;
 	}
 
-	public RecommendationType getRecommendation() {
-		return recommendation;
+	public ActionType getAction() {
+		return action;
 	}
 
 	public BigDecimal getAvgGain() {
@@ -57,7 +57,7 @@ public class RsiResult implements Serializable {
 
 	@Override
 	public String toString() {
-		return String.format("RsiResult [rsi=%s, recommendation=%s, avgGain=%s, avgLoss=%s]", rsi, recommendation, avgGain, avgLoss);
+		return String.format("RsiResult [rsi=%s, action=%s, avgGain=%s, avgLoss=%s]", rsi, action, avgGain, avgLoss);
 	}
 
 	public static class Holder {

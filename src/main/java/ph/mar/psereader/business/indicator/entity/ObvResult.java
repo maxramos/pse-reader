@@ -13,29 +13,21 @@ public class ObvResult implements Serializable {
 	@Column(nullable = false)
 	private Long obv;
 
-	@Column(name = "obv_movement", nullable = false, length = 9)
-	private MovementType movement;
-
 	public ObvResult() {
 		super();
 	}
 
-	public ObvResult(Long obv, MovementType movement) {
+	public ObvResult(Long obv) {
 		this.obv = obv;
-		this.movement = movement;
 	}
 
 	public Long getObv() {
 		return obv;
 	}
 
-	public MovementType getMovement() {
-		return movement;
-	}
-
 	@Override
 	public String toString() {
-		return String.format("ObvResult [obv=%s, movement=%s]", obv, movement);
+		return String.format("ObvResult [obv=%s]", obv);
 	}
 
 }

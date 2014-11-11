@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import ph.mar.psereader.business.indicator.entity.ActionType;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
-import ph.mar.psereader.business.indicator.entity.RecommendationType;
 import ph.mar.psereader.business.indicator.entity.SstoResult;
 import ph.mar.psereader.business.stock.entity.Quote;
 
@@ -25,7 +25,7 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * SLOW_%K = FAST_%D
  * SLOW_%D = SMAm(SLOW_%K)
  *
- * Recommendations:
+ * Actions:
  * MUST_BUY --- %K < 20 && %D < 20 && %K > %D && %K > PREV_%K
  * BUY --- %K < 20
  * BUY_WARNING --- %K <= 25 && %K < %D
@@ -72,10 +72,10 @@ public class SstoIndicator implements Callable<SstoResult> {
 
 		BigDecimal slowK = fastDList.get(0);
 		BigDecimal slowD = IndicatorUtil.avg(fastDList, 2);
-		RecommendationType recommendation = determineRecommendation(slowK, slowD, null);
+		ActionType action = determineAction(slowK, slowD, null);
 		BigDecimal fastK = fastKList.get(0);
 
-		SstoResult result = new SstoResult(slowK, slowD, recommendation, fastK);
+		SstoResult result = new SstoResult(slowK, slowD, action, fastK);
 		return result;
 	}
 
@@ -91,9 +91,9 @@ public class SstoIndicator implements Callable<SstoResult> {
 		BigDecimal slowK = IndicatorUtil.avg(fastKList, 2);
 		List<BigDecimal> fastDList = Arrays.asList(new BigDecimal[] { slowK, previous1SstoResult.getSlowK(), previous2SstoResult.getSlowK() });
 		BigDecimal slowD = IndicatorUtil.avg(fastDList, 2);
-		RecommendationType recommendation = determineRecommendation(slowK, slowD, previous1SstoResult.getSlowK());
+		ActionType action = determineAction(slowK, slowD, previous1SstoResult.getSlowK());
 
-		SstoResult result = new SstoResult(slowK, slowD, recommendation, fastK);
+		SstoResult result = new SstoResult(slowK, slowD, action, fastK);
 		return result;
 	}
 
@@ -160,40 +160,40 @@ public class SstoIndicator implements Callable<SstoResult> {
 		return highestHigh;
 	}
 
-	private RecommendationType determineRecommendation(BigDecimal k, BigDecimal d, BigDecimal prevK) {
-		RecommendationType recommendation;
+	private ActionType determineAction(BigDecimal k, BigDecimal d, BigDecimal prevK) {
+		ActionType action;
 
 		if (k.compareTo(BUY_CEILING) < 0) {
 			if (d.compareTo(BUY_CEILING) < 0 && k.compareTo(d) > 0 && prevK != null && k.compareTo(prevK) > 0) {
-				recommendation = RecommendationType.MUST_BUY; // %K < 20 && %D < 20 && %K > %D && %K > PREV_%K
+				action = ActionType.MUST_BUY; // %K < 20 && %D < 20 && %K > %D && %K > PREV_%K
 			} else {
-				recommendation = RecommendationType.BUY; // %K < 20
+				action = ActionType.BUY; // %K < 20
 			}
 		} else if (k.compareTo(HOLD_FLOOR) <= 0) {
 			if (k.compareTo(d) < 0) {
-				recommendation = RecommendationType.BUY_WARNING; // %K <= 25 && %K < %D
+				action = ActionType.BUY_WARNING; // %K <= 25 && %K < %D
 			} else {
-				recommendation = RecommendationType.HOLD; // %K <= 25
+				action = ActionType.HOLD; // %K <= 25
 			}
 		} else if (k.compareTo(HOLD_CEILING) < 0) {
-			recommendation = RecommendationType.HOLD; // %K < 75
+			action = ActionType.HOLD; // %K < 75
 		} else if (k.compareTo(SELL_FLOOR) <= 0) {
 			if (k.compareTo(d) > 0) {
-				recommendation = RecommendationType.SELL_WARNING; // %K <= 80 && %K > %D
+				action = ActionType.SELL_WARNING; // %K <= 80 && %K > %D
 			} else {
-				recommendation = RecommendationType.HOLD; // %K <= 80
+				action = ActionType.HOLD; // %K <= 80
 			}
 		} else if (k.compareTo(SELL_CEILING) <= 0) {
 			if (d.compareTo(SELL_CEILING) <= 0 && k.compareTo(d) < 0 && prevK != null && k.compareTo(prevK) < 0) {
-				recommendation = RecommendationType.MUST_SELL; // %K <= 100 && %D <= 100 && %K < %D && %K < PREV_%K
+				action = ActionType.MUST_SELL; // %K <= 100 && %D <= 100 && %K < %D && %K < PREV_%K
 			} else {
-				recommendation = RecommendationType.SELL; // %K <= 100
+				action = ActionType.SELL; // %K <= 100
 			}
 		} else {
-			recommendation = RecommendationType.HOLD;
+			action = ActionType.HOLD;
 		}
 
-		return recommendation;
+		return action;
 	}
 
 }

@@ -1,6 +1,6 @@
 package ph.mar.psereader.business.indicator.entity;
 
-public enum RecommendationType {
+public enum ActionType {
 
 	BUY("Buy"),
 	MUST_BUY("Must Buy"),
@@ -12,7 +12,7 @@ public enum RecommendationType {
 
 	private String name;
 
-	private RecommendationType(String name) {
+	private ActionType(String name) {
 		this.name = name;
 	}
 

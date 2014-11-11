@@ -9,8 +9,8 @@ import java.util.concurrent.Callable;
 
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.MacdResult;
-import ph.mar.psereader.business.indicator.entity.MomentumType;
 import ph.mar.psereader.business.indicator.entity.PositionType;
+import ph.mar.psereader.business.indicator.entity.TrendType;
 import ph.mar.psereader.business.stock.entity.Quote;
 
 /**
@@ -31,10 +31,10 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * SIGNAL_LINE = EMAo(MACD)
  * HISTOGRAM = MACD - SIGNAL_LINE
  *
- * Momentums:
- * BULLISH --- HISTOGRAM > 0 && MACD > 0
- * BEARISH --- HISTOGRAM < 0 && MACD < 0
- * NEUTRAL --- Everything Else
+ * Trends:
+ * UP --- MACD > 0
+ * DOWN --- MACD < 0
+ * SIDEWAYS --- Everything Else
  *
  * Positions:
  * ENTER --- PREV_HISTOGRAM < 0 && HISTOGRAM > 0
@@ -83,12 +83,12 @@ public class MacdIndicator implements Callable<MacdResult> {
 		BigDecimal signalLine = IndicatorUtil.avg(macdList, 10);
 		BigDecimal macd = macdList.get(macdList.size() - 1);
 		BigDecimal histogram = macd.subtract(signalLine);
-		MomentumType momentum = determineMomentum(macd, histogram);
+		TrendType trend = determineMomentum(macd, histogram);
 		PositionType position = PositionType.HOLD;
 		BigDecimal fastEma = fastEmaList.get(fastEmaList.size() - 1);
 		BigDecimal slowEma = slowEmaList.get(slowEmaList.size() - 1);
 
-		MacdResult result = new MacdResult(macd, signalLine, histogram, momentum, position, fastEma, slowEma);
+		MacdResult result = new MacdResult(macd, signalLine, histogram, trend, position, fastEma, slowEma);
 		return result;
 	}
 
@@ -107,10 +107,10 @@ public class MacdIndicator implements Callable<MacdResult> {
 		BigDecimal macd = macd(fastEma, slowEma);
 		BigDecimal signalLine = IndicatorUtil.ema(previousSignalLine, macd, SIGNAL_LINE_EMA_FACTOR, 10);
 		BigDecimal histogram = macd.subtract(signalLine);
-		MomentumType momentum = determineMomentum(macd, histogram);
+		TrendType trend = determineMomentum(macd, histogram);
 		PositionType position = determinePosition(macd, previousMacd, histogram, previousHistogram);
 
-		MacdResult result = new MacdResult(macd, signalLine, histogram, momentum, position, fastEma, slowEma);
+		MacdResult result = new MacdResult(macd, signalLine, histogram, trend, position, fastEma, slowEma);
 		return result;
 	}
 
@@ -139,18 +139,18 @@ public class MacdIndicator implements Callable<MacdResult> {
 		return fastEma.subtract(slowEma);
 	}
 
-	private MomentumType determineMomentum(BigDecimal macd, BigDecimal histogram) {
-		MomentumType momentum;
+	private TrendType determineMomentum(BigDecimal macd, BigDecimal histogram) {
+		TrendType trend;
 
-		if (histogram.compareTo(BigDecimal.ZERO) > 0 && macd.compareTo(BigDecimal.ZERO) > 0) {
-			momentum = MomentumType.BULLISH; // HISTOGRAM > 0 && MACD > 0
-		} else if (histogram.compareTo(BigDecimal.ZERO) < 0 && macd.compareTo(BigDecimal.ZERO) < 0) {
-			momentum = MomentumType.BEARISH; // HISTOGRAM < 0 && MACD < 0
+		if (macd.compareTo(BigDecimal.ZERO) > 0) {
+			trend = TrendType.UP; // MACD > 0
+		} else if (macd.compareTo(BigDecimal.ZERO) < 0) {
+			trend = TrendType.DOWN; // MACD < 0
 		} else {
-			momentum = MomentumType.NEUTRAL;
+			trend = TrendType.SIDEWAYS;
 		}
 
-		return momentum;
+		return trend;
 	}
 
 	private PositionType determinePosition(BigDecimal macd, BigDecimal prevMacd, BigDecimal histogram, BigDecimal prevHistogram) {

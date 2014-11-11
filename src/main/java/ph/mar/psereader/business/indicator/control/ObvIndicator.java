@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
-import ph.mar.psereader.business.indicator.entity.MovementType;
 import ph.mar.psereader.business.indicator.entity.ObvResult;
 import ph.mar.psereader.business.stock.entity.Quote;
 
@@ -15,11 +14,6 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * Computations:
  * Initial OBV = 0
  * OBV = if CLOSE > PREV_CLOSE then +VOLUME else if CLOSE < PREV_CLOSE then -VOLUME else PREV_OBV
- *
- * Movements:
- * UP --- OBV > PREV_OBV
- * DOWN --- OBV < PREV_OBV
- * UNCHANGED --- OBV == PREV_OBV
  */
 public class ObvIndicator implements Callable<ObvResult> {
 
@@ -44,8 +38,7 @@ public class ObvIndicator implements Callable<ObvResult> {
 		Long initialObv = 0L;
 
 		Long obv = obv(currentClose, previousClose, volume, initialObv);
-		MovementType movement = determineMovement(obv, initialObv);
-		ObvResult result = new ObvResult(obv, movement);
+		ObvResult result = new ObvResult(obv);
 		return result;
 	}
 
@@ -57,8 +50,7 @@ public class ObvIndicator implements Callable<ObvResult> {
 		Long prevObv = results.get(0).getObvResult().getObv();
 
 		Long obv = obv(currentClose, previousClose, volume, prevObv);
-		MovementType movement = determineMovement(obv, prevObv);
-		ObvResult result = new ObvResult(obv, movement);
+		ObvResult result = new ObvResult(obv);
 		return result;
 	}
 
@@ -72,20 +64,6 @@ public class ObvIndicator implements Callable<ObvResult> {
 		}
 
 		return obv;
-	}
-
-	private MovementType determineMovement(Long obv, Long prevObv) {
-		MovementType movement;
-
-		if (obv.compareTo(prevObv) > 0) {
-			movement = MovementType.UP; // OBV > PREV_OBV
-		} else if (obv.compareTo(prevObv) < 0) {
-			movement = MovementType.DOWN; // OBV < PREV_OBV
-		} else {
-			movement = MovementType.UNCHANGED; // OBV == PREV_OBV
-		}
-
-		return movement;
 	}
 
 }

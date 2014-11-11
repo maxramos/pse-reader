@@ -5,8 +5,8 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import ph.mar.psereader.business.indicator.entity.ActionType;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
-import ph.mar.psereader.business.indicator.entity.RecommendationType;
 import ph.mar.psereader.business.indicator.entity.RsiResult;
 import ph.mar.psereader.business.stock.entity.Quote;
 
@@ -24,7 +24,7 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * RS = AVG_GAIN / AVG_LOSS
  * RSI = 100 - 100 / (RS + 1)
  *
- * Recommendations:
+ * Actions:
  * MUST_BUY --- RSI < 30 && PREV_RSI < 30 && RSI > PREV_RSI
  * BUY --- RSI < 30
  * BUY_WARNING --- RSI <= 35 && RSI < PREV_RSI
@@ -68,9 +68,9 @@ public class RsiIndicator implements Callable<RsiResult> {
 		BigDecimal avgGain = IndicatorUtil.avg(gainsAndLosses.getGains(), 10);
 		BigDecimal avgLoss = IndicatorUtil.avg(gainsAndLosses.getLosses(), 10);
 		BigDecimal rsi = rsi(avgGain, avgLoss);
-		RecommendationType recommendation = determineRecommendation(rsi, null);
+		ActionType action = determineAction(rsi, null);
 
-		RsiResult result = new RsiResult(rsi, recommendation, avgGain, avgLoss);
+		RsiResult result = new RsiResult(rsi, action, avgGain, avgLoss);
 		return result;
 	}
 
@@ -90,9 +90,9 @@ public class RsiIndicator implements Callable<RsiResult> {
 		BigDecimal avgGain = IndicatorUtil.sma(previousAvgGain, currentGain, period, 10);
 		BigDecimal avgLoss = IndicatorUtil.sma(previousAvgLoss, currentLoss, period, 10);
 		BigDecimal rsi = rsi(avgGain, avgLoss);
-		RecommendationType recommendation = determineRecommendation(rsi, previousRsi);
+		ActionType action = determineAction(rsi, previousRsi);
 
-		RsiResult result = new RsiResult(rsi, recommendation, avgGain, avgLoss);
+		RsiResult result = new RsiResult(rsi, action, avgGain, avgLoss);
 		return result;
 	}
 
@@ -133,40 +133,40 @@ public class RsiIndicator implements Callable<RsiResult> {
 		return _100.subtract(_100.divide(rs.add(BigDecimal.ONE), 2, RoundingMode.HALF_UP));
 	}
 
-	private RecommendationType determineRecommendation(BigDecimal rsi, BigDecimal prevRsi) {
-		RecommendationType recommendation;
+	private ActionType determineAction(BigDecimal rsi, BigDecimal prevRsi) {
+		ActionType action;
 
 		if (rsi.compareTo(BUY_CEILING) < 0) {
 			if (prevRsi != null && prevRsi.compareTo(BUY_CEILING) < 0 && rsi.compareTo(prevRsi) > 0) {
-				recommendation = RecommendationType.MUST_BUY; // RSI < 30 && PREV_RSI < 30 && RSI > PREV_RSI
+				action = ActionType.MUST_BUY; // RSI < 30 && PREV_RSI < 30 && RSI > PREV_RSI
 			} else {
-				recommendation = RecommendationType.BUY; // RSI < 30
+				action = ActionType.BUY; // RSI < 30
 			}
 		} else if (rsi.compareTo(HOLD_FLOOR) <= 0) {
 			if (prevRsi != null && rsi.compareTo(prevRsi) < 0) {
-				recommendation = RecommendationType.BUY_WARNING; // RSI <= 35 && RSI < PREV_RSI
+				action = ActionType.BUY_WARNING; // RSI <= 35 && RSI < PREV_RSI
 			} else {
-				recommendation = RecommendationType.HOLD; // RSI <= 35
+				action = ActionType.HOLD; // RSI <= 35
 			}
 		} else if (rsi.compareTo(HOLD_CEILING) < 0) {
-			recommendation = RecommendationType.HOLD; // RSI < 65
+			action = ActionType.HOLD; // RSI < 65
 		} else if (rsi.compareTo(SELL_FLOOR) <= 0) {
 			if (prevRsi != null && rsi.compareTo(prevRsi) > 0) {
-				recommendation = RecommendationType.SELL_WARNING; // RSI <= 70 && RSI > PREV_RSI
+				action = ActionType.SELL_WARNING; // RSI <= 70 && RSI > PREV_RSI
 			} else {
-				recommendation = RecommendationType.HOLD; // RSI <= 70
+				action = ActionType.HOLD; // RSI <= 70
 			}
 		} else if (rsi.compareTo(SELL_CEILING) <= 0) {
 			if (prevRsi != null && prevRsi.compareTo(SELL_CEILING) <= 0 && rsi.compareTo(prevRsi) < 0) {
-				recommendation = RecommendationType.MUST_SELL; // RSI <= 100 && PREV_RSI <= 100 && RSI < PREV_RSI
+				action = ActionType.MUST_SELL; // RSI <= 100 && PREV_RSI <= 100 && RSI < PREV_RSI
 			} else {
-				recommendation = RecommendationType.SELL; // RSI <= 100
+				action = ActionType.SELL; // RSI <= 100
 			}
 		} else {
-			recommendation = RecommendationType.HOLD;
+			action = ActionType.HOLD;
 		}
 
-		return recommendation;
+		return action;
 	}
 
 }
