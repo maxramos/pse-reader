@@ -25,27 +25,19 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * RSI = 100 - 100 / (RS + 1)
  *
  * Actions:
- * MUST_BUY --- RSI < 30 && PREV_RSI < 30 && RSI > PREV_RSI
- * BUY --- RSI < 30
- * BUY_WARNING --- RSI <= 35 && RSI < PREV_RSI
- * HOLD --- RSI <= 35
- * HOLD --- RSI < 65
- * SELL_WARNING --- RSI <= 70 && RSI > PREV_RSI
- * HOLD --- RSI <= 70
- * MUST_SELL --- RSI <= 100 && PREV_RSI <= 100 && RSI < PREV_RSI
- * SELL --- RSI <= 100
+ * BUY --- RSI < 30 && PREV_RSI < 30 && RSI > PREV_RSI
+ * HOLD --- RSI < 70
+ * SELL --- RSI <= 100 && PREV_RSI <= 100 && RSI < PREV_RSI
  * HOLD --- Everything Else
  */
 public class RsiIndicator implements Callable<RsiResult> {
 
 	private static final BigDecimal _100 = new BigDecimal("100");
 	private static final BigDecimal BUY_CEILING = new BigDecimal("30");
-	private static final BigDecimal HOLD_FLOOR = new BigDecimal("35");
-	private static final BigDecimal HOLD_CEILING = new BigDecimal("65");
-	private static final BigDecimal SELL_FLOOR = new BigDecimal("70");
+	private static final BigDecimal HOLD_CEILING = new BigDecimal("70");
 	private static final BigDecimal SELL_CEILING = new BigDecimal("100");
 
-	private static final int LOOK_BACK_PERIOD = 14;
+	private static final int PERIOD = 14;
 
 	private List<Quote> _quotes;
 	private List<IndicatorResult> _results;
@@ -61,10 +53,10 @@ public class RsiIndicator implements Callable<RsiResult> {
 	}
 
 	private RsiResult initialRsi(List<Quote> quotes) {
-		int size = LOOK_BACK_PERIOD + 1; // 15
+		int size = PERIOD + 1; // 15
 		List<Quote> trimmedQuotes = quotes.subList(0, size);
 
-		RsiResult.Holder gainsAndLosses = gainsAndLosses(trimmedQuotes, LOOK_BACK_PERIOD);
+		RsiResult.Holder gainsAndLosses = gainsAndLosses(trimmedQuotes, PERIOD);
 		BigDecimal avgGain = IndicatorUtil.avg(gainsAndLosses.getGains(), 10);
 		BigDecimal avgLoss = IndicatorUtil.avg(gainsAndLosses.getLosses(), 10);
 		BigDecimal rsi = rsi(avgGain, avgLoss);
@@ -85,7 +77,7 @@ public class RsiIndicator implements Callable<RsiResult> {
 		RsiResult.Holder gainsAndLosses = gainsAndLosses(trimmedQuotes, 1);
 		BigDecimal currentGain = gainsAndLosses.getGains().get(0);
 		BigDecimal currentLoss = gainsAndLosses.getLosses().get(0);
-		BigDecimal period = new BigDecimal(LOOK_BACK_PERIOD);
+		BigDecimal period = new BigDecimal(PERIOD);
 
 		BigDecimal avgGain = IndicatorUtil.sma(previousAvgGain, currentGain, period, 10);
 		BigDecimal avgLoss = IndicatorUtil.sma(previousAvgLoss, currentLoss, period, 10);
@@ -136,37 +128,16 @@ public class RsiIndicator implements Callable<RsiResult> {
 	private ActionType determineAction(BigDecimal rsi, BigDecimal prevRsi) {
 		ActionType action;
 
-		if (rsi.compareTo(BUY_CEILING) < 0) {
-			if (prevRsi != null && prevRsi.compareTo(BUY_CEILING) < 0 && rsi.compareTo(prevRsi) > 0) {
-				action = ActionType.MUST_BUY; // RSI < 30 && PREV_RSI < 30 && RSI > PREV_RSI
-			} else {
-				action = ActionType.BUY; // RSI < 30
-			}
-		} else if (rsi.compareTo(HOLD_FLOOR) <= 0) {
-			if (prevRsi != null && rsi.compareTo(prevRsi) < 0) {
-				action = ActionType.BUY_WARNING; // RSI <= 35 && RSI < PREV_RSI
-			} else {
-				action = ActionType.HOLD; // RSI <= 35
-			}
+		if (rsi.compareTo(BUY_CEILING) < 0 && prevRsi != null && prevRsi.compareTo(BUY_CEILING) < 0 && rsi.compareTo(prevRsi) > 0) {
+			action = ActionType.BUY; // RSI < 30 && PREV_RSI < 30 && RSI > PREV_RSI
 		} else if (rsi.compareTo(HOLD_CEILING) < 0) {
-			action = ActionType.HOLD; // RSI < 65
-		} else if (rsi.compareTo(SELL_FLOOR) <= 0) {
-			if (prevRsi != null && rsi.compareTo(prevRsi) > 0) {
-				action = ActionType.SELL_WARNING; // RSI <= 70 && RSI > PREV_RSI
-			} else {
-				action = ActionType.HOLD; // RSI <= 70
-			}
-		} else if (rsi.compareTo(SELL_CEILING) <= 0) {
-			if (prevRsi != null && prevRsi.compareTo(SELL_CEILING) <= 0 && rsi.compareTo(prevRsi) < 0) {
-				action = ActionType.MUST_SELL; // RSI <= 100 && PREV_RSI <= 100 && RSI < PREV_RSI
-			} else {
-				action = ActionType.SELL; // RSI <= 100
-			}
+			action = ActionType.HOLD; // RSI < 70
+		} else if (rsi.compareTo(SELL_CEILING) <= 0 && prevRsi != null && prevRsi.compareTo(SELL_CEILING) <= 0 && rsi.compareTo(prevRsi) < 0) {
+			action = ActionType.SELL; // RSI <= 100 && PREV_RSI <= 100 && RSI < PREV_RSI
 		} else {
 			action = ActionType.HOLD;
 		}
 
 		return action;
 	}
-
 }

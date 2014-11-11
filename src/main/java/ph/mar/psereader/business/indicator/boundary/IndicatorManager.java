@@ -36,18 +36,18 @@ public class IndicatorManager {
 	@Inject
 	IndicatorContainer indicatorContainer;
 
-	int minQuoteSize = 34;
-	int minIndicatorResultSize = 2;
+	int quoteSize = 34;
+	int indicatorResultSize = 4;
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void process(Date date) {
 		List<Future<Stock>> results = new ArrayList<>();
-		List<Stock> stocks = repository.find(Stock.ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT, with("date", date).and("count", minQuoteSize)
+		List<Stock> stocks = repository.find(Stock.ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT, with("date", date).and("count", quoteSize)
 				.asParameters(), Stock.class);
 
 		for (Stock stock : stocks) {
 			repository.detach(stock);
-			Future<Stock> result = indicatorContainer.run(stock, date, minQuoteSize, minIndicatorResultSize);
+			Future<Stock> result = indicatorContainer.run(stock, date, quoteSize, indicatorResultSize);
 			results.add(result);
 		}
 

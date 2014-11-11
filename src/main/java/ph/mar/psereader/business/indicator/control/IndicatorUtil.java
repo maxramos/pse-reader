@@ -5,6 +5,11 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
+import ph.mar.psereader.business.indicator.entity.SentimentType;
+import ph.mar.psereader.business.indicator.entity.TrendType;
+import ph.mar.psereader.business.indicator.entity.ValueHolder;
+import ph.mar.psereader.business.stock.entity.Quote;
+
 public class IndicatorUtil {
 
 	public static List<BigDecimal> sma(List<BigDecimal> values, int smoothing, int decimalPlaces) {
@@ -61,6 +66,69 @@ public class IndicatorUtil {
 		}
 
 		return sum.divide(new BigDecimal(values.size()), decimalPlaces, RoundingMode.HALF_UP);
+	}
+
+	public static <T> SentimentType divergence(List<Quote> quotes, List<ValueHolder> values) {
+		if (values.size() < 5) {
+			return SentimentType.RANGE;
+		}
+
+		List<Quote> trimmedQuotes = quotes.subList(0, 5);
+		List<ValueHolder> trimmedValues = values.subList(0, 5);
+
+		TrendType priceTrend = priceTrend(trimmedQuotes);
+		TrendType indicatorTrend = indicatorTrend(trimmedValues);
+		SentimentType sentiment;
+
+		if (priceTrend == TrendType.DOWN && indicatorTrend == TrendType.UP) {
+			sentiment = SentimentType.BULLISH;
+		} else if (priceTrend == TrendType.UP && indicatorTrend == TrendType.DOWN) {
+			sentiment = SentimentType.BEARISH;
+		} else {
+			sentiment = SentimentType.RANGE;
+		}
+
+		return sentiment;
+	}
+
+	private static TrendType priceTrend(List<Quote> values) {
+		BigDecimal value0 = values.get(0).getClose();
+		BigDecimal value1 = values.get(1).getClose();
+		BigDecimal value2 = values.get(2).getClose();
+		BigDecimal value3 = values.get(3).getClose();
+		BigDecimal value4 = values.get(4).getClose();
+		TrendType trend;
+
+		if (value1.compareTo(value3) > 0 && value3.compareTo(value4) > 0 && value3.compareTo(value2) > 0 && value1.compareTo(value0) > 0) {
+			trend = TrendType.UP;
+		} else if (value1.compareTo(value3) < 0 && value3.compareTo(value4) < 0 && value3.compareTo(value2) < 0 && value1.compareTo(value0) < 0) {
+			trend = TrendType.DOWN;
+		} else {
+			trend = TrendType.SIDEWAYS;
+		}
+
+		return trend;
+	}
+
+	private static TrendType indicatorTrend(List<ValueHolder> values) {
+		BigDecimal value0 = values.get(0).getValue();
+		BigDecimal value1 = values.get(1).getValue();
+		BigDecimal value2 = values.get(2).getValue();
+		BigDecimal value3 = values.get(3).getValue();
+		BigDecimal value4 = values.get(4).getValue();
+		TrendType trend;
+
+		if (value1.compareTo(value3) < 0 && value3.subtract(value1).compareTo(BigDecimal.ONE) > 0 && value1.compareTo(value2) > 0
+				&& value1.compareTo(value0) > 0 && value3.compareTo(value4) > 0) {
+			trend = TrendType.DOWN;
+		} else if (value1.compareTo(value3) > 0 && value1.subtract(value3).compareTo(BigDecimal.ONE) > 0 && value1.compareTo(value2) < 0
+				&& value1.compareTo(value0) < 0 && value3.compareTo(value4) < 0) {
+			trend = TrendType.UP;
+		} else {
+			trend = TrendType.SIDEWAYS;
+		}
+
+		return trend;
 	}
 
 }

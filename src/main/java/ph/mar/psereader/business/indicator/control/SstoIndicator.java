@@ -9,7 +9,10 @@ import java.util.concurrent.Callable;
 
 import ph.mar.psereader.business.indicator.entity.ActionType;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
+import ph.mar.psereader.business.indicator.entity.SentimentType;
 import ph.mar.psereader.business.indicator.entity.SstoResult;
+import ph.mar.psereader.business.indicator.entity.TrendType;
+import ph.mar.psereader.business.indicator.entity.ValueHolder;
 import ph.mar.psereader.business.stock.entity.Quote;
 
 /**
@@ -26,31 +29,24 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * SLOW_%D = SMAm(SLOW_%K)
  *
  * Actions:
- * MUST_BUY --- %K < 20 && %D < 20 && %K > %D && %K > PREV_%K
- * BUY --- %K < 20
- * BUY_WARNING --- %K <= 25 && %K < %D
- * HOLD --- %K <= 25
- * HOLD --- %K < 75
- * SELL_WARNING --- %K <= 80 && %K > %D
- * HOLD --- %K <= 80
- * MUST_SELL --- %K <= 100 && %D <= 100 && %K < %D && %K < PREV_%K
- * SELL --- %K <= 100
+ * BUY --- %K < 20 && %D < 20 && %K > %D && %K > PREV_%K
+ * HOLD --- %K < 80
+ * SELL --- %K <= 100 && %D <= 100 && %K < %D && %K < PREV_%K
  * HOLD --- Everything Else
  */
 public class SstoIndicator implements Callable<SstoResult> {
 
 	private static final BigDecimal _100 = new BigDecimal("100");
-	private static final BigDecimal BUY_CEILING = new BigDecimal("20");
-	private static final BigDecimal HOLD_FLOOR = new BigDecimal("25");
-	private static final BigDecimal HOLD_CEILING = new BigDecimal("75");
-	private static final BigDecimal SELL_FLOOR = new BigDecimal("80");
-	private static final BigDecimal SELL_CEILING = new BigDecimal("100");
+	private static final BigDecimal BUY = new BigDecimal("20");
+	private static final BigDecimal SELL = new BigDecimal("100");
 
-	private static final int LOOK_BACK_PERIOD = 14;
-	private static final int SMA_SMOOTHING = 3;
+	private static final int PERIOD = 14;
+	private static final int SMOOTHING = 3;
 
 	private List<Quote> _quotes;
 	private List<IndicatorResult> _results;
+	private SstoResult result;
+	private TrendType trend;
 
 	public SstoIndicator(List<Quote> quotes, List<IndicatorResult> results) {
 		_quotes = quotes;
@@ -59,49 +55,55 @@ public class SstoIndicator implements Callable<SstoResult> {
 
 	@Override
 	public SstoResult call() throws Exception {
-		return _results.size() < 2 ? initialSsto(_quotes) : succeedingSsto(_quotes, _results);
-	}
+		if (result == null) {
+			result = _results.size() < 2 ? initialSsto() : succeedingSsto();
+		} else {
+			result = determineTradingSignal();
+		}
 
-	private SstoResult initialSsto(List<Quote> quotes) {
-		int size = LOOK_BACK_PERIOD + SMA_SMOOTHING * 2 - 1 - 1; // 18
-		List<Quote> trimmedQuotes = quotes.subList(0, size);
-
-		List<SstoResult.Holder> kDataList = kData(trimmedQuotes);
-		List<BigDecimal> fastKList = fastK(kDataList);
-		List<BigDecimal> fastDList = IndicatorUtil.sma(fastKList, SMA_SMOOTHING, 2);
-
-		BigDecimal slowK = fastDList.get(0);
-		BigDecimal slowD = IndicatorUtil.avg(fastDList, 2);
-		ActionType action = determineAction(slowK, slowD, null);
-		BigDecimal fastK = fastKList.get(0);
-
-		SstoResult result = new SstoResult(slowK, slowD, action, fastK);
 		return result;
 	}
 
-	private SstoResult succeedingSsto(List<Quote> quotes, List<IndicatorResult> results) {
-		int size = LOOK_BACK_PERIOD;
-		List<Quote> trimmedQuotes = quotes.subList(0, size);
+	public void setTrend(TrendType trend) {
+		this.trend = trend;
+	}
+
+	private SstoResult initialSsto() {
+		int size = PERIOD + SMOOTHING * 2 - 1 - 1; // 18
+		List<Quote> trimmedQuotes = _quotes.subList(0, size);
+
+		List<SstoResult.Holder> kDataList = kData(trimmedQuotes);
+		List<BigDecimal> fastKList = fastK(kDataList);
+		List<BigDecimal> fastDList = IndicatorUtil.sma(fastKList, SMOOTHING, 2);
+
+		BigDecimal slowK = fastDList.get(0);
+		BigDecimal slowD = IndicatorUtil.avg(fastDList, 2);
+		BigDecimal fastK = fastKList.get(0);
+
+		return new SstoResult(slowK, slowD, fastK);
+	}
+
+	private SstoResult succeedingSsto() {
+		int size = PERIOD;
+		List<Quote> trimmedQuotes = _quotes.subList(0, size);
 		Quote currentQuote = trimmedQuotes.get(0);
-		SstoResult previous1SstoResult = results.get(0).getSstoResult();
-		SstoResult previous2SstoResult = results.get(1).getSstoResult();
+		SstoResult previous1SstoResult = _results.get(0).getSstoResult();
+		SstoResult previous2SstoResult = _results.get(1).getSstoResult();
 
 		BigDecimal fastK = fastK(currentQuote.getClose(), lowestLow(trimmedQuotes), highestHigh(trimmedQuotes));
 		List<BigDecimal> fastKList = Arrays.asList(new BigDecimal[] { fastK, previous1SstoResult.getFastK(), previous2SstoResult.getFastK() });
 		BigDecimal slowK = IndicatorUtil.avg(fastKList, 2);
 		List<BigDecimal> fastDList = Arrays.asList(new BigDecimal[] { slowK, previous1SstoResult.getSlowK(), previous2SstoResult.getSlowK() });
 		BigDecimal slowD = IndicatorUtil.avg(fastDList, 2);
-		ActionType action = determineAction(slowK, slowD, previous1SstoResult.getSlowK());
 
-		SstoResult result = new SstoResult(slowK, slowD, action, fastK);
-		return result;
+		return new SstoResult(slowK, slowD, fastK);
 	}
 
 	private List<SstoResult.Holder> kData(List<Quote> quotes) {
-		int size = SMA_SMOOTHING * 2 - 1;
+		int size = SMOOTHING * 2 - 1;
 		List<SstoResult.Holder> kDataList = new ArrayList<>(size);
 
-		for (int i = 0, start = 0, end = LOOK_BACK_PERIOD; i < size; i++, start++, end++) {
+		for (int i = 0, start = 0, end = PERIOD; i < size; i++, start++, end++) {
 			List<Quote> period = quotes.subList(start, end);
 			BigDecimal lastClosing = period.get(0).getClose();
 			BigDecimal lowestLow = lowestLow(period);
@@ -160,40 +162,63 @@ public class SstoIndicator implements Callable<SstoResult> {
 		return highestHigh;
 	}
 
-	private ActionType determineAction(BigDecimal k, BigDecimal d, BigDecimal prevK) {
+	private SstoResult determineTradingSignal() {
+		BigDecimal k = result.getSlowK();
+		BigDecimal d = result.getSlowD();
 		ActionType action;
 
-		if (k.compareTo(BUY_CEILING) < 0) {
-			if (d.compareTo(BUY_CEILING) < 0 && k.compareTo(d) > 0 && prevK != null && k.compareTo(prevK) > 0) {
-				action = ActionType.MUST_BUY; // %K < 20 && %D < 20 && %K > %D && %K > PREV_%K
+		if (trend == TrendType.UP) {
+			if (k.compareTo(SELL) > 0 || d.compareTo(SELL) > 0) {
+				action = ActionType.SELL;
 			} else {
-				action = ActionType.BUY; // %K < 20
+				action = ActionType.HOLD;
 			}
-		} else if (k.compareTo(HOLD_FLOOR) <= 0) {
-			if (k.compareTo(d) < 0) {
-				action = ActionType.BUY_WARNING; // %K <= 25 && %K < %D
+		} else if (trend == TrendType.DOWN) {
+			if (k.compareTo(BUY) < 0 || d.compareTo(BUY) < 0) {
+				action = ActionType.BUY;
 			} else {
-				action = ActionType.HOLD; // %K <= 25
-			}
-		} else if (k.compareTo(HOLD_CEILING) < 0) {
-			action = ActionType.HOLD; // %K < 75
-		} else if (k.compareTo(SELL_FLOOR) <= 0) {
-			if (k.compareTo(d) > 0) {
-				action = ActionType.SELL_WARNING; // %K <= 80 && %K > %D
-			} else {
-				action = ActionType.HOLD; // %K <= 80
-			}
-		} else if (k.compareTo(SELL_CEILING) <= 0) {
-			if (d.compareTo(SELL_CEILING) <= 0 && k.compareTo(d) < 0 && prevK != null && k.compareTo(prevK) < 0) {
-				action = ActionType.MUST_SELL; // %K <= 100 && %D <= 100 && %K < %D && %K < PREV_%K
-			} else {
-				action = ActionType.SELL; // %K <= 100
+				action = ActionType.HOLD;
 			}
 		} else {
-			action = ActionType.HOLD;
+			BigDecimal prevK = result.getSlowK();
+			BigDecimal prevD = result.getSlowD();
+
+			List<ValueHolder> sstoResults = new ArrayList<>();
+			sstoResults.add(result);
+
+			for (IndicatorResult _result : _results) {
+				sstoResults.add(_result.getSstoResult());
+			}
+
+			SentimentType sentiment = IndicatorUtil.divergence(_quotes, sstoResults);
+
+			if (sentiment == SentimentType.BULLISH && firstTrough(sstoResults).compareTo(BUY) < 0) {
+				action = ActionType.BUY;
+			} else if (sentiment == SentimentType.BEARISH && firstPeak(sstoResults).compareTo(SELL) > 0) {
+				action = ActionType.SELL;
+			} else if (prevK.compareTo(BUY) < 0 && k.compareTo(BUY) > 0 || prevD.compareTo(BUY) < 0 && d.compareTo(BUY) > 0) {
+				action = ActionType.BUY;
+			} else if (prevK.compareTo(SELL) > 0 && k.compareTo(SELL) < 0 || prevD.compareTo(SELL) > 0 && d.compareTo(SELL) < 0) {
+				action = ActionType.SELL;
+			} else if (prevK.compareTo(prevD) < 0 && k.compareTo(d) > 0) {
+				action = ActionType.BUY;
+			} else if (prevK.compareTo(prevD) > 0 && k.compareTo(d) < 0) {
+				action = ActionType.SELL;
+			} else {
+				action = ActionType.HOLD;
+			}
 		}
 
-		return action;
+		result.setAction(action);
+		return result;
+	}
+
+	private BigDecimal firstTrough(List<ValueHolder> sstoResults) {
+		return sstoResults.get(3).getValue();
+	}
+
+	private BigDecimal firstPeak(List<ValueHolder> sstoResults) {
+		return sstoResults.get(3).getValue();
 	}
 
 }

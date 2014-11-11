@@ -9,7 +9,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 @Embeddable
-public class SstoResult implements Serializable {
+public class SstoResult implements Serializable, ValueHolder {
 
 	private static final long serialVersionUID = 1L;
 
@@ -23,6 +23,10 @@ public class SstoResult implements Serializable {
 	@Column(name = "ssto_action", nullable = false, length = 12)
 	private ActionType action;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "ssto_signal", nullable = false, length = 18)
+	private String signal;
+
 	@Column(name = "ssto_fast_k", nullable = false, precision = 5, scale = 2)
 	private BigDecimal fastK;
 
@@ -30,11 +34,15 @@ public class SstoResult implements Serializable {
 		super();
 	}
 
-	public SstoResult(BigDecimal slowK, BigDecimal slowD, ActionType action, BigDecimal fastK) {
+	public SstoResult(BigDecimal slowK, BigDecimal slowD, BigDecimal fastK) {
 		this.slowK = slowK;
 		this.slowD = slowD;
-		this.action = action;
 		this.fastK = fastK;
+	}
+
+	@Override
+	public BigDecimal getValue() {
+		return slowD;
 	}
 
 	public BigDecimal getSlowK() {
@@ -49,13 +57,25 @@ public class SstoResult implements Serializable {
 		return action;
 	}
 
+	public void setAction(ActionType action) {
+		this.action = action;
+	}
+
+	public String getSignal() {
+		return signal;
+	}
+
+	public void setSignal(String signal) {
+		this.signal = signal;
+	}
+
 	public BigDecimal getFastK() {
 		return fastK;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("SstoResult [slowK=%s, slowD=%s, action=%s, fastK=%s]", slowK, slowD, action, fastK);
+		return String.format("SstoResult [slowK=%s, slowD=%s, action=%s, signal=%s, fastK=%s]", slowK, slowD, action, signal, fastK);
 	}
 
 	public static class Holder {

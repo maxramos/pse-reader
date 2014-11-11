@@ -40,46 +40,68 @@ public class IndicatorContainer {
 	ManagedExecutorService executorService;
 
 	@Asynchronous
-	public Future<Stock> run(Stock stock, Date date, int minQuoteSize, int minIndicatorResultSize) {
-		List<Quote> quotes = findAllQuotesByStockAndDate(stock, date, minQuoteSize);
-		List<IndicatorResult> results = findAllIndicatorResultsByStock(stock, minIndicatorResultSize);
+	public Future<Stock> run(Stock stock, Date date, int quoteSize, int indicatorResultSize) {
+		List<Quote> quotes = findAllQuotesByStockAndDate(stock, date, quoteSize);
+		List<IndicatorResult> results = findAllIndicatorResultsByStock(stock, indicatorResultSize);
 
-		Future<SstoResult> sstoResult = executorService.submit(new SstoIndicator(quotes, results));
-		Future<RsiResult> rsiResult = executorService.submit(new RsiIndicator(quotes, results));
-		Future<DmiResult> dmiResult = executorService.submit(new DmiIndicator(quotes, results));
-		Future<MacdResult> macdResult = executorService.submit(new MacdIndicator(quotes, results));
-		Future<ObvResult> obvResult = executorService.submit(new ObvIndicator(quotes, results));
+		SstoIndicator sstoIndicator = new SstoIndicator(quotes, results);
+		RsiIndicator rsiIndicator = new RsiIndicator(quotes, results);
+		DmiIndicator dmiIndicator = new DmiIndicator(quotes, results);
+		MacdIndicator macdIndicator = new MacdIndicator(quotes, results);
+		ObvIndicator obvIndicator = new ObvIndicator(quotes, results);
 
-		while (!sstoResult.isDone() || !rsiResult.isDone() || !dmiResult.isDone() || !macdResult.isDone() || !obvResult.isDone()) {
+		Future<SstoResult> sstoResultFuture = executorService.submit(sstoIndicator);
+		Future<RsiResult> rsiResultFuture = executorService.submit(rsiIndicator);
+		Future<DmiResult> dmiResultFuture = executorService.submit(dmiIndicator);
+		Future<MacdResult> macdResultFuture = executorService.submit(macdIndicator);
+		Future<ObvResult> obvResultFuture = executorService.submit(obvIndicator);
+
+		while (!sstoResultFuture.isDone() || !rsiResultFuture.isDone() || !dmiResultFuture.isDone() || !macdResultFuture.isDone()
+				|| !obvResultFuture.isDone()) {
 			continue;
 		}
 
-		IndicatorResult indicatorResult = new IndicatorResult(stock, date);
-
 		try {
-			indicatorResult.setSstoResult(sstoResult.get());
-			indicatorResult.setRsiResult(rsiResult.get());
-			indicatorResult.setDmiResult(dmiResult.get());
-			indicatorResult.setMacdResult(macdResult.get());
-			indicatorResult.setObvResult(obvResult.get());
+			SstoResult sstoResult = sstoResultFuture.get();
+			RsiResult rsiResult = rsiResultFuture.get();
+			DmiResult dmiResult = dmiResultFuture.get();
+			MacdResult macdResult = macdResultFuture.get();
+			ObvResult obvResult = obvResultFuture.get();
+
+			sstoIndicator.setTrend(dmiResult.getTrend());
+
+			sstoResultFuture = executorService.submit(sstoIndicator);
+
+			while (!sstoResultFuture.isDone() || !rsiResultFuture.isDone() || !dmiResultFuture.isDone() || !macdResultFuture.isDone()
+					|| !obvResultFuture.isDone()) {
+				continue;
+			}
+
+			IndicatorResult indicatorResult = new IndicatorResult(stock, date);
+
+			indicatorResult.setSstoResult(sstoResult);
+			indicatorResult.setRsiResult(rsiResult);
+			indicatorResult.setDmiResult(dmiResult);
+			indicatorResult.setMacdResult(macdResult);
+			indicatorResult.setObvResult(obvResult);
+
+			stock.add(indicatorResult);
+			log.info("{} processed.", stock.getSymbol());
+			return new AsyncResult<>(stock);
 		} catch (ExecutionException | InterruptedException e) {
 			throw new EJBException(e);
 		}
-
-		stock.add(indicatorResult);
-		log.info("{} processed.", stock.getSymbol());
-		return new AsyncResult<>(stock);
 	}
 
-	private List<Quote> findAllQuotesByStockAndDate(Stock stock, Date date, int minQuoteSize) {
+	private List<Quote> findAllQuotesByStockAndDate(Stock stock, Date date, int quoteSize) {
 		return repository.find(Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(), Quote.class,
-				minQuoteSize);
+				quoteSize);
 	}
 
-	private List<IndicatorResult> findAllIndicatorResultsByStock(Stock stock, int minIndicatorResultSize) {
+	private List<IndicatorResult> findAllIndicatorResultsByStock(Stock stock, int indicatorResultSize) {
 		// Quick fix for issue with @Order By and Join Fetch.
 		return repository.find(IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, with("stock", stock).asParameters(), IndicatorResult.class,
-				minIndicatorResultSize);
+				indicatorResultSize);
 	}
 
 }
