@@ -24,11 +24,20 @@ public class SstoResult implements Serializable, ValueHolder {
 	private ActionType action;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "ssto_signal", nullable = false, length = 18)
-	private String signal;
+	@Column(name = "ssto_reason", length = 18)
+	private Reason reason;
 
 	@Column(name = "ssto_fast_k", nullable = false, precision = 5, scale = 2)
 	private BigDecimal fastK;
+
+	@Column(name = "ssto_buy_stop", precision = 8, scale = 4)
+	private BigDecimal buyStop;
+
+	@Column(name = "ssto_sell_stop", precision = 8, scale = 4)
+	private BigDecimal sellStop;
+
+	@Column(name = "ssto_stop_loss", precision = 8, scale = 4)
+	private BigDecimal stopLoss;
 
 	public SstoResult() {
 		super();
@@ -61,21 +70,46 @@ public class SstoResult implements Serializable, ValueHolder {
 		this.action = action;
 	}
 
-	public String getSignal() {
-		return signal;
+	public Reason getReason() {
+		return reason;
 	}
 
-	public void setSignal(String signal) {
-		this.signal = signal;
+	public void setReason(Reason reason) {
+		this.reason = reason;
 	}
 
 	public BigDecimal getFastK() {
 		return fastK;
 	}
 
+	public BigDecimal getBuyStop() {
+		return buyStop;
+	}
+
+	public void setBuyStop(BigDecimal buyStop) {
+		this.buyStop = buyStop;
+	}
+
+	public BigDecimal getSellStop() {
+		return sellStop;
+	}
+
+	public void setSellStop(BigDecimal sellStop) {
+		this.sellStop = sellStop;
+	}
+
+	public BigDecimal getStopLoss() {
+		return stopLoss;
+	}
+
+	public void setStopLoss(BigDecimal stopLoss) {
+		this.stopLoss = stopLoss;
+	}
+
 	@Override
 	public String toString() {
-		return String.format("SstoResult [slowK=%s, slowD=%s, action=%s, signal=%s, fastK=%s]", slowK, slowD, action, signal, fastK);
+		return String.format("SstoResult [slowK=%s, slowD=%s, action=%s, reason=%s, fastK=%s, buyStop=%s, sellStop=%s, stopLoss=%s]", slowK, slowD,
+				action, reason, fastK, buyStop, sellStop, stopLoss);
 	}
 
 	public static class Holder {
@@ -100,6 +134,35 @@ public class SstoResult implements Serializable, ValueHolder {
 
 		public BigDecimal getHighestHigh() {
 			return highestHigh;
+		}
+
+	}
+
+	public static enum Reason {
+
+		BULLISH_DIVERGENCE("Bullish Divergence", "Bullish divergence (on %D) where the first trough is below the Oversold level."),
+		BEARISH_DIVERGENCE("Bearish Divergence", "Bearish divergence (on %D) where the first peak is above the Overbought level."),
+		BULLISH_DIP("Bullish Dip", "%K or %D falls below the Oversold level and rises back above it."),
+		BEARISH_DIP("Bearish Dip", "%K or %D rises above the Overbought level then falls back below it."),
+		BULLISH_CROSSOVER("Bullish Crossover", "%K crosses to above %D."),
+		BEARISH_CROSSOVER("Bearish Crossover", "%K crosses to below %D."),
+		OVERSOLD("Oversold", "%K or %D falls below the Oversold line."),
+		OVERBROUGHT("Overbrought", "%K or %D rises above the Overbought line.");
+
+		private String name;
+		private String description;
+
+		private Reason(String name, String description) {
+			this.name = name;
+			this.description = description;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getDescription() {
+			return description;
 		}
 
 	}

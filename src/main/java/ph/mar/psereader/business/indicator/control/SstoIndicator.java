@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import ph.mar.psereader.business.indicator.entity.ActionType;
+import ph.mar.psereader.business.indicator.entity.BoardLotAndPriceFluctuations;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.SentimentType;
 import ph.mar.psereader.business.indicator.entity.SstoResult;
@@ -29,10 +30,6 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * SLOW_%D = SMAm(SLOW_%K)
  *
  * Actions:
- * BUY --- %K < 20 && %D < 20 && %K > %D && %K > PREV_%K
- * HOLD --- %K < 80
- * SELL --- %K <= 100 && %D <= 100 && %K < %D && %K < PREV_%K
- * HOLD --- Everything Else
  */
 public class SstoIndicator implements Callable<SstoResult> {
 
@@ -166,51 +163,99 @@ public class SstoIndicator implements Callable<SstoResult> {
 		BigDecimal k = result.getSlowK();
 		BigDecimal d = result.getSlowD();
 		ActionType action;
+		SstoResult.Reason reason = null;
 
-		if (trend == TrendType.UP) {
+		if (trend == TrendType.UP || trend == TrendType.STRONG_UP) {
 			if (k.compareTo(SELL) > 0 || d.compareTo(SELL) > 0) {
 				action = ActionType.SELL;
+				reason = SstoResult.Reason.OVERBROUGHT;
 			} else {
 				action = ActionType.HOLD;
 			}
-		} else if (trend == TrendType.DOWN) {
+		} else if (trend == TrendType.DOWN || trend == TrendType.STRONG_DOWN) {
 			if (k.compareTo(BUY) < 0 || d.compareTo(BUY) < 0) {
 				action = ActionType.BUY;
+				reason = SstoResult.Reason.OVERSOLD;
 			} else {
 				action = ActionType.HOLD;
 			}
 		} else {
-			BigDecimal prevK = result.getSlowK();
-			BigDecimal prevD = result.getSlowD();
+			List<ValueHolder> sstoResults = consolidateSstoResult();
 
-			List<ValueHolder> sstoResults = new ArrayList<>();
-			sstoResults.add(result);
-
-			for (IndicatorResult _result : _results) {
-				sstoResults.add(_result.getSstoResult());
-			}
-
-			SentimentType sentiment = IndicatorUtil.divergence(_quotes, sstoResults);
-
-			if (sentiment == SentimentType.BULLISH && firstTrough(sstoResults).compareTo(BUY) < 0) {
-				action = ActionType.BUY;
-			} else if (sentiment == SentimentType.BEARISH && firstPeak(sstoResults).compareTo(SELL) > 0) {
-				action = ActionType.SELL;
-			} else if (prevK.compareTo(BUY) < 0 && k.compareTo(BUY) > 0 || prevD.compareTo(BUY) < 0 && d.compareTo(BUY) > 0) {
-				action = ActionType.BUY;
-			} else if (prevK.compareTo(SELL) > 0 && k.compareTo(SELL) < 0 || prevD.compareTo(SELL) > 0 && d.compareTo(SELL) < 0) {
-				action = ActionType.SELL;
-			} else if (prevK.compareTo(prevD) < 0 && k.compareTo(d) > 0) {
-				action = ActionType.BUY;
-			} else if (prevK.compareTo(prevD) > 0 && k.compareTo(d) < 0) {
-				action = ActionType.SELL;
-			} else {
+			if (sstoResults.size() < 2) {
 				action = ActionType.HOLD;
+			} else {
+				SstoResult previous1Ssto = _results.get(0).getSstoResult();
+				BigDecimal prevK1 = previous1Ssto.getSlowK();
+				BigDecimal prevD1 = previous1Ssto.getSlowD();
+				SstoResult previous2Ssto = _results.size() >= 3 ? _results.get(1).getSstoResult() : null;
+				BigDecimal prevK2 = previous2Ssto == null ? null : previous2Ssto.getSlowK();
+				BigDecimal prevD2 = previous2Ssto == null ? null : previous2Ssto.getSlowD();
+
+				SentimentType sentiment = IndicatorUtil.divergence(_quotes, sstoResults);
+
+				if (sentiment == SentimentType.BULLISH && firstTrough(sstoResults).compareTo(BUY) < 0) {
+					action = ActionType.BUY;
+					reason = SstoResult.Reason.BULLISH_DIVERGENCE;
+				} else if (sentiment == SentimentType.BEARISH && firstPeak(sstoResults).compareTo(SELL) > 0) {
+					action = ActionType.SELL;
+					reason = SstoResult.Reason.BEARISH_DIVERGENCE;
+				} else if (prevK2 != null && prevK2.compareTo(BUY) > 0 && prevK1.compareTo(BUY) < 0 && k.compareTo(BUY) > 0 || prevD2 != null
+						&& prevD2.compareTo(BUY) > 0 && prevD1.compareTo(BUY) < 0 && d.compareTo(BUY) > 0) {
+					action = ActionType.BUY;
+					reason = SstoResult.Reason.BULLISH_DIP;
+				} else if (prevK2 != null && prevK2.compareTo(SELL) < 0 && prevK1.compareTo(SELL) > 0 && k.compareTo(SELL) < 0 || prevD2 != null
+						&& prevD2.compareTo(SELL) < 0 && prevD1.compareTo(SELL) > 0 && d.compareTo(SELL) < 0) {
+					action = ActionType.SELL;
+					reason = SstoResult.Reason.BEARISH_DIP;
+				} else if (prevK1.compareTo(prevD1) < 0 && k.compareTo(d) > 0) {
+					action = ActionType.BUY;
+					reason = SstoResult.Reason.BULLISH_CROSSOVER;
+				} else if (prevK1.compareTo(prevD1) > 0 && k.compareTo(d) < 0) {
+					action = ActionType.SELL;
+					reason = SstoResult.Reason.BEARISH_CROSSOVER;
+				} else {
+					action = ActionType.HOLD;
+				}
 			}
 		}
 
+		BigDecimal buyStop;
+		BigDecimal sellStop;
+		BigDecimal stopLoss;
+
+		if (action == ActionType.BUY) {
+			buyStop = buyStop();
+			sellStop = null;
+			stopLoss = stopLoss(action);
+		} else if (action == ActionType.SELL) {
+			buyStop = null;
+			sellStop = sellStop();
+			stopLoss = stopLoss(action);
+		} else {
+			buyStop = null;
+			sellStop = null;
+			stopLoss = null;
+		}
+
 		result.setAction(action);
+		result.setReason(reason);
+		result.setBuyStop(buyStop);
+		result.setSellStop(sellStop);
+		result.setStopLoss(stopLoss);
+
 		return result;
+	}
+
+	private List<ValueHolder> consolidateSstoResult() {
+		List<ValueHolder> sstoResults = new ArrayList<>();
+		sstoResults.add(result);
+
+		for (IndicatorResult _result : _results) {
+			sstoResults.add(_result.getSstoResult());
+		}
+
+		return sstoResults;
 	}
 
 	private BigDecimal firstTrough(List<ValueHolder> sstoResults) {
@@ -219,6 +264,107 @@ public class SstoIndicator implements Callable<SstoResult> {
 
 	private BigDecimal firstPeak(List<ValueHolder> sstoResults) {
 		return sstoResults.get(3).getValue();
+	}
+
+	private BigDecimal buyStop() {
+		BigDecimal currentHigh = _quotes.get(0).getHigh();
+		BigDecimal buyStop;
+
+		if (_results.isEmpty()) {
+			BigDecimal priceFluctuation = BoardLotAndPriceFluctuations.determinePriceFluctuation(currentHigh);
+			buyStop = currentHigh.add(priceFluctuation);
+		} else {
+			BigDecimal previousBuyStop = _results.get(0).getSstoResult().getBuyStop();
+
+			if (previousBuyStop == null) {
+				BigDecimal priceFluctuation = BoardLotAndPriceFluctuations.determinePriceFluctuation(currentHigh);
+				buyStop = currentHigh.add(priceFluctuation);
+			} else {
+				BigDecimal previousHigh = _quotes.get(1).getHigh();
+
+				if (currentHigh.compareTo(previousHigh) < 0) {
+					BigDecimal priceFluctuation = BoardLotAndPriceFluctuations.determinePriceFluctuation(currentHigh);
+					buyStop = currentHigh.add(priceFluctuation);
+				} else {
+					buyStop = previousBuyStop;
+				}
+			}
+		}
+
+		return buyStop;
+	}
+
+	private BigDecimal sellStop() {
+		BigDecimal currentLow = _quotes.get(0).getLow();
+		BigDecimal sellStop;
+
+		if (_results.isEmpty()) {
+			BigDecimal priceFluctuation = BoardLotAndPriceFluctuations.determinePriceFluctuation(currentLow);
+			sellStop = currentLow.subtract(priceFluctuation);
+		} else {
+			BigDecimal previousSellStop = _results.get(0).getSstoResult().getSellStop();
+
+			if (previousSellStop == null) {
+				BigDecimal priceFluctuation = BoardLotAndPriceFluctuations.determinePriceFluctuation(currentLow);
+				sellStop = currentLow.subtract(priceFluctuation);
+			} else {
+				BigDecimal previousLow = _quotes.get(1).getLow();
+
+				if (currentLow.compareTo(previousLow) > 0) {
+					BigDecimal priceFluctuation = BoardLotAndPriceFluctuations.determinePriceFluctuation(currentLow);
+					sellStop = currentLow.subtract(priceFluctuation);
+				} else {
+					sellStop = previousSellStop;
+				}
+			}
+		}
+
+		return sellStop;
+	}
+
+	private BigDecimal stopLoss(ActionType action) {
+		Quote currentQuote = _quotes.get(0);
+		BigDecimal stopLoss;
+
+		if (action == ActionType.BUY) {
+			if (_results.isEmpty()) {
+				stopLoss = currentQuote.getLow();
+			} else {
+				ActionType previousAction = _results.get(0).getSstoResult().getAction();
+				BigDecimal previousStopLoss = previousAction == ActionType.SELL ? null : _results.get(0).getSstoResult().getStopLoss();
+
+				if (previousStopLoss == null) {
+					stopLoss = currentQuote.getLow();
+				} else {
+					if (currentQuote.getLow().compareTo(previousStopLoss) < 0) {
+						stopLoss = currentQuote.getLow();
+					} else {
+						stopLoss = previousStopLoss;
+					}
+				}
+			}
+		} else if (action == ActionType.SELL) {
+			if (_results.isEmpty()) {
+				stopLoss = currentQuote.getHigh();
+			} else {
+				ActionType previousAction = _results.get(0).getSstoResult().getAction();
+				BigDecimal previousStopLoss = previousAction == ActionType.BUY ? null : _results.get(0).getSstoResult().getStopLoss();
+
+				if (previousStopLoss == null) {
+					stopLoss = currentQuote.getHigh();
+				} else {
+					if (currentQuote.getHigh().compareTo(previousStopLoss) > 0) {
+						stopLoss = currentQuote.getHigh();
+					} else {
+						stopLoss = previousStopLoss;
+					}
+				}
+			}
+		} else {
+			stopLoss = null;
+		}
+
+		return stopLoss;
 	}
 
 }

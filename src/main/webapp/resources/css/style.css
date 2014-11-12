@@ -1,15 +1,16 @@
 @CHARSET "UTF-8";
 
-.BUY, .MUST_BUY, .UP, .STRONG_UP, .ENTER, .RISING { color: #008800; }
-.BUY_WARNING, .ENTER_WARNING { color: #8BDD8B; }
-.SELL, .MUST_SELL, .DOWN, .STRONG_DOWN, .EXIT, .FALLING, { color: #880000; }
-.SELL_WARNING, .EXIT_WARNING { color: #DD8B8B; }
-.HOLD, .SIDEWAYS { color: #888800 }
+.BUY, .UP, .STRONG_UP, .ENTER, .RISING { color: #008800; font-size: 0.6em; }
+.ENTER_WARNING { color: #8BDD8B; }
+.SELL, .DOWN, .STRONG_DOWN, .EXIT, .FALLING { color: #880000; font-size: 0.6em; }
+.EXIT_WARNING { color: #DD8B8B; font-size: 0.6em; }
+.HOLD, .SIDEWAYS { color: #888800; font-size: 0.6em; }
 
-.action { text-align: left; font-size: 0.6em; font-weight: bold; white-space: nowrap; vertical-align: middle; }
-.main { color: #000088; }
+.action { text-align: left; font-weight: bold; white-space: nowrap; }
+.main { color: #000088; font-size: 0.6em; }
 .signal, .negative { color: #880000; font-size: 0.6em; }
 .gauge, .positive { color: #008800; font-size: 0.6em; }
+.buy-stop, .sell-stop, .stop-loss { font-size: 0.6em; }
 
 body { font-size: 0.8em !important; }
 
