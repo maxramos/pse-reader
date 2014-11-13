@@ -140,8 +140,6 @@ public class SstoResult implements Serializable, ValueHolder {
 
 	public static enum Reason {
 
-		BULLISH_DIVERGENCE("Bullish Divergence", "Bullish divergence (on %D) where the first trough is below the Oversold level."),
-		BEARISH_DIVERGENCE("Bearish Divergence", "Bearish divergence (on %D) where the first peak is above the Overbought level."),
 		BULLISH_DIP("Bullish Dip", "%K or %D falls below the Oversold level and rises back above it."),
 		BEARISH_DIP("Bearish Dip", "%K or %D rises above the Overbought level then falls back below it."),
 		BULLISH_CROSSOVER("Bullish Crossover", "%K crosses to above %D."),

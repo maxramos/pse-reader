@@ -10,7 +10,6 @@ import java.util.concurrent.Callable;
 import ph.mar.psereader.business.indicator.entity.ActionType;
 import ph.mar.psereader.business.indicator.entity.BoardLotAndPriceFluctuations;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
-import ph.mar.psereader.business.indicator.entity.SentimentType;
 import ph.mar.psereader.business.indicator.entity.SstoResult;
 import ph.mar.psereader.business.indicator.entity.TrendType;
 import ph.mar.psereader.business.indicator.entity.ValueHolder;
@@ -39,11 +38,11 @@ import ph.mar.psereader.business.stock.entity.Quote;
  *
  *   Ranging:
  *     BUY:
- *       BULLISH_DIVERGENCE --- DOWNTREND(PRICE) && UPTREND(%D) && FIRST_TROUGH < 20
+ *       BULLISH_DIVERGENCE (See Chart) --- DOWNTREND(PRICE) && UPTREND(%D) && FIRST_TROUGH < 20
  *       BULLISH_DIP --- PREV_%K2 > 20 && PREV_%K1 < 20 && %K > 20 || PREV_%D2 > 20 && PREV_%D1 < 20 && %D > 20
  *       BULLISH_CROSSOVER --- PREV_%K < PREV_%D && %K > %D
  *     SELL:
- *       BEARISH_DIVERGENCE --- UPTREND(PRICE) && DOWNTREND(%D) && FIRST_PEAK > 80
+ *       BEARISH_DIVERGENCE (See Chart) --- UPTREND(PRICE) && DOWNTREND(%D) && FIRST_PEAK > 80
  *       BEARISH_DIP --- PREV_%K2 < 80 && PREV_%K1 > 80 && %K < 80 || PREV_%D2 < 80 && PREV_%D1 > 80 && %D < 80
  *       BEARISH_CROSSOVER --- PREV_%K > PREV_%D && %K < %D
  *
@@ -218,15 +217,7 @@ public class SstoIndicator implements Callable<SstoResult> {
 				BigDecimal prevK2 = previous2Ssto == null ? null : previous2Ssto.getSlowK();
 				BigDecimal prevD2 = previous2Ssto == null ? null : previous2Ssto.getSlowD();
 
-				SentimentType sentiment = IndicatorUtil.divergence(_quotes, sstoResults);
-
-				if (sentiment == SentimentType.BULLISH && firstTrough(sstoResults).compareTo(BUY) < 0) {
-					action = ActionType.BUY; // DOWNTREND(PRICE) && UPTREND(%D) && FIRST_TROUGH < 20
-					reason = SstoResult.Reason.BULLISH_DIVERGENCE;
-				} else if (sentiment == SentimentType.BEARISH && firstPeak(sstoResults).compareTo(SELL) > 0) {
-					action = ActionType.SELL; // UPTREND(PRICE) && DOWNTREND(%D) && FIRST_PEAK > 80
-					reason = SstoResult.Reason.BEARISH_DIVERGENCE;
-				} else if (prevK2 != null && prevK2.compareTo(BUY) > 0 && prevK1.compareTo(BUY) < 0 && k.compareTo(BUY) > 0 || prevD2 != null
+				if (prevK2 != null && prevK2.compareTo(BUY) > 0 && prevK1.compareTo(BUY) < 0 && k.compareTo(BUY) > 0 || prevD2 != null
 						&& prevD2.compareTo(BUY) > 0 && prevD1.compareTo(BUY) < 0 && d.compareTo(BUY) > 0) {
 					action = ActionType.BUY; // PREV_%K2 > 20 && PREV_%K1 < 20 && %K > 20 || PREV_%D2 > 20 && PREV_%D1 < 20 && %D > 20
 					reason = SstoResult.Reason.BULLISH_DIP;
@@ -282,14 +273,6 @@ public class SstoIndicator implements Callable<SstoResult> {
 		}
 
 		return sstoResults;
-	}
-
-	private BigDecimal firstTrough(List<ValueHolder> sstoResults) {
-		return sstoResults.get(3).getValue();
-	}
-
-	private BigDecimal firstPeak(List<ValueHolder> sstoResults) {
-		return sstoResults.get(3).getValue();
 	}
 
 	private BigDecimal buyStop() {
