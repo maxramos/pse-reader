@@ -20,16 +20,42 @@ import ph.mar.psereader.business.stock.entity.Quote;
  * This implements the Slow Stochastic (SSto).
  *
  * Computations:
- * n = look-back period (14)
- * m = smoothing period (3)
+ *   n = look-back period (14)
+ *   m = smoothing period (3)
  *
- * FAST_%K = (LAST_CLOSING - LOWEST_LOW(n)) / (HIGHEST_HIGH(n) - LOWEST_LOW(n)) * 100
- * FAST_%D = SMAm(FAST_%K)
+ *   FAST_%K = (LAST_CLOSING - LOWEST_LOW(n)) / (HIGHEST_HIGH(n) - LOWEST_LOW(n)) * 100
+ *   FAST_%D = SMAm(FAST_%K)
  *
- * SLOW_%K = FAST_%D
- * SLOW_%D = SMAm(SLOW_%K)
+ *   SLOW_%K = FAST_%D
+ *   SLOW_%D = SMAm(SLOW_%K)
+ *
  *
  * Actions:
+ *   Trending:
+ *     BUY:
+ *       OVERSOLD --- DOWNTREND && (%K or %D) < 20
+ *     SELL:
+ *       OVERBOUGHT --- UPTREND && (%K or %D) > 80
+ *
+ *   Ranging:
+ *     BUY:
+ *       BULLISH_DIVERGENCE --- DOWNTREND(PRICE) && UPTREND(%D) && FIRST_TROUGH < 20
+ *       BULLISH_DIP --- PREV_%K2 > 20 && PREV_%K1 < 20 && %K > 20 || PREV_%D2 > 20 && PREV_%D1 < 20 && %D > 20
+ *       BULLISH_CROSSOVER --- PREV_%K < PREV_%D && %K > %D
+ *     SELL:
+ *       BEARISH_DIVERGENCE --- UPTREND(PRICE) && DOWNTREND(%D) && FIRST_PEAK > 80
+ *       BEARISH_DIP --- PREV_%K2 < 80 && PREV_%K1 > 80 && %K < 80 || PREV_%D2 < 80 && PREV_%D1 > 80 && %D < 80
+ *       BEARISH_CROSSOVER --- PREV_%K > PREV_%D && %K < %D
+ *
+ *
+ * Trailing Stop Loss:
+ *   Buy:
+ *     BUY_STOP --- if CURRENT_HIGH < PREVIOUS_HIGH ? CURRENT_HIGH + PRICE_FLUCTUATION(CURRENT_HIGH) : PREVIOUS_BUY_STOP
+ *     STOP_LOSS --- CURRENT_LOW < PREV_STOP_LOSS ? CURRENT_LOW : PREV_STOP_LOSS
+ *
+ *   Sell:
+ *     SELL_STOP --- if CURRENT_LOW > PREVIOUS_LOW ? CURRENT_LOW - PRICE_FLUCTUATION(CURRENT_LOW) : PREVIOUS_SELL_STOP
+ *     STOP_LOSS --- CURRENT_HIGH > PREV_STOP_LOSS ? CURRENT_HIGH : PREV_STOP_LOSS
  */
 public class SstoIndicator implements Callable<SstoResult> {
 
@@ -165,21 +191,21 @@ public class SstoIndicator implements Callable<SstoResult> {
 		ActionType action;
 		SstoResult.Reason reason = null;
 
-		if (trend == TrendType.UP || trend == TrendType.STRONG_UP) {
+		if (trend == TrendType.UP || trend == TrendType.STRONG_UP) { // UPTREND
 			if (k.compareTo(SELL) > 0 || d.compareTo(SELL) > 0) {
-				action = ActionType.SELL;
-				reason = SstoResult.Reason.OVERBROUGHT;
+				action = ActionType.SELL; // UP && (%K or %D) > 80
+				reason = SstoResult.Reason.OVERBOUGHT;
 			} else {
 				action = ActionType.HOLD;
 			}
-		} else if (trend == TrendType.DOWN || trend == TrendType.STRONG_DOWN) {
+		} else if (trend == TrendType.DOWN || trend == TrendType.STRONG_DOWN) { // DOWNTREND
 			if (k.compareTo(BUY) < 0 || d.compareTo(BUY) < 0) {
-				action = ActionType.BUY;
+				action = ActionType.BUY; // DOWN && (%K or %D) < 20
 				reason = SstoResult.Reason.OVERSOLD;
 			} else {
 				action = ActionType.HOLD;
 			}
-		} else {
+		} else { // SIDEWAYS
 			List<ValueHolder> sstoResults = consolidateSstoResult();
 
 			if (sstoResults.size() < 2) {
@@ -195,24 +221,24 @@ public class SstoIndicator implements Callable<SstoResult> {
 				SentimentType sentiment = IndicatorUtil.divergence(_quotes, sstoResults);
 
 				if (sentiment == SentimentType.BULLISH && firstTrough(sstoResults).compareTo(BUY) < 0) {
-					action = ActionType.BUY;
+					action = ActionType.BUY; // DOWNTREND(PRICE) && UPTREND(%D) && FIRST_TROUGH < 20
 					reason = SstoResult.Reason.BULLISH_DIVERGENCE;
 				} else if (sentiment == SentimentType.BEARISH && firstPeak(sstoResults).compareTo(SELL) > 0) {
-					action = ActionType.SELL;
+					action = ActionType.SELL; // UPTREND(PRICE) && DOWNTREND(%D) && FIRST_PEAK > 80
 					reason = SstoResult.Reason.BEARISH_DIVERGENCE;
 				} else if (prevK2 != null && prevK2.compareTo(BUY) > 0 && prevK1.compareTo(BUY) < 0 && k.compareTo(BUY) > 0 || prevD2 != null
 						&& prevD2.compareTo(BUY) > 0 && prevD1.compareTo(BUY) < 0 && d.compareTo(BUY) > 0) {
-					action = ActionType.BUY;
+					action = ActionType.BUY; // PREV_%K2 > 20 && PREV_%K1 < 20 && %K > 20 || PREV_%D2 > 20 && PREV_%D1 < 20 && %D > 20
 					reason = SstoResult.Reason.BULLISH_DIP;
 				} else if (prevK2 != null && prevK2.compareTo(SELL) < 0 && prevK1.compareTo(SELL) > 0 && k.compareTo(SELL) < 0 || prevD2 != null
 						&& prevD2.compareTo(SELL) < 0 && prevD1.compareTo(SELL) > 0 && d.compareTo(SELL) < 0) {
-					action = ActionType.SELL;
+					action = ActionType.SELL; // PREV_%K2 < 80 && PREV_%K1 > 80 && %K < 80 || PREV_%D2 < 80 && PREV_%D1 > 80 && %D < 80
 					reason = SstoResult.Reason.BEARISH_DIP;
 				} else if (prevK1.compareTo(prevD1) < 0 && k.compareTo(d) > 0) {
-					action = ActionType.BUY;
+					action = ActionType.BUY; // PREV_%K < PREV_%D && %K > %D
 					reason = SstoResult.Reason.BULLISH_CROSSOVER;
 				} else if (prevK1.compareTo(prevD1) > 0 && k.compareTo(d) < 0) {
-					action = ActionType.SELL;
+					action = ActionType.SELL; // PREV_%K > PREV_%D && %K < %D
 					reason = SstoResult.Reason.BEARISH_CROSSOVER;
 				} else {
 					action = ActionType.HOLD;
@@ -323,38 +349,41 @@ public class SstoIndicator implements Callable<SstoResult> {
 	}
 
 	private BigDecimal stopLoss(ActionType action) {
-		Quote currentQuote = _quotes.get(0);
 		BigDecimal stopLoss;
 
 		if (action == ActionType.BUY) {
+			BigDecimal currentLow = _quotes.get(0).getLow();
+
 			if (_results.isEmpty()) {
-				stopLoss = currentQuote.getLow();
+				stopLoss = currentLow;
 			} else {
 				ActionType previousAction = _results.get(0).getSstoResult().getAction();
 				BigDecimal previousStopLoss = previousAction == ActionType.SELL ? null : _results.get(0).getSstoResult().getStopLoss();
 
 				if (previousStopLoss == null) {
-					stopLoss = currentQuote.getLow();
+					stopLoss = currentLow;
 				} else {
-					if (currentQuote.getLow().compareTo(previousStopLoss) < 0) {
-						stopLoss = currentQuote.getLow();
+					if (currentLow.compareTo(previousStopLoss) < 0) {
+						stopLoss = currentLow;
 					} else {
 						stopLoss = previousStopLoss;
 					}
 				}
 			}
 		} else if (action == ActionType.SELL) {
+			BigDecimal currentHigh = _quotes.get(0).getHigh();
+
 			if (_results.isEmpty()) {
-				stopLoss = currentQuote.getHigh();
+				stopLoss = currentHigh;
 			} else {
 				ActionType previousAction = _results.get(0).getSstoResult().getAction();
 				BigDecimal previousStopLoss = previousAction == ActionType.BUY ? null : _results.get(0).getSstoResult().getStopLoss();
 
 				if (previousStopLoss == null) {
-					stopLoss = currentQuote.getHigh();
+					stopLoss = currentHigh;
 				} else {
-					if (currentQuote.getHigh().compareTo(previousStopLoss) > 0) {
-						stopLoss = currentQuote.getHigh();
+					if (currentHigh.compareTo(previousStopLoss) > 0) {
+						stopLoss = currentHigh;
 					} else {
 						stopLoss = previousStopLoss;
 					}

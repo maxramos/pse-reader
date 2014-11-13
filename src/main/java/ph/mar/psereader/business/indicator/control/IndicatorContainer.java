@@ -78,7 +78,6 @@ public class IndicatorContainer {
 			}
 
 			IndicatorResult indicatorResult = new IndicatorResult(stock, date);
-
 			indicatorResult.setSstoResult(sstoResult);
 			indicatorResult.setRsiResult(rsiResult);
 			indicatorResult.setDmiResult(dmiResult);

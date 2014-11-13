@@ -70,7 +70,7 @@ public class IndicatorUtil {
 
 	public static <T> SentimentType divergence(List<Quote> quotes, List<ValueHolder> values) {
 		if (values.size() < 5) {
-			return SentimentType.RANGE;
+			return SentimentType.RANGING;
 		}
 
 		List<Quote> trimmedQuotes = quotes.subList(0, 5);
@@ -85,7 +85,7 @@ public class IndicatorUtil {
 		} else if (priceTrend == TrendType.UP && indicatorTrend == TrendType.DOWN) {
 			sentiment = SentimentType.BEARISH;
 		} else {
-			sentiment = SentimentType.RANGE;
+			sentiment = SentimentType.RANGING;
 		}
 
 		return sentiment;

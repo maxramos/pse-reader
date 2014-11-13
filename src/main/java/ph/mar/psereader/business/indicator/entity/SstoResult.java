@@ -147,7 +147,7 @@ public class SstoResult implements Serializable, ValueHolder {
 		BULLISH_CROSSOVER("Bullish Crossover", "%K crosses to above %D."),
 		BEARISH_CROSSOVER("Bearish Crossover", "%K crosses to below %D."),
 		OVERSOLD("Oversold", "%K or %D falls below the Oversold line."),
-		OVERBROUGHT("Overbrought", "%K or %D rises above the Overbought line.");
+		OVERBOUGHT("Overbought", "%K or %D rises above the Overbought line.");
 
 		private String name;
 		private String description;

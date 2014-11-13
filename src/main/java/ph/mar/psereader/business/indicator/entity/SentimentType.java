@@ -4,6 +4,6 @@ public enum SentimentType {
 
 	BULLISH,
 	BEARISH,
-	RANGE;
+	RANGING;
 
 }
