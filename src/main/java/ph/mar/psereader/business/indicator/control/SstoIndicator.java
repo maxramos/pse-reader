@@ -38,11 +38,11 @@ import ph.mar.psereader.business.stock.entity.Quote;
  *
  *   Ranging:
  *     BUY:
- *       BULLISH_DIVERGENCE (See Chart) --- DOWNTREND(PRICE) && UPTREND(%D) && FIRST_TROUGH < 20
+ *       BULLISH_DIVERGENCE (n/a, See Chart) --- DOWNTREND(PRICE) && UPTREND(%D) && FIRST_TROUGH < 20
  *       BULLISH_DIP --- PREV_%K2 > 20 && PREV_%K1 < 20 && %K > 20 || PREV_%D2 > 20 && PREV_%D1 < 20 && %D > 20
  *       BULLISH_CROSSOVER --- PREV_%K < PREV_%D && %K > %D
  *     SELL:
- *       BEARISH_DIVERGENCE (See Chart) --- UPTREND(PRICE) && DOWNTREND(%D) && FIRST_PEAK > 80
+ *       BEARISH_DIVERGENCE (n/a, See Chart) --- UPTREND(PRICE) && DOWNTREND(%D) && FIRST_PEAK > 80
  *       BEARISH_DIP --- PREV_%K2 < 80 && PREV_%K1 > 80 && %K < 80 || PREV_%D2 < 80 && PREV_%D1 > 80 && %D < 80
  *       BEARISH_CROSSOVER --- PREV_%K > PREV_%D && %K < %D
  *
