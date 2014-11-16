@@ -35,12 +35,6 @@
 			<h:outputText value="#{result.stock.symbol}" />
 		</p:column>
 		
-		<p:column headerText="Price" sortBy="#{result.stock.latestPrice}" styleClass="numeric">
-			<h:outputText value="#{result.stock.latestPrice}">
-				<f:convertNumber type="number" groupingUsed="true" />
-			</h:outputText>
-		</p:column>
-		
 		<p:column headerText="EMA" sortBy="#{result.emaResult.ema}" styleClass="numeric">
 			<div class="table">
 				<div class="table-row">

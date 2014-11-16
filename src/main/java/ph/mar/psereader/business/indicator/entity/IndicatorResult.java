@@ -96,13 +96,8 @@ public class IndicatorResult implements Serializable {
 	}
 
 	/**
-	 * Used for NEW jpql construct.
+	 * Used for processing indicator results.
 	 */
-
-	public Long getId() {
-		return id;
-	}
-
 	public IndicatorResult(DmiResult dmiResult, SstoResult sstoResult, EmaResult emaResult, ObvResult obvResult) {
 		this.dmiResult = dmiResult;
 		this.sstoResult = sstoResult;
@@ -124,6 +119,10 @@ public class IndicatorResult implements Serializable {
 
 		determineAction(results);
 		determineTrailingStop(quotes, results);
+	}
+
+	public Long getId() {
+		return id;
 	}
 
 	public Date getDate() {
