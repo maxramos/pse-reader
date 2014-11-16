@@ -2,7 +2,7 @@ package ph.mar.psereader.business.indicator.entity;
 
 import java.math.BigDecimal;
 
-public enum BoardLotAndPriceFluctuations {
+public enum BoardLotAndPriceFluctuation {
 
 	_0_0001___0_0099(new BigDecimal("0.0001"), new BigDecimal("0.0099"), 1_000_000, new BigDecimal("0.0001")),
 	_0_01___0_049(new BigDecimal("0.01"), new BigDecimal("0.049"), 100_000, new BigDecimal("0.001")),
@@ -25,7 +25,7 @@ public enum BoardLotAndPriceFluctuations {
 	private int boardLot;
 	private BigDecimal priceFluctuation;
 
-	private BoardLotAndPriceFluctuations(BigDecimal floor, BigDecimal ceiling, int boardLot, BigDecimal priceFluctuation) {
+	private BoardLotAndPriceFluctuation(BigDecimal floor, BigDecimal ceiling, int boardLot, BigDecimal priceFluctuation) {
 		this.floor = floor;
 		this.ceiling = ceiling;
 		this.boardLot = boardLot;
@@ -33,9 +33,9 @@ public enum BoardLotAndPriceFluctuations {
 	}
 
 	public static int determineBoardLot(BigDecimal price) {
-		BoardLotAndPriceFluctuations[] values = BoardLotAndPriceFluctuations.values();
+		BoardLotAndPriceFluctuation[] values = BoardLotAndPriceFluctuation.values();
 
-		for (BoardLotAndPriceFluctuations value : values) {
+		for (BoardLotAndPriceFluctuation value : values) {
 			// FLOOR <= PRICE <= CEILING
 			if (value.getFloor().compareTo(price) <= 0 && price.compareTo(value.getCeiling()) <= 0) {
 				return value.getBoardLot();
@@ -46,9 +46,9 @@ public enum BoardLotAndPriceFluctuations {
 	}
 
 	public static BigDecimal determinePriceFluctuation(BigDecimal price) {
-		BoardLotAndPriceFluctuations[] values = BoardLotAndPriceFluctuations.values();
+		BoardLotAndPriceFluctuation[] values = BoardLotAndPriceFluctuation.values();
 
-		for (BoardLotAndPriceFluctuations value : values) {
+		for (BoardLotAndPriceFluctuation value : values) {
 			// FLOOR <= PRICE <= CEILING
 			if (value.getFloor().compareTo(price) <= 0 && price.compareTo(value.getCeiling()) <= 0) {
 				return value.getPriceFluctuation();

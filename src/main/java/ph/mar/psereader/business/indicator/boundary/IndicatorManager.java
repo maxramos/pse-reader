@@ -36,8 +36,8 @@ public class IndicatorManager {
 	@Inject
 	IndicatorContainer indicatorContainer;
 
-	int quoteSize = 34;
-	int indicatorResultSize = 4;
+	int quoteSize = 21;
+	int indicatorResultSize = 2;
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void process(Date date) {

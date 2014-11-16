@@ -3,8 +3,8 @@ package ph.mar.psereader.business.indicator.entity;
 public enum ActionType {
 
 	BUY("Buy"),
-	HOLD("Hold"),
-	SELL("Sell");
+	SELL("Sell"),
+	HOLD("Hold");
 
 	private String name;
 

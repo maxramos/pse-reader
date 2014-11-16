@@ -2,8 +2,6 @@ package ph.mar.psereader.business.indicator.entity;
 
 public enum TrendType {
 
-	STRONG_UP("Strong Up"),
-	STRONG_DOWN("Strong Down"),
 	UP("Up"),
 	DOWN("Down"),
 	SIDEWAYS("Sideways");

@@ -1,11 +1,16 @@
 package ph.mar.psereader.business.indicator.entity;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
@@ -18,19 +23,23 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
+import ph.mar.psereader.business.stock.entity.Quote;
 import ph.mar.psereader.business.stock.entity.Stock;
 
 @Entity
 @Table(name = "indicator_result", uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
 	@NamedQuery(name = IndicatorResult.ALL_BY_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.date = :date"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.sstoResult, ir.rsiResult, ir.dmiResult, ir.macdResult, ir.obvResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
 public class IndicatorResult implements Serializable {
 
 	public static final String ALL_BY_DATE = "IndicatorResult.ALL_BY_DATE";
 	public static final String ALL_INDICATOR_DATA_BY_STOCK = "IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK";
 
 	private static final long serialVersionUID = 1L;
+	private static final BigDecimal TREND_SIGNAL = new BigDecimal("20");
+	private static final BigDecimal BUY = new BigDecimal("20");
+	private static final BigDecimal SELL = new BigDecimal("100");
 
 	@Id
 	@SequenceGenerator(name = "seq_indicator_result", sequenceName = "seq_indicator_result", allocationSize = 1)
@@ -41,17 +50,35 @@ public class IndicatorResult implements Serializable {
 	@Column(nullable = false)
 	private Date date;
 
-	@Embedded
-	private SstoResult sstoResult;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "trend", nullable = false, length = 11)
+	private TrendType trend;
 
-	@Embedded
-	private RsiResult rsiResult;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "action", nullable = false, length = 12)
+	private ActionType action;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "reason", length = 18)
+	private ReasonType reason;
+
+	@Column(name = "buy_stop", precision = 8, scale = 4)
+	private BigDecimal buyStop;
+
+	@Column(name = "sell_stop", precision = 8, scale = 4)
+	private BigDecimal sellStop;
+
+	@Column(name = "stop_loss", precision = 8, scale = 4)
+	private BigDecimal stopLoss;
 
 	@Embedded
 	private DmiResult dmiResult;
 
 	@Embedded
-	private MacdResult macdResult;
+	private SstoResult sstoResult;
+
+	@Embedded
+	private EmaResult emaResult;
 
 	@Embedded
 	private ObvResult obvResult;
@@ -71,40 +98,60 @@ public class IndicatorResult implements Serializable {
 	/**
 	 * Used for NEW jpql construct.
 	 */
-	public IndicatorResult(SstoResult sstoResult, RsiResult rsiResult, DmiResult dmiResult, MacdResult macdResult, ObvResult obvResult) {
-		this.sstoResult = sstoResult;
-		this.rsiResult = rsiResult;
-		this.dmiResult = dmiResult;
-		this.macdResult = macdResult;
-		this.obvResult = obvResult;
-	}
 
 	public Long getId() {
 		return id;
+	}
+
+	public IndicatorResult(DmiResult dmiResult, SstoResult sstoResult, EmaResult emaResult, ObvResult obvResult) {
+		this.dmiResult = dmiResult;
+		this.sstoResult = sstoResult;
+		this.emaResult = emaResult;
+		this.obvResult = obvResult;
+	}
+
+	public void process(List<Quote> quotes, List<IndicatorResult> results) {
+		determineTrend();
+
+		if (results.isEmpty()) {
+			action = ActionType.HOLD;
+			reason = null;
+			buyStop = null;
+			sellStop = null;
+			stopLoss = null;
+			return;
+		}
+
+		determineAction(results);
+		determineTrailingStop(quotes, results);
 	}
 
 	public Date getDate() {
 		return date;
 	}
 
-	public SstoResult getSstoResult() {
-		return sstoResult;
+	public TrendType getTrend() {
+		return trend;
 	}
 
-	public void setSstoResult(SstoResult sstoResult) {
-		this.sstoResult = sstoResult;
+	public ActionType getAction() {
+		return action;
 	}
 
-	public RsiResult getRsiResult() {
-		return rsiResult;
+	public ReasonType getReason() {
+		return reason;
 	}
 
-	public void setRsiResult(RsiResult rsiResult) {
-		this.rsiResult = rsiResult;
+	public BigDecimal getBuyStop() {
+		return buyStop;
 	}
 
-	public Stock getStock() {
-		return stock;
+	public BigDecimal getSellStop() {
+		return sellStop;
+	}
+
+	public BigDecimal getStopLoss() {
+		return stopLoss;
 	}
 
 	public DmiResult getDmiResult() {
@@ -115,12 +162,20 @@ public class IndicatorResult implements Serializable {
 		this.dmiResult = dmiResult;
 	}
 
-	public MacdResult getMacdResult() {
-		return macdResult;
+	public SstoResult getSstoResult() {
+		return sstoResult;
 	}
 
-	public void setMacdResult(MacdResult macdResult) {
-		this.macdResult = macdResult;
+	public void setSstoResult(SstoResult sstoResult) {
+		this.sstoResult = sstoResult;
+	}
+
+	public EmaResult getEmaResult() {
+		return emaResult;
+	}
+
+	public void setEmaResult(EmaResult emaResult) {
+		this.emaResult = emaResult;
 	}
 
 	public ObvResult getObvResult() {
@@ -131,11 +186,185 @@ public class IndicatorResult implements Serializable {
 		this.obvResult = obvResult;
 	}
 
+	public Stock getStock() {
+		return stock;
+	}
+
 	@Override
 	public String toString() {
-		return String.format(
-				"IndicatorResult [id=%s, date=%s, sstoResult=%s, rsiResult=%s, dmiResult=%s, macdResult=%s, obvResult=%s, vrResult=%s, stock.id=%s]",
-				id, date, sstoResult, rsiResult, dmiResult, macdResult, obvResult, stock == null ? null : stock.getId());
+		return String
+				.format("IndicatorResult [id=%s, date=%s, action=%s, reason=%s, buyStop=%s, sellStop=%s, stopLoss=%s, dmiResult=%s, sstoResult=%s, emaResult=%s, obvResult=%s, stock=%s]",
+						id, date, action, reason, buyStop, sellStop, stopLoss, dmiResult, sstoResult, emaResult, obvResult, stock == null ? null
+								: stock.getId());
+	}
+
+	private void determineTrend() {
+		BigDecimal adx = dmiResult.getAdx();
+		BigDecimal plusDi = dmiResult.getPlusDi();
+		BigDecimal minusDi = dmiResult.getMinusDi();
+
+		BigDecimal _adx = adx.divide(BigDecimal.ONE, 2, RoundingMode.HALF_UP);
+		BigDecimal _plusDi = plusDi.divide(BigDecimal.ONE, 2, RoundingMode.HALF_UP);
+		BigDecimal _minusDi = minusDi.divide(BigDecimal.ONE, 2, RoundingMode.HALF_UP);
+
+		if (_adx.compareTo(TREND_SIGNAL) > 0) {
+			trend = _plusDi.compareTo(_minusDi) > 0 ? TrendType.UP : TrendType.DOWN;
+		} else {
+			trend = TrendType.SIDEWAYS;
+		}
+	}
+
+	private void determineAction(List<IndicatorResult> results) {
+		BigDecimal k = sstoResult.getSlowK();
+		BigDecimal d = sstoResult.getSlowD();
+
+		if (trend == TrendType.UP) {
+			BigDecimal ema = emaResult.getEma();
+			BigDecimal previousEma = results.get(0).getEmaResult().getEma();
+
+			if ((k.compareTo(SELL) > 0 || d.compareTo(SELL) > 0) && ema.compareTo(previousEma) < 0) {
+				action = ActionType.SELL;
+				reason = ReasonType.OVERBOUGHT;
+			} else {
+				action = ActionType.HOLD;
+				reason = null;
+			}
+		} else if (trend == TrendType.DOWN) {
+			BigDecimal ema = emaResult.getEma();
+			BigDecimal previousEma = results.get(0).getEmaResult().getEma();
+
+			if ((k.compareTo(BUY) < 0 || d.compareTo(BUY) < 0) && ema.compareTo(previousEma) > 0) {
+				action = ActionType.BUY;
+				reason = ReasonType.OVERSOLD;
+			} else {
+				action = ActionType.HOLD;
+				reason = null;
+			}
+		} else {
+			SstoResult previous1Ssto = results.get(0).getSstoResult();
+			BigDecimal prevK1 = previous1Ssto.getSlowK();
+			BigDecimal prevD1 = previous1Ssto.getSlowD();
+			SstoResult previous2Ssto = results.size() >= 2 ? results.get(1).getSstoResult() : null;
+			BigDecimal prevK2 = previous2Ssto == null ? null : previous2Ssto.getSlowK();
+			BigDecimal prevD2 = previous2Ssto == null ? null : previous2Ssto.getSlowD();
+
+			if (prevK2 != null && prevK2.compareTo(BUY) > 0 && prevK1.compareTo(BUY) < 0 && k.compareTo(BUY) > 0 || prevD2 != null
+					&& prevD2.compareTo(BUY) > 0 && prevD1.compareTo(BUY) < 0 && d.compareTo(BUY) > 0) {
+				action = ActionType.BUY;
+				reason = ReasonType.BULLISH_DIP;
+			} else if (prevK2 != null && prevK2.compareTo(SELL) < 0 && prevK1.compareTo(SELL) > 0 && k.compareTo(SELL) < 0 || prevD2 != null
+					&& prevD2.compareTo(SELL) < 0 && prevD1.compareTo(SELL) > 0 && d.compareTo(SELL) < 0) {
+				action = ActionType.SELL;
+				reason = ReasonType.BEARISH_DIP;
+			} else if (prevK1.compareTo(prevD1) < 0 && k.compareTo(d) > 0) {
+				action = ActionType.BUY;
+				reason = ReasonType.BULLISH_CROSSOVER;
+			} else if (prevK1.compareTo(prevD1) > 0 && k.compareTo(d) < 0) {
+				action = ActionType.SELL;
+				reason = ReasonType.BEARISH_CROSSOVER;
+			} else {
+				action = ActionType.HOLD;
+				reason = null;
+			}
+		}
+	}
+
+	private void determineTrailingStop(List<Quote> quotes, List<IndicatorResult> results) {
+		if (action == ActionType.BUY) {
+			buyStop = buyStop(quotes, results);
+			sellStop = null;
+			stopLoss = stopLoss(quotes, results);
+		} else if (action == ActionType.SELL) {
+			buyStop = null;
+			sellStop = sellStop(quotes, results);
+			stopLoss = stopLoss(quotes, results);
+		} else {
+			buyStop = null;
+			sellStop = null;
+			stopLoss = null;
+		}
+	}
+
+	private BigDecimal buyStop(List<Quote> quotes, List<IndicatorResult> results) {
+		BigDecimal currentHigh = quotes.get(0).getHigh();
+		BigDecimal previousBuyStop = results.get(0).getBuyStop();
+		BigDecimal _buyStop;
+
+		if (previousBuyStop == null) {
+			BigDecimal priceFluctuation = BoardLotAndPriceFluctuation.determinePriceFluctuation(currentHigh);
+			_buyStop = currentHigh.add(priceFluctuation);
+		} else {
+			BigDecimal previousHigh = quotes.get(1).getHigh();
+
+			if (currentHigh.compareTo(previousHigh) < 0) {
+				BigDecimal priceFluctuation = BoardLotAndPriceFluctuation.determinePriceFluctuation(currentHigh);
+				_buyStop = currentHigh.add(priceFluctuation);
+			} else {
+				_buyStop = previousBuyStop;
+			}
+		}
+
+		return _buyStop;
+	}
+
+	private BigDecimal sellStop(List<Quote> quotes, List<IndicatorResult> results) {
+		BigDecimal currentLow = quotes.get(0).getLow();
+		BigDecimal previousSellStop = results.get(0).getSellStop();
+		BigDecimal _sellStop;
+
+		if (previousSellStop == null) {
+			BigDecimal priceFluctuation = BoardLotAndPriceFluctuation.determinePriceFluctuation(currentLow);
+			_sellStop = currentLow.subtract(priceFluctuation);
+		} else {
+			BigDecimal previousLow = quotes.get(1).getLow();
+
+			if (currentLow.compareTo(previousLow) > 0) {
+				BigDecimal priceFluctuation = BoardLotAndPriceFluctuation.determinePriceFluctuation(currentLow);
+				_sellStop = currentLow.subtract(priceFluctuation);
+			} else {
+				_sellStop = previousSellStop;
+			}
+		}
+
+		return _sellStop;
+	}
+
+	private BigDecimal stopLoss(List<Quote> quotes, List<IndicatorResult> results) {
+		BigDecimal _stopLoss;
+
+		if (action == ActionType.BUY) {
+			BigDecimal currentLow = quotes.get(0).getLow();
+			ActionType previousAction = results.get(0).getAction();
+			BigDecimal previousStopLoss = previousAction == ActionType.SELL ? null : results.get(0).getStopLoss();
+
+			if (previousStopLoss == null) {
+				_stopLoss = currentLow;
+			} else {
+				if (currentLow.compareTo(previousStopLoss) < 0) {
+					_stopLoss = currentLow;
+				} else {
+					_stopLoss = previousStopLoss;
+				}
+			}
+		} else if (action == ActionType.SELL) {
+			BigDecimal currentHigh = quotes.get(0).getHigh();
+			ActionType previousAction = results.get(0).getAction();
+			BigDecimal previousStopLoss = previousAction == ActionType.BUY ? null : results.get(0).getStopLoss();
+
+			if (previousStopLoss == null) {
+				_stopLoss = currentHigh;
+			} else {
+				if (currentHigh.compareTo(previousStopLoss) > 0) {
+					_stopLoss = currentHigh;
+				} else {
+					_stopLoss = previousStopLoss;
+				}
+			}
+		} else {
+			_stopLoss = null;
+		}
+
+		return _stopLoss;
 	}
 
 }

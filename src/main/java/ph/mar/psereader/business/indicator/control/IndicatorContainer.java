@@ -18,10 +18,9 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 
 import ph.mar.psereader.business.indicator.entity.DmiResult;
+import ph.mar.psereader.business.indicator.entity.EmaResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
-import ph.mar.psereader.business.indicator.entity.MacdResult;
 import ph.mar.psereader.business.indicator.entity.ObvResult;
-import ph.mar.psereader.business.indicator.entity.RsiResult;
 import ph.mar.psereader.business.indicator.entity.SstoResult;
 import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
@@ -44,46 +43,22 @@ public class IndicatorContainer {
 		List<Quote> quotes = findAllQuotesByStockAndDate(stock, date, quoteSize);
 		List<IndicatorResult> results = findAllIndicatorResultsByStock(stock, indicatorResultSize);
 
-		SstoIndicator sstoIndicator = new SstoIndicator(quotes, results);
-		RsiIndicator rsiIndicator = new RsiIndicator(quotes, results);
-		DmiIndicator dmiIndicator = new DmiIndicator(quotes, results);
-		MacdIndicator macdIndicator = new MacdIndicator(quotes, results);
-		ObvIndicator obvIndicator = new ObvIndicator(quotes, results);
+		Future<DmiResult> dmiResult = executorService.submit(new DMI(quotes, results));
+		Future<SstoResult> sstoResult = executorService.submit(new SSTO(quotes, results));
+		Future<EmaResult> emaResult = executorService.submit(new EMA(quotes, results));
+		Future<ObvResult> obvResult = executorService.submit(new OBV(quotes, results));
 
-		Future<SstoResult> sstoResultFuture = executorService.submit(sstoIndicator);
-		Future<RsiResult> rsiResultFuture = executorService.submit(rsiIndicator);
-		Future<DmiResult> dmiResultFuture = executorService.submit(dmiIndicator);
-		Future<MacdResult> macdResultFuture = executorService.submit(macdIndicator);
-		Future<ObvResult> obvResultFuture = executorService.submit(obvIndicator);
-
-		while (!sstoResultFuture.isDone() || !rsiResultFuture.isDone() || !dmiResultFuture.isDone() || !macdResultFuture.isDone()
-				|| !obvResultFuture.isDone()) {
+		while (!dmiResult.isDone() || !sstoResult.isDone() || !emaResult.isDone() || !obvResult.isDone()) {
 			continue;
 		}
 
 		try {
-			SstoResult sstoResult = sstoResultFuture.get();
-			RsiResult rsiResult = rsiResultFuture.get();
-			DmiResult dmiResult = dmiResultFuture.get();
-			MacdResult macdResult = macdResultFuture.get();
-			ObvResult obvResult = obvResultFuture.get();
-
-			sstoIndicator.setTrend(dmiResult.getTrend());
-
-			sstoResultFuture = executorService.submit(sstoIndicator);
-
-			while (!sstoResultFuture.isDone() || !rsiResultFuture.isDone() || !dmiResultFuture.isDone() || !macdResultFuture.isDone()
-					|| !obvResultFuture.isDone()) {
-				continue;
-			}
-
 			IndicatorResult indicatorResult = new IndicatorResult(stock, date);
-			indicatorResult.setSstoResult(sstoResult);
-			indicatorResult.setRsiResult(rsiResult);
-			indicatorResult.setDmiResult(dmiResult);
-			indicatorResult.setMacdResult(macdResult);
-			indicatorResult.setObvResult(obvResult);
-
+			indicatorResult.setDmiResult(dmiResult.get());
+			indicatorResult.setSstoResult(sstoResult.get());
+			indicatorResult.setEmaResult(emaResult.get());
+			indicatorResult.setObvResult(obvResult.get());
+			indicatorResult.process(quotes, results);
 			stock.add(indicatorResult);
 			log.info("{} processed.", stock.getSymbol());
 			return new AsyncResult<>(stock);

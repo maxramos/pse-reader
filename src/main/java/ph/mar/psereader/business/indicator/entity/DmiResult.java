@@ -8,8 +8,6 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 
 @Embeddable
 public class DmiResult implements Serializable {
@@ -25,14 +23,6 @@ public class DmiResult implements Serializable {
 	@Column(name = "dmi_minus_di", nullable = false, precision = 13, scale = 10)
 	private BigDecimal minusDi;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "dmi_trend", nullable = false, length = 11)
-	private TrendType trend;
-
-	@Enumerated(EnumType.STRING)
-	@Column(name = "dmi_position", nullable = false, length = 13)
-	private PositionType position;
-
 	@Column(name = "dmi_smoothed_plus_dm", nullable = false, precision = 13, scale = 10)
 	private BigDecimal smoothedPlusDm;
 
@@ -46,13 +36,10 @@ public class DmiResult implements Serializable {
 		super();
 	}
 
-	public DmiResult(BigDecimal adx, BigDecimal plusDi, BigDecimal minusDi, TrendType trend, PositionType position, BigDecimal smoothedPlusDm,
-			BigDecimal smoothedMinusDm, BigDecimal atr) {
+	public DmiResult(BigDecimal adx, BigDecimal plusDi, BigDecimal minusDi, BigDecimal smoothedPlusDm, BigDecimal smoothedMinusDm, BigDecimal atr) {
 		this.adx = adx;
 		this.plusDi = plusDi;
 		this.minusDi = minusDi;
-		this.trend = trend;
-		this.position = position;
 		this.smoothedPlusDm = smoothedPlusDm;
 		this.smoothedMinusDm = smoothedMinusDm;
 		this.atr = atr;
@@ -70,14 +57,6 @@ public class DmiResult implements Serializable {
 		return minusDi;
 	}
 
-	public TrendType getTrend() {
-		return trend;
-	}
-
-	public PositionType getPosition() {
-		return position;
-	}
-
 	public BigDecimal getSmoothedPlusDm() {
 		return smoothedPlusDm;
 	}
@@ -92,121 +71,97 @@ public class DmiResult implements Serializable {
 
 	@Override
 	public String toString() {
-		return String.format("DmiResult [adx=%s, plusDi=%s, minusDi=%s, trend=%s, position=%s, smoothedPlusDm=%s, smoothedMinusDm=%s, atr=%s]", adx,
-				plusDi, minusDi, trend, position, smoothedPlusDm, smoothedMinusDm, atr);
+		return String.format("DmiResult [adx=%s, plusDi=%s, minusDi=%s, smoothedPlusDm=%s, smoothedMinusDm=%s, atr=%s]", adx, plusDi, minusDi,
+				smoothedPlusDm, smoothedMinusDm, atr);
 	}
 
 	public static class Holder {
 
-		private List<BigDecimal> trList;
-		private List<BigDecimal> plusDmList;
-		private List<BigDecimal> minusDmList;
+		private List<BigDecimal> trs;
+		private List<BigDecimal> plusDms;
+		private List<BigDecimal> minusDms;
 
 		public Holder(int size) {
-			trList = new ArrayList<>(size);
-			plusDmList = new ArrayList<>(size);
-			minusDmList = new ArrayList<>(size);
+			trs = new ArrayList<>(size);
+			plusDms = new ArrayList<>(size);
+			minusDms = new ArrayList<>(size);
 		}
 
 		public void add(BigDecimal tr, BigDecimal plusDm, BigDecimal minusDm) {
-			trList.add(tr);
-			plusDmList.add(plusDm);
-			minusDmList.add(minusDm);
+			trs.add(tr);
+			plusDms.add(plusDm);
+			minusDms.add(minusDm);
 		}
 
 		public void reverse() {
-			Collections.reverse(trList);
-			Collections.reverse(plusDmList);
-			Collections.reverse(minusDmList);
+			Collections.reverse(trs);
+			Collections.reverse(plusDms);
+			Collections.reverse(minusDms);
 		}
 
-		public List<BigDecimal> getTrList() {
-			return trList;
+		public List<BigDecimal> getTrs() {
+			return trs;
 		}
 
-		public List<BigDecimal> getPlusDmList() {
-			return plusDmList;
+		public List<BigDecimal> getPlusDms() {
+			return plusDms;
 		}
 
-		public List<BigDecimal> getMinusDmList() {
-			return minusDmList;
+		public List<BigDecimal> getMinusDms() {
+			return minusDms;
 		}
 
 	}
 
 	public static class SmoothedHolder {
 
-		private List<BigDecimal> atrList;
-		private List<BigDecimal> smoothedPlusDmList;
-		private List<BigDecimal> smoothedMinusDmList;
-		private List<BigDecimal> plusDiList;
-		private List<BigDecimal> minusDiList;
-		private List<BigDecimal> dxList;
+		private List<BigDecimal> atrs;
+		private List<BigDecimal> smoothedPlusDms;
+		private List<BigDecimal> smoothedMinusDms;
+		private List<BigDecimal> plusDis;
+		private List<BigDecimal> minusDis;
+		private List<BigDecimal> dxs;
 
 		public SmoothedHolder(int size) {
-			atrList = new ArrayList<>(size);
-			smoothedPlusDmList = new ArrayList<>(size);
-			smoothedMinusDmList = new ArrayList<>(size);
-			plusDiList = new ArrayList<>(size);
-			minusDiList = new ArrayList<>(size);
-			dxList = new ArrayList<>(size);
+			atrs = new ArrayList<>(size);
+			smoothedPlusDms = new ArrayList<>(size);
+			smoothedMinusDms = new ArrayList<>(size);
+			plusDis = new ArrayList<>(size);
+			minusDis = new ArrayList<>(size);
+			dxs = new ArrayList<>(size);
 		}
 
 		public void add(BigDecimal atr, BigDecimal smoothedPlusDm, BigDecimal smoothedMinusDm, BigDecimal plusDi, BigDecimal minusDi, BigDecimal dx) {
-			atrList.add(atr);
-			smoothedPlusDmList.add(smoothedPlusDm);
-			smoothedMinusDmList.add(smoothedMinusDm);
-			plusDiList.add(plusDi);
-			minusDiList.add(minusDi);
-			dxList.add(dx);
+			atrs.add(atr);
+			smoothedPlusDms.add(smoothedPlusDm);
+			smoothedMinusDms.add(smoothedMinusDm);
+			plusDis.add(plusDi);
+			minusDis.add(minusDi);
+			dxs.add(dx);
 		}
 
 		public BigDecimal getLastAtr() {
-			return atrList.get(atrList.size() - 1);
+			return atrs.get(atrs.size() - 1);
 		}
 
 		public BigDecimal getLastSmoothedPlusDm() {
-			return smoothedPlusDmList.get(smoothedPlusDmList.size() - 1);
+			return smoothedPlusDms.get(smoothedPlusDms.size() - 1);
 		}
 
 		public BigDecimal getLastSmoothedMinusDm() {
-			return smoothedMinusDmList.get(smoothedMinusDmList.size() - 1);
+			return smoothedMinusDms.get(smoothedMinusDms.size() - 1);
 		}
 
 		public BigDecimal getLastPlusDi() {
-			return plusDiList.get(plusDiList.size() - 1);
+			return plusDis.get(plusDis.size() - 1);
 		}
 
 		public BigDecimal getLastMinusDi() {
-			return minusDiList.get(minusDiList.size() - 1);
+			return minusDis.get(minusDis.size() - 1);
 		}
 
-		public BigDecimal getLastDx() {
-			return dxList.get(dxList.size() - 1);
-		}
-
-		public List<BigDecimal> getAtrList() {
-			return atrList;
-		}
-
-		public List<BigDecimal> getSmoothedPlusDmList() {
-			return smoothedPlusDmList;
-		}
-
-		public List<BigDecimal> getSmoothedMinusDmList() {
-			return smoothedMinusDmList;
-		}
-
-		public List<BigDecimal> getPlusDiList() {
-			return plusDiList;
-		}
-
-		public List<BigDecimal> getMinusDiList() {
-			return minusDiList;
-		}
-
-		public List<BigDecimal> getDxList() {
-			return dxList;
+		public List<BigDecimal> getDxs() {
+			return dxs;
 		}
 
 	}
