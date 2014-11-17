@@ -21,6 +21,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import ph.mar.psereader.business.stock.entity.Quote;
@@ -29,11 +30,13 @@ import ph.mar.psereader.business.stock.entity.Stock;
 @Entity
 @Table(name = "indicator_result", uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
-	@NamedQuery(name = IndicatorResult.ALL_BY_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.date = :date"),
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.trend, ir.action, ir.reason, ir.buyStop, ir.sellStop, ir.stopLoss, ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date ORDER BY ir.stock.symbol"),
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_ACTION, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.trend, ir.action, ir.reason, ir.buyStop, ir.sellStop, ir.stopLoss, ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date AND ir.action = :action ORDER BY ir.stock.symbol"),
 	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
 public class IndicatorResult implements Serializable {
 
-	public static final String ALL_BY_DATE = "IndicatorResult.ALL_BY_DATE";
+	public static final String ALL_INDICATOR_DATA_BY_DATE = "IndicatorResult.ALL_INDICATOR_DATA_BY_DATE";
+	public static final String ALL_INDICATOR_DATA_BY_DATE_AND_ACTION = "IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_ACTION";
 	public static final String ALL_INDICATOR_DATA_BY_STOCK = "IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK";
 
 	private static final long serialVersionUID = 1L;
@@ -86,6 +89,9 @@ public class IndicatorResult implements Serializable {
 	@ManyToOne
 	private Stock stock;
 
+	@Transient
+	private Quote quote;
+
 	public IndicatorResult() {
 		super();
 	}
@@ -103,6 +109,25 @@ public class IndicatorResult implements Serializable {
 		this.sstoResult = sstoResult;
 		this.emaResult = emaResult;
 		this.obvResult = obvResult;
+	}
+
+	/**
+	 * Used for displaying indicator results.
+	 */
+	public IndicatorResult(TrendType trend, ActionType action, ReasonType reason, BigDecimal buyStop, BigDecimal sellStop, BigDecimal stopLoss,
+			DmiResult dmiResult, SstoResult sstoResult, EmaResult emaResult, ObvResult obvResult, Stock stock, Quote quote) {
+		this.trend = trend;
+		this.action = action;
+		this.reason = reason;
+		this.buyStop = buyStop;
+		this.sellStop = sellStop;
+		this.stopLoss = stopLoss;
+		this.dmiResult = dmiResult;
+		this.sstoResult = sstoResult;
+		this.emaResult = emaResult;
+		this.obvResult = obvResult;
+		this.stock = stock;
+		this.quote = quote;
 	}
 
 	public void process(List<Quote> quotes, List<IndicatorResult> results) {
@@ -187,6 +212,10 @@ public class IndicatorResult implements Serializable {
 
 	public Stock getStock() {
 		return stock;
+	}
+
+	public Quote getQuote() {
+		return quote;
 	}
 
 	@Override

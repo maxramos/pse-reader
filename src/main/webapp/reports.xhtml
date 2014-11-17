@@ -7,20 +7,22 @@
 
 <ui:define name="content">
 <h:form id="reportForm">
-	<p:dataTable id="reportDataTable" var="row" value="#{reportsPage.rows}" filteredValue="#{reportsPage.filteredRows}">
+	<p:dataTable id="reportDataTable" widgetVar="reportDataTable" var="row" value="#{reportsPage.rows}" filteredValue="#{reportsPage.filteredRows}">
 		<f:facet name="header">
 			<p:panelGrid id="header" styleClass="header">
 				<p:row>
 					<p:column styleClass="left">
 						<p:selectOneMenu id="selectedReportDate" value="#{reportsPage.selectedDate}">
-							<p:ajax update="reportDataTable" listener="#{reportsPage.onDateChange}" />
+							<p:ajax update="title" listener="#{reportsPage.onDateChange}" oncomplete="PF('reportDataTable').filter();" />
 							<f:selectItems value="#{reportsPage.dates}" />
 						</p:selectOneMenu>
 					</p:column>
 					<p:column styleClass="middle">
-						<h:outputText value="End of Day Quotes" rendered="#{not empty reportsPage.dates}" />
-						<br />
-						<h:outputText value="#{reportsPage.selectedDate}" styleClass="caption" />
+						<p:outputPanel id="title">
+							<h:outputText value="End of Day Quotes" rendered="#{not empty reportsPage.dates}" />
+							<br />
+							<h:outputText value="#{reportsPage.selectedDate}" styleClass="caption" />
+						</p:outputPanel>
 					</p:column>
 					<p:column styleClass="right">
 						<p:commandButton id="toggler" type="button" value="Columns" icon="ui-icon-calculator" />

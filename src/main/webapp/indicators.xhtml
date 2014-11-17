@@ -9,12 +9,17 @@
 
 <ui:define name="content">
 <h:form id="indicatorForm">
-	<p:dataTable id="indicatorResultsDataTable" var="result" value="#{indicatorsPage.results}" filteredValue="#{indicatorsPage.filteredResults}">		
+	<p:dataTable id="indicatorResultsDataTable" widgetVar="indicatorResultsDataTable" var="result" value="#{indicatorsPage.results}" filteredValue="#{indicatorsPage.filteredResults}" rowExpandMode="single">		
 		<f:facet name="header">
 			<p:panelGrid id="header" styleClass="header">
 				<p:row>
 					<p:column styleClass="left">
-						<p:spacer />
+						<p:selectOneButton value="#{indicatorsPage.selectedAction}">
+							<p:ajax listener="#{indicatorsPage.onActionChange}" oncomplete="PF('indicatorResultsDataTable').filter();" />
+							<f:selectItem itemLabel="All" itemValue="ALL" />
+							<f:selectItem itemLabel="Buy" itemValue="BUY" />
+							<f:selectItem itemLabel="Sell" itemValue="SELL" />
+						</p:selectOneButton>
 					</p:column>
 					<p:column styleClass="middle">
 						<h:outputText value="Indicators" rendered="#{not empty indicatorsPage.results}" />
@@ -24,108 +29,249 @@
 						</h:outputText>
 					</p:column>
 					<p:column styleClass="right">
-						<p:commandButton id="toggler" type="button" value="Columns" icon="ui-icon-calculator" />
-        				<p:columnToggler datasource="indicatorResultsDataTable" trigger="toggler" />
+						<p:spacer />
 					</p:column>
 				</p:row>
         	</p:panelGrid>
 		</f:facet>
 		
-		<p:column headerText="Symbol" sortBy="#{result.stock.symbol}" filterBy="#{result.stock.symbol}" filterMatchMode="exact" styleClass="text">
+		<p:column style="width: 2em;">
+			<p:rowToggler />
+		</p:column>
+		
+		<p:column headerText="Symbol" sortBy="#{result.stock.symbol}" filterBy="#{result.stock.symbol}" filterMatchMode="exact" styleClass="text" >
 			<h:outputText value="#{result.stock.symbol}" />
 		</p:column>
 		
-		<p:column headerText="EMA" sortBy="#{result.emaResult.ema}" styleClass="numeric">
-			<div class="table">
-				<div class="table-row">
-					<div class="table-cell">
-						<h:outputText value="#{result.emaResult.ema}" styleClass="main">
-							<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-						</h:outputText>
-					</div>
-				</div>
-			</div>
+		<p:column headerText="Trend" styleClass="text">
+			<h:outputText value="#{result.trend.name}" styleClass="trend #{result.trend}" />
 		</p:column>
 		
-		<p:column headerText="DMI" sortBy="#{result.dmiResult.adx}" styleClass="numeric">
-			<div class="table">
-				<div class="table-row">
-					<div class="table-cell action" style="width: 45%;">
-						<h:outputText value="#{result.trend.name}" styleClass="#{result.trend}" />
-					</div>
-					<div class="table-cell" style="width: 55%;">
-						<h:outputText value="#{result.dmiResult.adx}" styleClass="main">
-							<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="2" />
-						</h:outputText>
-						<br />
-						<h:outputText value="#{result.dmiResult.plusDi}" styleClass="positive">
-							<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="2" />
-						</h:outputText>
-						<br />
-						<h:outputText value="#{result.dmiResult.minusDi}" styleClass="negative">
-							<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="2" />
-						</h:outputText>
-					</div>
-				</div>
-			</div>
+		<p:column headerText="Action" styleClass="text">
+			<h:outputText value="#{result.action.name}" styleClass="action #{result.action}" />
 		</p:column>
 		
-		<p:column headerText="SSto" sortBy="#{result.sstoResult.slowK}" styleClass="numeric">
+		<p:rowExpansion>
 			<div class="table">
 				<div class="table-row">
-					<div class="table-cell action" style="width: 70%;">
-						<h:outputText value="#{result.action.name}" styleClass="#{result.action}" rendered="#{result.action ne 'HOLD'}" />
-						<br />
-						<h:outputText value="#{result.reason.name}" styleClass="#{result.action}" rendered="#{result.action ne 'HOLD'}" />
+					<div class="table-cell" style="padding-left: 2em; padding-right: 2em;">
+						<p:panelGrid columns="2">
+							<f:facet name="header">
+								<h:outputText value="Stock" />
+							</f:facet>
+							
+							<h:outputText value="Symbol" />
+							<h:outputText value="#{result.stock.symbol}" />
+							
+							<h:outputText value="Name" />
+							<h:outputText value="#{result.stock.name}" />
+							
+							<h:outputText value="Sector" />
+							<h:outputText value="#{result.stock.sector.name}" />
+							
+							<h:outputText value="Sub Sector" />
+							<h:outputText value="#{result.stock.subSector.name}" />
+							
+							<h:outputText value="Board Lot" />
+							<h:outputText value="#{result.quote.boardLot}">
+								<f:convertNumber type="number" groupingUsed="true" />
+							</h:outputText>
+							
+							<h:outputText value="Fluctuation" />
+							<h:outputText value="#{result.quote.priceFluctuation}">
+								<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" maxFractionDigits="4" />
+							</h:outputText>
+						</p:panelGrid>
 					</div>
-					<div class="table-cell" style="width: 15%;">
-						<h:outputText value="#{result.buyStop}" styleClass="buy-stop" rendered="#{result.action eq 'BUY'}">
-							<f:convertNumber type="number" groupingUsed="true" />
-						</h:outputText>
-						<h:outputText value="#{result.sellStop}" styleClass="sell-stop" rendered="#{result.action eq 'SELL'}">
-							<f:convertNumber type="number" groupingUsed="true" />
-						</h:outputText>
-						<br />
-						<h:outputText value="#{result.stopLoss}" styleClass="stop-loss" rendered="#{result.action eq 'BUY' or result.action eq 'SELL'}">
-							<f:convertNumber type="number" groupingUsed="true" />
-						</h:outputText>
+					<div class="table-cell" style="padding-left: 2em; padding-right: 2em;">
+						<p:panelGrid columns="2">
+							<f:facet name="header">
+								<h:outputText value="Quote" />
+							</f:facet>
+						
+							<h:outputText value="Previous" />
+							<h:outputText value="#{result.quote.close}">
+								<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+							</h:outputText>
+						
+							<h:outputText value="Open" />
+							<h:outputText value="#{result.quote.open}">
+								<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+							</h:outputText>
+							
+							<h:outputText value="High" />
+							<h:outputText value="#{result.quote.high}">
+								<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+							</h:outputText>
+							
+							<h:outputText value="Low" />
+							<h:outputText value="#{result.quote.low}">
+								<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+							</h:outputText>
+							
+							<h:outputText value="Bid" />
+							<h:outputText value="#{result.quote.bid}">
+								<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+							</h:outputText>
+							
+							<h:outputText value="Ask" />
+							<h:outputText value="#{result.quote.ask}">
+								<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+							</h:outputText>
+							
+							<h:outputText value="Volume" />
+							<h:outputText value="#{result.quote.volume}">
+								<f:convertNumber type="number" groupingUsed="true" />
+							</h:outputText>
+							
+							<h:outputText value="Value" />
+							<h:outputText value="#{result.quote.value}">
+								<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+							</h:outputText>
+							
+							<h:outputText value="Foreign Buy/Sell" />
+							<h:outputText value="#{result.quote.foreignBuySell}">
+								<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+							</h:outputText>
+						</p:panelGrid>
 					</div>
-					<div class="table-cell" style="width: 15%;">
-						<h:outputText value="#{result.sstoResult.slowK}" styleClass="main">
-							<f:convertNumber type="number" groupingUsed="true" />
-						</h:outputText>
-						<br />
-						<h:outputText value="#{result.sstoResult.slowD}" styleClass="signal">
-							<f:convertNumber type="number" groupingUsed="true" />
-						</h:outputText>
+					<div class="table-cell" style="padding-left: 2em; padding-right: 2em;">
+						<p:panelGrid>
+							<f:facet name="header">
+								<p:row>
+									<p:column colspan="2">
+										<h:outputText value="Signal" />
+									</p:column>
+								</p:row>
+							</f:facet>
+							<p:row>
+								<p:column>
+									<h:outputText value="Trend" />
+								</p:column>
+								<p:column>
+									<h:outputText value="#{result.trend.name}" styleClass="trend #{result.trend}" />
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column>
+									<h:outputText value="Action" />
+								</p:column>
+								<p:column>
+									<h:outputText value="#{result.action.name}" styleClass="action #{result.action}" />
+								</p:column>
+							</p:row>
+							<p:row rendered="#{result.action eq 'BUY' or result.action eq 'SELL'}">
+								<p:column>
+									<h:outputText value="Reason" rendered="#{result.action eq 'BUY' or result.action eq 'SELL'}" />
+								</p:column>
+								<p:column>
+									<h:outputText value="#{result.reason.name}" styleClass="reason #{result.action}" />
+								</p:column>
+							</p:row>
+							<p:row rendered="#{result.action eq 'BUY'}">
+								<p:column>
+									<h:outputText value="Buy Stop" />
+								</p:column>
+								<p:column>
+									<h:outputText value="#{result.buyStop}" styleClass="buy-stop">
+										<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+									</h:outputText>
+								</p:column>
+							</p:row>
+							<p:row rendered="#{result.action eq 'SELL'}">
+								<p:column>
+									<h:outputText value="Sell Stop" />
+								</p:column>
+								<p:column>
+									<h:outputText value="#{result.sellStop}" styleClass="sell-stop">
+										<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+									</h:outputText>
+								</p:column>
+							</p:row>
+							<p:row rendered="#{result.action eq 'BUY' or result.action eq 'SELL'}">
+								<p:column>
+									<h:outputText value="Stop Loss" />
+								</p:column>
+								<p:column>
+									<h:outputText value="#{result.stopLoss}" styleClass="stop-loss">
+										<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+									</h:outputText>
+								</p:column>
+							</p:row>
+						</p:panelGrid>
+					</div>
+					<div class="table-cell" style="padding-left: 2em; padding-right: 2em;">
+						<p:panelGrid>
+							<f:facet name="header">
+								<p:row>
+									<p:column colspan="2">
+										<h:outputText value="Indicators" />
+									</p:column>
+								</p:row>
+							</f:facet>
+							<p:row>
+								<p:column>
+									<h:outputText value="DMI" />
+								</p:column>
+								<p:column>
+									<h:outputText value="#{result.dmiResult.adx}" styleClass="main">
+									<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" maxFractionDigits="2" />
+									</h:outputText>
+									<p:spacer style="width: 1em;" />
+									<h:outputText value="#{result.dmiResult.plusDi}" styleClass="positive">
+										<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" maxFractionDigits="2" />
+									</h:outputText>
+									<p:spacer style="width: 1em;" />
+									<h:outputText value="#{result.dmiResult.minusDi}" styleClass="negative">
+										<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" maxFractionDigits="2" />
+									</h:outputText>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column>
+									<h:outputText value="SSTO" />
+								</p:column>
+								<p:column>
+									<h:outputText value="#{result.sstoResult.slowK}" styleClass="main" minFractionDigits="2" />
+									<p:spacer style="width: 1em;" />
+									<h:outputText value="#{result.sstoResult.slowD}" styleClass="signal" minFractionDigits="2" />
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column>
+									<h:outputText value="EMA" />
+								</p:column>
+								<p:column>
+									<h:outputText value="#{result.emaResult.ema}" styleClass="main">
+										<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+									</h:outputText>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column>
+									<h:outputText value="OBV" />
+								</p:column>
+								<p:column>
+									<h:outputText value="#{result.obvResult.obv}" styleClass="main">
+										<f:convertNumber type="number" groupingUsed="true" />
+									</h:outputText>
+								</p:column>
+							</p:row>
+							<p:row>
+								<p:column>
+									<h:outputText value="ATR" />
+								</p:column>
+								<p:column>
+									<h:outputText value="#{result.dmiResult.atr}" styleClass="main">
+										<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="7" />
+									</h:outputText>
+								</p:column>
+							</p:row>
+						</p:panelGrid>
 					</div>
 				</div>
 			</div>
-		</p:column>
-		
-		<p:column headerText="OBV" sortBy="#{result.obvResult.obv}" styleClass="numeric">
-			<div class="table">
-				<div class="table-row">
-					<div class="table-cell">
-						<h:outputText value="#{result.obvResult.obv}" styleClass="main">
-							<f:convertNumber type="number" groupingUsed="true" />
-						</h:outputText>
-					</div>
-				</div>
-			</div>
-		</p:column>
-		
-		<p:column headerText="ATR" sortBy="#{result.dmiResult.atr}" styleClass="numeric">
-			<div class="table">
-				<div class="table-row">
-					<div class="table-cell">
-						<h:outputText value="#{result.dmiResult.atr}" styleClass="main">
-							<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="7" />
-						</h:outputText>
-					</div>
-				</div>
-			</div>
-		</p:column>
+		</p:rowExpansion>
 	</p:dataTable>
 </h:form>
 </ui:define>

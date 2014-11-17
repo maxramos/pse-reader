@@ -1,14 +1,13 @@
 @CHARSET "UTF-8";
 
-.UP, .BUY { color: #008800; font-size: 0.6em; }
-.DOWN, .SELL { color: #880000; font-size: 0.6em; }
-.SIDEWAYS, .HOLD { color: #888800; font-size: 0.6em; }
+.UP, .BUY { color: #008800; }
+.DOWN, .SELL { color: #880000; }
+.SIDEWAYS, .HOLD { color: #888800; }
 
-.action { text-align: left; font-weight: bold; white-space: nowrap; }
-.main { color: #000088; font-size: 0.6em; }
-.signal, .negative { color: #880000; font-size: 0.6em; }
-.positive { color: #008800; font-size: 0.6em; }
-.buy-stop, .sell-stop, .stop-loss { font-size: 0.6em; }
+.trend, .action, .reason { font-weight: bold; white-space: nowrap; }
+.main { color: #000088; }
+.signal, .negative, .sell-stop, .stop-loss { color: #880000; }
+.positive, .buy-stop { color: #008800; }
 
 body { font-size: 0.8em !important; }
 
@@ -20,10 +19,12 @@ body { font-size: 0.8em !important; }
 
 .text { text-align: center; }
 .numeric { text-align: right; }
+
 .menu .selected { color: #FFFFFF; background: #6580A1; }
 
 .no-border, .no-border tr, .no-border td { border: none !important; }
 .no-border .ui-chkbox-label { margin-top: 0em !important; }
+
 .table { display: table; width: 100%; }
 .table-row { display: table-row; }
 .table-cell { display: table-cell; }

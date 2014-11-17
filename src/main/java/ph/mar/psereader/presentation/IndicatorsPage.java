@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import ph.mar.psereader.business.indicator.boundary.IndicatorManager;
+import ph.mar.psereader.business.indicator.entity.ActionType;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.operation.boundary.OperationManager;
 
@@ -17,7 +18,9 @@ import ph.mar.psereader.business.operation.boundary.OperationManager;
 @ViewScoped
 public class IndicatorsPage implements Serializable {
 
+
 	private static final long serialVersionUID = 1L;
+	private static final String ALL = "ALL";
 
 	@Inject
 	IndicatorManager indicatorManager;
@@ -28,11 +31,21 @@ public class IndicatorsPage implements Serializable {
 	private Date lastProcessedDate;
 	private List<IndicatorResult> results;
 	private List<IndicatorResult> filteredResults;
+	private String selectedAction;
 
 	@PostConstruct
 	void init() {
 		lastProcessedDate = operationManager.findLastProcessedDate();
 		results = indicatorManager.findAllByDate(lastProcessedDate);
+		selectedAction = ALL;
+	}
+
+	public void onActionChange() {
+		if (ALL.equals(selectedAction)) {
+			results = indicatorManager.findAllByDate(lastProcessedDate);
+		} else {
+			results = indicatorManager.findAllByDateAndAction(lastProcessedDate, ActionType.valueOf(selectedAction));
+		}
 	}
 
 	public Date getLastProcessedDate() {
@@ -49,6 +62,14 @@ public class IndicatorsPage implements Serializable {
 
 	public void setFilteredResults(List<IndicatorResult> filteredResults) {
 		this.filteredResults = filteredResults;
+	}
+
+	public String getSelectedAction() {
+		return selectedAction;
+	}
+
+	public void setSelectedAction(String selectedAction) {
+		this.selectedAction = selectedAction;
 	}
 
 }
