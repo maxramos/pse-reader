@@ -13,8 +13,11 @@ import javax.inject.Named;
 
 import org.primefaces.event.ToggleEvent;
 import org.primefaces.model.Visibility;
-import org.primefaces.model.chart.ChartSeries;
+import org.primefaces.model.chart.Axis;
+import org.primefaces.model.chart.AxisType;
 import org.primefaces.model.chart.LineChartModel;
+import org.primefaces.model.chart.LineChartSeries;
+import org.primefaces.model.chart.LinearAxis;
 
 import ph.mar.psereader.business.indicator.boundary.IndicatorManager;
 import ph.mar.psereader.business.indicator.entity.ActionType;
@@ -27,7 +30,7 @@ public class IndicatorsPage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private static final String ALL = "ALL";
-	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yy");
+	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
 	@Inject
 	IndicatorManager indicatorManager;
@@ -62,19 +65,26 @@ public class IndicatorsPage implements Serializable {
 		}
 
 		IndicatorResult selectedResult = (IndicatorResult) event.getData();
-		List<IndicatorResult> dataList = indicatorManager.findAllByStockAndDate(selectedResult.getStock(), lastProcessedDate);
+		List<IndicatorResult> dataList = indicatorManager.findAllByStockAndDate(selectedResult.getStock(), lastProcessedDate, 21);
 		updateCharts(dataList);
 	}
 
 	private void updateCharts(List<IndicatorResult> dataList) {
-		priceModel = new LineChartModel();
-		ChartSeries priceSeries = new ChartSeries();
+		LineChartSeries priceSeries = new LineChartSeries();
+		priceSeries.setLabel("Price");
 
 		for (IndicatorResult data : dataList) {
 			priceSeries.set(DATE_FORMAT.format(data.getDate()), data.getPrice());
 		}
 
+		priceModel = new LineChartModel();
+		priceModel.setTitle("Price Chart");
+		priceModel.setShowPointLabels(true);
 		priceModel.addSeries(priceSeries);
+
+		Axis axis = new LinearAxis("Dates");
+		axis.setTickAngle(-50);
+		priceModel.getAxes().put(AxisType.X, axis);
 	}
 
 	public Date getLastProcessedDate() {

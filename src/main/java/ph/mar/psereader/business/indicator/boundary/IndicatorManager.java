@@ -65,8 +65,9 @@ public class IndicatorManager {
 				IndicatorResult.class);
 	}
 
-	public List<IndicatorResult> findAllByStockAndDate(Stock stock, Date date) {
-		return repository.find(IndicatorResult.ALL_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(), IndicatorResult.class);
+	public List<IndicatorResult> findAllByStockAndDate(Stock stock, Date date, int maxSize) {
+		return repository.find(IndicatorResult.ALL_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(), IndicatorResult.class,
+				maxSize);
 	}
 
 	private void addIndicatorResults(Date date, List<Future<Stock>> results) {

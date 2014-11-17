@@ -8,10 +8,14 @@
 	template="/WEB-INF/template/template.xhtml">
 
 <ui:define name="content">
+
+<p:outputPanel id="indicatorOutputPanel">
+	<p:chart type="line" model="#{indicatorsPage.priceModel}" rendered="#{indicatorsPage.priceModel ne null}" />
+</p:outputPanel>
+
 <h:form id="indicatorForm">
-	<p:dataTable id="indicatorResultsDataTable" widgetVar="indicatorResultsDataTable" var="result" value="#{indicatorsPage.results}" filteredValue="#{indicatorsPage.filteredResults}" rowExpandMode="single">		
-		<p:ajax event="rowToggle" update="indicatorRowExpansion" listener="#{indicatorsPage.onRowToggle}" />
-		 
+	<p:dataTable id="indicatorResultsDataTable" widgetVar="indicatorResultsDataTable" var="result" value="#{indicatorsPage.results}" filteredValue="#{indicatorsPage.filteredResults}" rowExpandMode="single">
+		<p:ajax event="rowToggle" update=":indicatorOutputPanel" listener="#{indicatorsPage.onRowToggle}" />
 		<f:facet name="header">
 			<p:panelGrid id="header" styleClass="header">
 				<p:row>
@@ -272,14 +276,9 @@
 						</p:panelGrid>
 					</div>
 				</div>
-				<div class="table-row">
-					<div class="table-cell" style="padding-left: 2em; padding-right: 2em;">
-						<p:chart type="line" model="#{indicatorsPage.priceModel}" style="height: 300px;" />
-					</div>
-				</div>
 			</div>
 		</p:rowExpansion>
-	</p:dataTable>
+	</p:dataTable>	
 </h:form>
 </ui:define>
 
