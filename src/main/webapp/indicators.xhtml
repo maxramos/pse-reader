@@ -10,6 +10,8 @@
 <ui:define name="content">
 <h:form id="indicatorForm">
 	<p:dataTable id="indicatorResultsDataTable" widgetVar="indicatorResultsDataTable" var="result" value="#{indicatorsPage.results}" filteredValue="#{indicatorsPage.filteredResults}" rowExpandMode="single">		
+		<p:ajax event="rowToggle" update="indicatorRowExpansion" listener="#{indicatorsPage.onRowToggle}" />
+		 
 		<f:facet name="header">
 			<p:panelGrid id="header" styleClass="header">
 				<p:row>
@@ -51,7 +53,7 @@
 			<h:outputText value="#{result.action.name}" styleClass="action #{result.action}" />
 		</p:column>
 		
-		<p:rowExpansion>
+		<p:rowExpansion id="indicatorRowExpansion">
 			<div class="table">
 				<div class="table-row">
 					<div class="table-cell" style="padding-left: 2em; padding-right: 2em;">
@@ -268,6 +270,11 @@
 								</p:column>
 							</p:row>
 						</p:panelGrid>
+					</div>
+				</div>
+				<div class="table-row">
+					<div class="table-cell" style="padding-left: 2em; padding-right: 2em;">
+						<p:chart type="line" model="#{indicatorsPage.priceModel}" style="height: 300px;" />
 					</div>
 				</div>
 			</div>

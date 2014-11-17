@@ -53,7 +53,7 @@ public class IndicatorContainer {
 		}
 
 		try {
-			IndicatorResult indicatorResult = new IndicatorResult(stock, date);
+			IndicatorResult indicatorResult = new IndicatorResult(stock, date, quotes.get(0).getClose());
 			indicatorResult.setDmiResult(dmiResult.get());
 			indicatorResult.setSstoResult(sstoResult.get());
 			indicatorResult.setEmaResult(emaResult.get());
