@@ -22,6 +22,7 @@ import ph.mar.psereader.business.indicator.entity.ActionType;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.operation.entity.Settings;
 import ph.mar.psereader.business.repository.control.Repository;
+import ph.mar.psereader.business.stock.entity.Quote;
 import ph.mar.psereader.business.stock.entity.Stock;
 
 @Startup
@@ -68,6 +69,10 @@ public class IndicatorManager {
 	public List<IndicatorResult> findAllByStockAndDate(Stock stock, Date date, int maxSize) {
 		return repository.find(IndicatorResult.ALL_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(), IndicatorResult.class,
 				maxSize);
+	}
+
+	public List<Quote> findAllQuoteByStockAndDate(Stock stock, Date date, int maxSize) {
+		return repository.find(Quote.ALL_CHART_DATA_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(), Quote.class, maxSize);
 	}
 
 	private void addIndicatorResults(Date date, List<Future<Stock>> results) {

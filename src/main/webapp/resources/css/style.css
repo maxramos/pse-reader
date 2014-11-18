@@ -28,3 +28,5 @@ body { font-size: 0.8em !important; }
 .table { display: table; width: 100%; }
 .table-row { display: table-row; }
 .table-cell { display: table-cell; }
+
+.jqplot-table-legend { width: auto !important; }

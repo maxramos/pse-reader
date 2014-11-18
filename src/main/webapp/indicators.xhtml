@@ -8,14 +8,10 @@
 	template="/WEB-INF/template/template.xhtml">
 
 <ui:define name="content">
-
-<p:outputPanel id="indicatorOutputPanel">
-	<p:chart type="line" model="#{indicatorsPage.priceModel}" rendered="#{indicatorsPage.priceModel ne null}" />
-</p:outputPanel>
-
+<h:outputScript name="jqplot.canvasOverlay.js" library="js" />
 <h:form id="indicatorForm">
 	<p:dataTable id="indicatorResultsDataTable" widgetVar="indicatorResultsDataTable" var="result" value="#{indicatorsPage.results}" filteredValue="#{indicatorsPage.filteredResults}" rowExpandMode="single">
-		<p:ajax event="rowToggle" update=":indicatorOutputPanel" listener="#{indicatorsPage.onRowToggle}" />
+		<p:ajax event="rowToggle" listener="#{indicatorsPage.onRowToggle}" />
 		<f:facet name="header">
 			<p:panelGrid id="header" styleClass="header">
 				<p:row>
@@ -277,9 +273,101 @@
 					</div>
 				</div>
 			</div>
+			<p:commandButton value="Show Charts" update="chartOutputPanel" actionListener="#{indicatorsPage.updateCharts}" />
+			<p:outputPanel id="chartOutputPanel" styleClass="table no-border">
+				<p:panelGrid columns="3">
+					<p:chart type="ohlc" model="#{indicatorsPage.quoteModel}" rendered="#{indicatorsPage.quoteModel ne null}" style="width: 500px; height: 250px;" />
+					<p:chart type="line" model="#{indicatorsPage.emaModel}" rendered="#{indicatorsPage.emaModel ne null}" style="width: 500px; height: 250px;" />
+					<p:chart type="line" model="#{indicatorsPage.obvModel}" rendered="#{indicatorsPage.obvModel ne null}" style="width: 500px; height: 250px;" />
+					<p:chart type="line" model="#{indicatorsPage.sstoModel}" rendered="#{indicatorsPage.sstoModel ne null}" style="width: 500px; height: 250px;" />
+					<p:chart type="line" model="#{indicatorsPage.dmiModel}" rendered="#{indicatorsPage.dmiModel ne null}" style="width: 500px; height: 250px;" />
+					<p:chart type="line" model="#{indicatorsPage.atrModel}" rendered="#{indicatorsPage.atrModel ne null}" style="width: 500px; height: 250px;" />
+				</p:panelGrid>
+			</p:outputPanel>
 		</p:rowExpansion>
 	</p:dataTable>	
 </h:form>
+
+<script type="text/javascript">
+	function extendQuoteModel() {
+		this.cfg.axes.xaxis.showTicks = false;
+		this.cfg.seriesDefaults.rendererOptions.candleStick = true;
+		this.cfg.seriesDefaults.rendererOptions.upBodyColor = "#008800";
+		this.cfg.seriesDefaults.rendererOptions.downBodyColor = "#880000";
+		this.cfg.seriesDefaults.rendererOptions.fillUpBody = true;
+		this.cfg.seriesDefaults.rendererOptions.fillDownBody = true;
+		this.cfg.highlighter = {
+			show: true,
+			showMarker:false,
+			tooltipAxes: 'xy',
+			yvalues: 4,
+			formatString:'<table style="width: auto;" class="jqplot-highlighter"> \
+				<tr><td>date:</td><td>%s</td></tr> \
+				<tr><td>open:</td><td>%s</td></tr> \
+				<tr><td>hi:</td><td>%s</td></tr> \
+				<tr><td>low:</td><td>%s</td></tr> \
+				<tr><td>close:</td><td>%s</td></tr></table>'
+			}
+	}
+	
+	function extendEmaModel() {
+		this.cfg.axes.xaxis.showTicks = false;
+		this.cfg.seriesDefaults.lineWidth = 1;
+		this.cfg.seriesDefaults.rendererOptions.smooth = true;
+	}
+	
+	function extendObvModel() {
+		this.cfg.axes.xaxis.showTicks = false;
+		this.cfg.seriesDefaults.lineWidth = 1;
+		this.cfg.seriesDefaults.rendererOptions.smooth = true;
+	}
+	
+	function extendSstoModel() {
+		this.cfg.axes.xaxis.showTicks = false;
+		this.cfg.seriesDefaults.lineWidth = 1;
+		this.cfg.seriesDefaults.rendererOptions.smooth = true;
+		this.cfg.canvasOverlay = {
+			show: true,
+			objects: [
+				{horizontalLine: {
+					y: 30,
+					color: "#000000",
+					lineWidth: 0.5,
+					shadow: false
+				}},
+				{horizontalLine: {
+					y: 70,
+					color: "#000000",
+					lineWidth: 0.5,
+					shadow: false
+				}}
+			]
+		};
+	}
+	
+	function extendDmiModel() {
+		this.cfg.axes.xaxis.showTicks = false;
+		this.cfg.seriesDefaults.lineWidth = 1;
+		this.cfg.seriesDefaults.rendererOptions.smooth = true;
+		this.cfg.canvasOverlay = {
+			show: true,
+			objects: [
+				{horizontalLine: {
+					y: 20,
+					color: "#000000",
+					lineWidth: 0.5,
+					shadow: false
+				}}
+			]
+		};
+	}
+	
+	function extendAtrModel() {
+		this.cfg.axes.xaxis.showTicks = false;
+		this.cfg.seriesDefaults.lineWidth = 1;
+		this.cfg.seriesDefaults.rendererOptions.smooth = true;
+	}
+</script>
 </ui:define>
 
 </ui:composition>
