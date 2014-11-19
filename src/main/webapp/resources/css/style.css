@@ -37,9 +37,9 @@ body { font-size: 0.8em !important; }
 .indicator-data-panelgrid td:first-child { width: 10em !important; vertical-align: top; background-color: rgba(225,225,225, 0.6); }
 .indicator-data-panelgrid .ui-panelgrid-even { background-color: #FFFFFF; }
 
-.UP, .BUY { color: #008800; }
-.DOWN, .SELL { color: #880000; }
-.SIDEWAYS, .HOLD { color: #888800; }
+.UP, .BUY, .GAIN { color: #008800; }
+.DOWN, .SELL, .LOSS { color: #880000; }
+.SIDEWAYS, .HOLD, .NO_CHANGED { color: #888800; }
 
 .trend, .action, .reason { font-weight: bold; white-space: nowrap; }
 .main { color: #000088; }

@@ -131,12 +131,22 @@
 							<p:panelGrid styleClass="indicator-data-panelgrid no-border">
 								<p:row>
 									<p:column>
-										<h:outputText value="Close" />
+										<h:outputText value="Price" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.quote.close}">
+										<h:outputText value="#{result.price}" styleClass="#{result.changeType}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
+										<p:spacer style="width: 1em;" />
+										<h:outputText value="(" />
+										<h:outputText value="#{result.priceChange}" styleClass="#{result.changeType}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
+										<p:spacer style="width: 1em;" />
+										<h:outputText value="#{result.pricePercentChange}" styleClass="#{result.changeType}">
+											<f:convertNumber type="percent" minFractionDigits="2" />
+										</h:outputText>
+										<h:outputText value=")" />
 									</p:column>
 								</p:row>
 								<p:row>
