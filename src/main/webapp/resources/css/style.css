@@ -1,15 +1,23 @@
 @CHARSET "UTF-8";
 
-.UP, .BUY { color: #008800; }
-.DOWN, .SELL { color: #880000; }
-.SIDEWAYS, .HOLD { color: #888800; }
-
-.trend, .action, .reason { font-weight: bold; white-space: nowrap; }
-.main { color: #000088; }
-.signal, .negative, .sell-stop, .stop-loss { color: #880000; }
-.positive, .buy-stop { color: #008800; }
-
+/* HTML Overrides */
 body { font-size: 0.8em !important; }
+
+
+/* Primefaces Overrides */
+.ui-datatable-even { background-color: #FFFFFF; }
+.jqplot-table-legend { width: auto !important; }
+
+
+/* User defined */
+.no-border, .no-border tr, .no-border td { border: none !important; }
+.no-border .ui-chkbox-label { margin-top: 0em !important; }
+
+.table { display: table; width: 100%; }
+.table-row { display: table-row; }
+.table-cell { display: table-cell; }
+
+.menu .selected { color: #FFFFFF; background: #6580A1; }
 
 .header, .header tr, .header td { background: none; border: none !important; padding: 0em !important; }
 .header .middle { width: 50%; text-align: center; color: #FFFFFF; }
@@ -20,13 +28,20 @@ body { font-size: 0.8em !important; }
 .text { text-align: center; }
 .numeric { text-align: right; }
 
-.menu .selected { color: #FFFFFF; background: #6580A1; }
+.chart { width: 500px; height: 250px; }
 
-.no-border, .no-border tr, .no-border td { border: none !important; }
-.no-border .ui-chkbox-label { margin-top: 0em !important; }
+.indicator-data-panel .ui-panel-content { padding: 0em !important; }
 
-.table { display: table; width: 100%; }
-.table-row { display: table-row; }
-.table-cell { display: table-cell; }
+.indicator-data-panelgrid { font-size: 0.9em !important; }
+.indicator-data-panelgrid td  { border: 1px solid #CCCCCC !important; }
+.indicator-data-panelgrid td:first-child { width: 10em !important; vertical-align: top; background-color: rgba(225,225,225, 0.6); }
+.indicator-data-panelgrid .ui-panelgrid-even { background-color: #FFFFFF; }
 
-.jqplot-table-legend { width: auto !important; }
+.UP, .BUY { color: #008800; }
+.DOWN, .SELL { color: #880000; }
+.SIDEWAYS, .HOLD { color: #888800; }
+
+.trend, .action, .reason { font-weight: bold; white-space: nowrap; }
+.main { color: #000088; }
+.signal, .negative, .sell-stop, .stop-loss { color: #880000; }
+.positive, .buy-stop { color: #008800; }

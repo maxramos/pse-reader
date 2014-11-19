@@ -45,9 +45,9 @@ public class IndicatorsPage implements Serializable {
 	private IndicatorResult selectedResult;
 	private OhlcChartModel quoteModel;
 	private LineChartModel emaModel;
-	private LineChartModel obvModel;
 	private LineChartModel sstoModel;
 	private LineChartModel dmiModel;
+	private LineChartModel obvModel;
 	private LineChartModel atrModel;
 
 	@PostConstruct
@@ -55,6 +55,7 @@ public class IndicatorsPage implements Serializable {
 		lastProcessedDate = operationManager.findLastProcessedDate();
 		results = indicatorManager.findAllByDate(lastProcessedDate);
 		selectedAction = ALL;
+		initCharts();
 	}
 
 	public void onActionChange() {
@@ -68,12 +69,6 @@ public class IndicatorsPage implements Serializable {
 	public void onRowToggle(ToggleEvent event) {
 		if (event.getVisibility() == Visibility.VISIBLE) {
 			selectedResult = (IndicatorResult) event.getData();
-			quoteModel = null;
-			emaModel = null;
-			obvModel = null;
-			sstoModel = null;
-			dmiModel = null;
-			atrModel = null;
 		} else {
 			selectedResult = null;
 		}
@@ -82,19 +77,8 @@ public class IndicatorsPage implements Serializable {
 	public void updateCharts() {
 		List<Quote> quotes = indicatorManager.findAllQuoteByStockAndDate(selectedResult.getStock(), lastProcessedDate, 200);
 		Collections.reverse(quotes);
-
-		quoteModel = new OhlcChartModel();
-		quoteModel.setTitle("Price");
-		quoteModel.setShadow(false);
-		quoteModel.setAnimate(true);
-		quoteModel.setZoom(true);
-		quoteModel.setExtender("extendQuoteModel");
-
-		for (int i = 0; i < quotes.size(); i++) {
-			Quote quote = quotes.get(i);
-			quoteModel.add(new OhlcChartSeries(i, quote.getOpen().doubleValue(), quote.getHigh().doubleValue(), quote.getLow().doubleValue(), quote
-					.getClose().doubleValue()));
-		}
+		List<IndicatorResult> indicatorResults = indicatorManager.findAllByStockAndDate(selectedResult.getStock(), lastProcessedDate, 200);
+		Collections.reverse(indicatorResults);
 
 		LineChartSeries priceSeries = new LineChartSeries();
 		priceSeries.setLabel("Price");
@@ -102,9 +86,6 @@ public class IndicatorsPage implements Serializable {
 		LineChartSeries emaSeries = new LineChartSeries();
 		emaSeries.setLabel("EMA");
 		emaSeries.setShowMarker(false);
-
-		LineChartSeries obvSeries = new LineChartSeries();
-		obvSeries.setShowMarker(false);
 
 		LineChartSeries kSeries = new LineChartSeries();
 		kSeries.setLabel("%K");
@@ -123,19 +104,23 @@ public class IndicatorsPage implements Serializable {
 		minusDiSeries.setLabel("-DI");
 		minusDiSeries.setShowMarker(false);
 
+		LineChartSeries obvSeries = new LineChartSeries();
+		obvSeries.setShowMarker(false);
+
 		LineChartSeries atrSeries = new LineChartSeries();
 		atrSeries.setShowMarker(false);
 
-		List<IndicatorResult> indicatorResults = indicatorManager.findAllByStockAndDate(selectedResult.getStock(), lastProcessedDate, 200);
-		Collections.reverse(indicatorResults);
+		for (int i = 0; i < quotes.size(); i++) {
+			Quote quote = quotes.get(i);
+			quoteModel.add(new OhlcChartSeries(i, quote.getOpen().doubleValue(), quote.getHigh().doubleValue(), quote.getLow().doubleValue(), quote
+					.getClose().doubleValue()));
+		}
 
 		for (int i = 0; i < indicatorResults.size(); i++) {
 			IndicatorResult result = indicatorResults.get(i);
 
 			priceSeries.set(i, result.getPrice());
 			emaSeries.set(i, result.getEmaResult().getEma());
-
-			obvSeries.set(i, result.getObvResult().getObv());
 
 			DmiResult dmiResult = result.getDmiResult();
 			adxSeries.set(i, dmiResult.getAdx());
@@ -146,62 +131,27 @@ public class IndicatorsPage implements Serializable {
 			kSeries.set(i, sstoResult.getSlowK());
 			dSeries.set(i, sstoResult.getSlowD());
 
+			obvSeries.set(i, result.getObvResult().getObv());
+
 			atrSeries.set(i, result.getDmiResult().getAtr());
 		}
 
-		emaModel = new LineChartModel();
-		emaModel.setTitle("EMA");
-		emaModel.setLegendPosition("nw");
-		emaModel.setLegendCols(2);
-		emaModel.setSeriesColors("008800, 000088");
-		emaModel.setShadow(false);
-		emaModel.setAnimate(true);
-		emaModel.setZoom(true);
-		emaModel.setExtender("extendEmaModel");
 		emaModel.addSeries(priceSeries);
 		emaModel.addSeries(emaSeries);
 
-		obvModel = new LineChartModel();
-		obvModel.setTitle("OBV");
-		obvModel.setSeriesColors("000088");
-		obvModel.setShadow(false);
-		obvModel.setAnimate(true);
-		obvModel.setZoom(true);
-		obvModel.setExtender("extendObvModel");
-		obvModel.addSeries(obvSeries);
-
-		sstoModel = new LineChartModel();
-		sstoModel.setTitle("SSTO");
-		sstoModel.setLegendPosition("nw");
-		sstoModel.setLegendCols(2);
-		sstoModel.setSeriesColors("000088, 880000");
-		sstoModel.setShadow(false);
-		sstoModel.setAnimate(true);
-		sstoModel.setZoom(true);
-		sstoModel.setExtender("extendSstoModel");
+		sstoModel.clear();
 		sstoModel.addSeries(kSeries);
 		sstoModel.addSeries(dSeries);
 
-		dmiModel = new LineChartModel();
-		dmiModel.setTitle("DMI");
-		dmiModel.setLegendPosition("nw");
-		dmiModel.setLegendCols(3);
-		dmiModel.setSeriesColors("000088, 008800, 880000");
-		dmiModel.setShadow(false);
-		dmiModel.setAnimate(true);
-		dmiModel.setZoom(true);
-		dmiModel.setExtender("extendDmiModel");
+		dmiModel.clear();
 		dmiModel.addSeries(adxSeries);
 		dmiModel.addSeries(plusDiSeries);
 		dmiModel.addSeries(minusDiSeries);
 
-		atrModel = new LineChartModel();
-		atrModel.setTitle("ATR");
-		atrModel.setSeriesColors("000088");
-		atrModel.setShadow(false);
-		atrModel.setAnimate(true);
-		atrModel.setZoom(true);
-		atrModel.setExtender("extendAtrModel");
+		obvModel.clear();
+		obvModel.addSeries(obvSeries);
+
+		atrModel.clear();
 		atrModel.addSeries(atrSeries);
 	}
 
@@ -237,10 +187,6 @@ public class IndicatorsPage implements Serializable {
 		return emaModel;
 	}
 
-	public LineChartModel getObvModel() {
-		return obvModel;
-	}
-
 	public LineChartModel getSstoModel() {
 		return sstoModel;
 	}
@@ -249,8 +195,67 @@ public class IndicatorsPage implements Serializable {
 		return dmiModel;
 	}
 
+	public LineChartModel getObvModel() {
+		return obvModel;
+	}
+
 	public LineChartModel getAtrModel() {
 		return atrModel;
+	}
+
+	private void initCharts() {
+		quoteModel = new OhlcChartModel();
+		quoteModel.setTitle("Price");
+		quoteModel.setShadow(false);
+		quoteModel.setAnimate(true);
+		quoteModel.setZoom(true);
+		quoteModel.setExtender("extendQuoteModel");
+
+		emaModel = new LineChartModel();
+		emaModel.setTitle("EMA");
+		emaModel.setLegendPosition("nw");
+		emaModel.setLegendCols(2);
+		emaModel.setSeriesColors("008800, 000088");
+		emaModel.setShadow(false);
+		emaModel.setAnimate(true);
+		emaModel.setZoom(true);
+		emaModel.setExtender("extendEmaModel");
+
+		sstoModel = new LineChartModel();
+		sstoModel.setTitle("SSTO");
+		sstoModel.setLegendPosition("nw");
+		sstoModel.setLegendCols(2);
+		sstoModel.setSeriesColors("000088, 880000");
+		sstoModel.setShadow(false);
+		sstoModel.setAnimate(true);
+		sstoModel.setZoom(true);
+		sstoModel.setExtender("extendSstoModel");
+
+		dmiModel = new LineChartModel();
+		dmiModel.setTitle("DMI");
+		dmiModel.setLegendPosition("nw");
+		dmiModel.setLegendCols(3);
+		dmiModel.setSeriesColors("000088, 008800, 880000");
+		dmiModel.setShadow(false);
+		dmiModel.setAnimate(true);
+		dmiModel.setZoom(true);
+		dmiModel.setExtender("extendDmiModel");
+
+		obvModel = new LineChartModel();
+		obvModel.setTitle("OBV");
+		obvModel.setSeriesColors("000088");
+		obvModel.setShadow(false);
+		obvModel.setAnimate(true);
+		obvModel.setZoom(true);
+		obvModel.setExtender("extendObvModel");
+
+		atrModel = new LineChartModel();
+		atrModel.setTitle("ATR");
+		atrModel.setSeriesColors("000088");
+		atrModel.setShadow(false);
+		atrModel.setAnimate(true);
+		atrModel.setZoom(true);
+		atrModel.setExtender("extendAtrModel");
 	}
 
 }
