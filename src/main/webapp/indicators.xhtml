@@ -134,19 +134,49 @@
 										<h:outputText value="Price" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.price}" styleClass="#{result.changeType}">
+										<h:outputText value="#{result.priceActionResult.price}" styleClass="#{result.priceActionResult.priceMovement}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
 										<h:outputText value="(" />
-										<h:outputText value="#{result.priceChange}" styleClass="#{result.changeType}">
+										<h:outputText value="#{result.priceActionResult.priceChange}" styleClass="#{result.priceActionResult.priceMovement}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.pricePercentChange}" styleClass="#{result.changeType}">
+										<h:outputText value="#{result.priceActionResult.pricePercentChange}" styleClass="#{result.priceActionResult.priceMovement}">
 											<f:convertNumber type="percent" minFractionDigits="2" />
 										</h:outputText>
 										<h:outputText value=")" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<h:outputText value="52 Wk High" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.priceActionResult.high52Week}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
+										<p:spacer style="width: 1em;" />
+										<h:outputText value="(" />
+										<h:outputText value="#{result.priceActionResult.changeFrom52WeekHigh}" styleClass="#{result.priceActionResult.changeFrom52WeekHighCritical ? 'negative' : ''}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
+										<p:spacer style="width: 1em;" />
+										<h:outputText value="#{result.priceActionResult.percentChangeFrom52WeekHigh}" styleClass="#{result.priceActionResult.changeFrom52WeekHighCritical ? 'negative' : ''}">
+											<f:convertNumber type="percent" minFractionDigits="2" />
+										</h:outputText>
+										<h:outputText value=")" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<h:outputText value="52 Wk Low" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.priceActionResult.low52Week}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
 									</p:column>
 								</p:row>
 								<p:row>

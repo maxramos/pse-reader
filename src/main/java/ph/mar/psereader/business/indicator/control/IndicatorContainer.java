@@ -21,6 +21,7 @@ import ph.mar.psereader.business.indicator.entity.DmiResult;
 import ph.mar.psereader.business.indicator.entity.EmaResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.ObvResult;
+import ph.mar.psereader.business.indicator.entity.PriceActionResult;
 import ph.mar.psereader.business.indicator.entity.SstoResult;
 import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
@@ -47,17 +48,19 @@ public class IndicatorContainer {
 		Future<SstoResult> sstoResult = executorService.submit(new SSTO(quotes, results));
 		Future<EmaResult> emaResult = executorService.submit(new EMA(quotes, results));
 		Future<ObvResult> obvResult = executorService.submit(new OBV(quotes, results));
+		Future<PriceActionResult> priceActionResult = executorService.submit(new PriceAction(quotes, results));
 
-		while (!dmiResult.isDone() || !sstoResult.isDone() || !emaResult.isDone() || !obvResult.isDone()) {
+		while (!dmiResult.isDone() || !sstoResult.isDone() || !emaResult.isDone() || !obvResult.isDone() || !priceActionResult.isDone()) {
 			continue;
 		}
 
 		try {
-			IndicatorResult indicatorResult = new IndicatorResult(stock, date, quotes.get(0).getClose());
+			IndicatorResult indicatorResult = new IndicatorResult(stock, date);
 			indicatorResult.setDmiResult(dmiResult.get());
 			indicatorResult.setSstoResult(sstoResult.get());
 			indicatorResult.setEmaResult(emaResult.get());
 			indicatorResult.setObvResult(obvResult.get());
+			indicatorResult.setPriceActionResult(priceActionResult.get());
 			indicatorResult.process(quotes, results);
 			stock.add(indicatorResult);
 			log.info("{} processed.", stock.getSymbol());

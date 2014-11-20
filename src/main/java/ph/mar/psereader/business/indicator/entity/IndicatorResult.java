@@ -31,9 +31,9 @@ import ph.mar.psereader.business.stock.entity.Stock;
 @Table(name = "indicator_result", uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
 	@NamedQuery(name = IndicatorResult.ALL_BY_STOCK_AND_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.stock = :stock AND ir.date <= :date ORDER BY ir.date DESC"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.price, ir.priceChange, ir.pricePercentChange, ir.trend, ir.action, ir.reason, ir.buyStop, ir.sellStop, ir.stopLoss, ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date ORDER BY ir.stock.symbol"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_ACTION, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.price, ir.priceChange, ir.pricePercentChange, ir.trend, ir.action, ir.reason, ir.buyStop, ir.sellStop, ir.stopLoss, ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date AND ir.action = :action ORDER BY ir.stock.symbol"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.trend, ir.action, ir.reason, ir.buyStop, ir.sellStop, ir.stopLoss, ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date ORDER BY ir.stock.symbol"),
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_ACTION, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.trend, ir.action, ir.reason, ir.buyStop, ir.sellStop, ir.stopLoss, ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date AND ir.action = :action ORDER BY ir.stock.symbol"),
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
 public class IndicatorResult implements Serializable {
 
 	public static final String ALL_BY_STOCK_AND_DATE = "IndicatorResult.ALL_BY_STOCK_AND_DATE";
@@ -54,15 +54,6 @@ public class IndicatorResult implements Serializable {
 	@Temporal(TemporalType.DATE)
 	@Column(nullable = false)
 	private Date date;
-
-	@Column(precision = 8, scale = 4)
-	private BigDecimal price;
-
-	@Column(name = "price_change", nullable = false, precision = 8, scale = 4)
-	private BigDecimal priceChange;
-
-	@Column(name = "price_percent_change", nullable = false, precision = 6, scale = 4)
-	private BigDecimal pricePercentChange;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "trend", nullable = false, length = 11)
@@ -97,6 +88,9 @@ public class IndicatorResult implements Serializable {
 	@Embedded
 	private ObvResult obvResult;
 
+	@Embedded
+	private PriceActionResult priceActionResult;
+
 	@ManyToOne
 	private Stock stock;
 
@@ -107,8 +101,7 @@ public class IndicatorResult implements Serializable {
 		super();
 	}
 
-	public IndicatorResult(Stock stock, Date date, BigDecimal price) {
-		this.price = price;
+	public IndicatorResult(Stock stock, Date date) {
 		this.stock = stock;
 		this.date = date;
 	}
@@ -116,22 +109,20 @@ public class IndicatorResult implements Serializable {
 	/**
 	 * Used for processing indicator results.
 	 */
-	public IndicatorResult(DmiResult dmiResult, SstoResult sstoResult, EmaResult emaResult, ObvResult obvResult) {
+	public IndicatorResult(DmiResult dmiResult, SstoResult sstoResult, EmaResult emaResult, ObvResult obvResult, PriceActionResult priceActionResult) {
 		this.dmiResult = dmiResult;
 		this.sstoResult = sstoResult;
 		this.emaResult = emaResult;
 		this.obvResult = obvResult;
+		this.priceActionResult = priceActionResult;
 	}
 
 	/**
 	 * Used for displaying indicator results.
 	 */
-	public IndicatorResult(BigDecimal price, BigDecimal priceChange, BigDecimal pricePercentChange, TrendType trend, ActionType action,
-			ReasonType reason, BigDecimal buyStop, BigDecimal sellStop, BigDecimal stopLoss, DmiResult dmiResult, SstoResult sstoResult,
-			EmaResult emaResult, ObvResult obvResult, Stock stock, Quote quote) {
-		this.price = price;
-		this.priceChange = priceChange;
-		this.pricePercentChange = pricePercentChange;
+	public IndicatorResult(TrendType trend, ActionType action, ReasonType reason, BigDecimal buyStop, BigDecimal sellStop, BigDecimal stopLoss,
+			DmiResult dmiResult, SstoResult sstoResult, EmaResult emaResult, ObvResult obvResult, PriceActionResult priceActionResult, Stock stock,
+			Quote quote) {
 		this.trend = trend;
 		this.action = action;
 		this.reason = reason;
@@ -142,12 +133,12 @@ public class IndicatorResult implements Serializable {
 		this.sstoResult = sstoResult;
 		this.emaResult = emaResult;
 		this.obvResult = obvResult;
+		this.priceActionResult = priceActionResult;
 		this.stock = stock;
 		this.quote = quote;
 	}
 
 	public void process(List<Quote> quotes, List<IndicatorResult> results) {
-		determinePriceChange(quotes);
 		determineTrend();
 
 		if (results.isEmpty()) {
@@ -163,38 +154,12 @@ public class IndicatorResult implements Serializable {
 		determineTrailingStop(quotes, results);
 	}
 
-	public ChangeType getChangeType() {
-		ChangeType changeType;
-
-		if (priceChange.compareTo(BigDecimal.ZERO) > 0) {
-			changeType = ChangeType.GAIN;
-		} else if (priceChange.compareTo(BigDecimal.ZERO) < 0) {
-			changeType = ChangeType.LOSS;
-		} else {
-			changeType = ChangeType.NO_CHANGED;
-		}
-
-		return changeType;
-	}
-
 	public Long getId() {
 		return id;
 	}
 
 	public Date getDate() {
 		return date;
-	}
-
-	public BigDecimal getPrice() {
-		return price;
-	}
-
-	public BigDecimal getPriceChange() {
-		return priceChange;
-	}
-
-	public BigDecimal getPricePercentChange() {
-		return pricePercentChange;
 	}
 
 	public TrendType getTrend() {
@@ -253,6 +218,14 @@ public class IndicatorResult implements Serializable {
 		this.obvResult = obvResult;
 	}
 
+	public PriceActionResult getPriceActionResult() {
+		return priceActionResult;
+	}
+
+	public void setPriceActionResult(PriceActionResult priceActionResult) {
+		this.priceActionResult = priceActionResult;
+	}
+
 	public Stock getStock() {
 		return stock;
 	}
@@ -264,15 +237,9 @@ public class IndicatorResult implements Serializable {
 	@Override
 	public String toString() {
 		return String
-				.format("IndicatorResult [id=%s, date=%s, price=%s, priceChange=%s, pricePercentChange=%s, action=%s, reason=%s, buyStop=%s, sellStop=%s, stopLoss=%s, dmiResult=%s, sstoResult=%s, emaResult=%s, obvResult=%s, stock=%s]",
-						id, date, price, priceChange, pricePercentChange, action, reason, buyStop, sellStop, stopLoss, dmiResult, sstoResult,
-						emaResult, obvResult, stock == null ? null : stock.getId());
-	}
-
-	private void determinePriceChange(List<Quote> quotes) {
-		BigDecimal previousPrice = quotes.get(1).getClose();
-		priceChange = price.subtract(previousPrice);
-		pricePercentChange = priceChange.divide(previousPrice, 4, RoundingMode.HALF_UP);
+				.format("IndicatorResult [id=%s, date=%s, trend=%s, action=%s, reason=%s, buyStop=%s, sellStop=%s, stopLoss=%s, dmiResult=%s, sstoResult=%s, emaResult=%s, obvResult=%s, priceActionResult=%s, stock=%s]",
+						id, date, trend, action, reason, buyStop, sellStop, stopLoss, dmiResult, sstoResult, emaResult, obvResult, priceActionResult,
+						stock == null ? null : stock.getId());
 	}
 
 	private void determineTrend() {
