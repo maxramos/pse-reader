@@ -55,7 +55,6 @@ public class IndicatorsPage implements Serializable {
 		lastProcessedDate = operationManager.findLastProcessedDate();
 		results = indicatorManager.findAllByDate(lastProcessedDate);
 		selectedAction = ALL;
-		initCharts();
 	}
 
 	public void onActionChange() {
@@ -69,6 +68,7 @@ public class IndicatorsPage implements Serializable {
 	public void onRowToggle(ToggleEvent event) {
 		if (event.getVisibility() == Visibility.VISIBLE) {
 			selectedResult = (IndicatorResult) event.getData();
+			initCharts();
 		} else {
 			selectedResult = null;
 		}
