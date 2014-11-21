@@ -16,8 +16,8 @@
 			<p:panelGrid id="header" styleClass="header">
 				<p:row>
 					<p:column styleClass="left">
-						<p:selectOneButton value="#{indicatorsPage.selectedAction}">
-							<p:ajax listener="#{indicatorsPage.onActionChange}" oncomplete="PF('indicatorResultsDataTable').filter();" />
+						<p:selectOneButton value="#{indicatorsPage.selectedRecommendation}">
+							<p:ajax listener="#{indicatorsPage.onRecommendationChange}" oncomplete="PF('indicatorResultsDataTable').filter();" />
 							<f:selectItem itemLabel="All" itemValue="ALL" />
 							<f:selectItem itemLabel="Buy" itemValue="BUY" />
 							<f:selectItem itemLabel="Sell" itemValue="SELL" />
@@ -49,8 +49,13 @@
 			<h:outputText value="#{result.trend.name}" styleClass="trend #{result.trend}" />
 		</p:column>
 		
-		<p:column headerText="Action" styleClass="text">
-			<h:outputText value="#{result.action.name}" styleClass="action #{result.action}" />
+		<p:column headerText="Recommendation" styleClass="text">
+			<h:outputText value="#{result.recommendation.name}" styleClass="recommendation #{result.recommendation}" />
+		</p:column>
+		
+		<p:column headerText="Risk" styleClass="text">
+			<h:outputText value="#{result.buyRisk.name}" styleClass="risk #{result.buyRisk}" rendered="#{result.recommendation eq 'BUY'}" />
+			<h:outputText value="#{result.sellRisk.name}" styleClass="risk #{result.sellRisk}" rendered="#{result.recommendation eq 'SELL'}" />
 		</p:column>
 		
 		<p:rowExpansion id="indicatorRowExpansion">
@@ -134,16 +139,16 @@
 										<h:outputText value="Price" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.priceActionResult.price}" styleClass="#{result.priceActionResult.priceMovement}">
+										<h:outputText value="#{result.priceActionResult.price}" styleClass="#{result.movement}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
 										<h:outputText value="(" />
-										<h:outputText value="#{result.priceActionResult.priceChange}" styleClass="#{result.priceActionResult.priceMovement}">
+										<h:outputText value="#{result.priceActionResult.priceChange}" styleClass="#{result.movement}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.priceActionResult.pricePercentChange}" styleClass="#{result.priceActionResult.priceMovement}">
+										<h:outputText value="#{result.priceActionResult.pricePercentChange}" styleClass="#{result.movement}">
 											<f:convertNumber type="percent" minFractionDigits="2" />
 										</h:outputText>
 										<h:outputText value=")" />
@@ -151,7 +156,7 @@
 								</p:row>
 								<p:row>
 									<p:column>
-										<h:outputText value="52 Wk High" />
+										<h:outputText value="52 Week High" />
 									</p:column>
 									<p:column>
 										<h:outputText value="#{result.priceActionResult.high52Week}">
@@ -159,11 +164,11 @@
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
 										<h:outputText value="(" />
-										<h:outputText value="#{result.priceActionResult.changeFrom52WeekHigh}" styleClass="#{result.priceActionResult.changeFrom52WeekHighCritical ? 'negative' : ''}">
+										<h:outputText value="#{result.priceActionResult.changeFrom52WeekHigh}" styleClass="#{result.buyRisk}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.priceActionResult.percentChangeFrom52WeekHigh}" styleClass="#{result.priceActionResult.changeFrom52WeekHighCritical ? 'negative' : ''}">
+										<h:outputText value="#{result.priceActionResult.percentChangeFrom52WeekHigh}" styleClass="#{result.buyRisk}">
 											<f:convertNumber type="percent" minFractionDigits="2" />
 										</h:outputText>
 										<h:outputText value=")" />
@@ -171,12 +176,22 @@
 								</p:row>
 								<p:row>
 									<p:column>
-										<h:outputText value="52 Wk Low" />
+										<h:outputText value="52 Week Low" />
 									</p:column>
 									<p:column>
 										<h:outputText value="#{result.priceActionResult.low52Week}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
+										<p:spacer style="width: 1em;" />
+										<h:outputText value="(" />
+										<h:outputText value="#{result.priceActionResult.changeFrom52WeekLow}" styleClass="#{result.sellRisk}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
+										<p:spacer style="width: 1em;" />
+										<h:outputText value="#{result.priceActionResult.percentChangeFrom52WeekLow}" styleClass="#{result.sellRisk}">
+											<f:convertNumber type="percent" minFractionDigits="2" />
+										</h:outputText>
+										<h:outputText value=")" />
 									</p:column>
 								</p:row>
 								<p:row>
@@ -273,21 +288,30 @@
 								</p:row>
 								<p:row>
 									<p:column>
-										<h:outputText value="Action" />
+										<h:outputText value="Recommendation" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.action.name}" styleClass="action #{result.action}" />
+										<h:outputText value="#{result.recommendation.name}" styleClass="recommendation #{result.recommendation}" />
 									</p:column>
 								</p:row>
-								<p:row rendered="#{result.action eq 'BUY' or result.action eq 'SELL'}">
+								<p:row rendered="#{result.recommendation eq 'BUY' or result.recommendation eq 'SELL'}">
 									<p:column>
-										<h:outputText value="Reason" rendered="#{result.action eq 'BUY' or result.action eq 'SELL'}" />
+										<h:outputText value="Reason" rendered="#{result.recommendation eq 'BUY' or result.recommendation eq 'SELL'}" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.reason.name}" styleClass="reason #{result.action}" />
+										<h:outputText value="#{result.reason.name}" styleClass="reason #{result.recommendation}" />
 									</p:column>
 								</p:row>
-								<p:row rendered="#{result.action eq 'BUY'}">
+								<p:row rendered="#{result.recommendation ne 'HOLD'}">
+									<p:column>
+										<h:outputText value="Risk" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.buyRisk.name}" styleClass="risk #{result.buyRisk}" rendered="#{result.recommendation eq 'BUY'}" />
+										<h:outputText value="#{result.sellRisk.name}" styleClass="risk #{result.sellRisk}" rendered="#{result.recommendation eq 'SELL'}" />
+									</p:column>
+								</p:row>
+								<p:row rendered="#{result.recommendation eq 'BUY'}">
 									<p:column>
 										<h:outputText value="Buy Stop" />
 									</p:column>
@@ -297,7 +321,7 @@
 										</h:outputText>
 									</p:column>
 								</p:row>
-								<p:row rendered="#{result.action eq 'SELL'}">
+								<p:row rendered="#{result.recommendation eq 'SELL'}">
 									<p:column>
 										<h:outputText value="Sell Stop" />
 									</p:column>
@@ -307,7 +331,7 @@
 										</h:outputText>
 									</p:column>
 								</p:row>
-								<p:row rendered="#{result.action eq 'BUY' or result.action eq 'SELL'}">
+								<p:row rendered="#{result.recommendation eq 'BUY' or result.recommendation eq 'SELL'}">
 									<p:column>
 										<h:outputText value="Stop Loss" />
 									</p:column>

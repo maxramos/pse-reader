@@ -95,4 +95,16 @@ public class Repository {
 		return query.executeUpdate();
 	}
 
+	public Object[] execute(String queryName, Map<String, Object> parameters) {
+		TypedQuery<Object[]> query = em.createNamedQuery(queryName, Object[].class);
+
+		if (parameters != null && !parameters.isEmpty()) {
+			for (Entry<String, Object> parameter : parameters.entrySet()) {
+				query.setParameter(parameter.getKey(), parameter.getValue());
+			}
+		}
+
+		return query.getSingleResult();
+	}
+
 }

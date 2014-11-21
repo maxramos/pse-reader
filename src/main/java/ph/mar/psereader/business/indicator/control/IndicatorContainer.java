@@ -2,6 +2,10 @@ package ph.mar.psereader.business.indicator.control;
 
 import static ph.mar.psereader.business.repository.control.QueryParameter.with;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -43,12 +47,13 @@ public class IndicatorContainer {
 	public Future<Stock> run(Stock stock, Date date, int quoteSize, int indicatorResultSize) {
 		List<Quote> quotes = findAllQuotesByStockAndDate(stock, date, quoteSize);
 		List<IndicatorResult> results = findAllIndicatorResultsByStock(stock, indicatorResultSize);
+		BigDecimal[] highAndLow52Week = find52WeekHighAndLowByStockAndDate(stock, date);
 
 		Future<DmiResult> dmiResult = executorService.submit(new DMI(quotes, results));
 		Future<SstoResult> sstoResult = executorService.submit(new SSTO(quotes, results));
 		Future<EmaResult> emaResult = executorService.submit(new EMA(quotes, results));
 		Future<ObvResult> obvResult = executorService.submit(new OBV(quotes, results));
-		Future<PriceActionResult> priceActionResult = executorService.submit(new PriceAction(quotes, results));
+		Future<PriceActionResult> priceActionResult = executorService.submit(new PriceAction(quotes, highAndLow52Week));
 
 		while (!dmiResult.isDone() || !sstoResult.isDone() || !emaResult.isDone() || !obvResult.isDone() || !priceActionResult.isDone()) {
 			continue;
@@ -81,4 +86,13 @@ public class IndicatorContainer {
 				indicatorResultSize);
 	}
 
+	private BigDecimal[] find52WeekHighAndLowByStockAndDate(Stock stock, Date date) {
+		LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		localDate = localDate.minusYears(1);
+		Date start = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		Date end = date;
+		Object[] results = repository.execute(Quote.MAX_HIGH_AND_MIN_LOW_BY_STOCK_AND_DATE, with("stock", stock).and("start", start).and("end", end)
+				.asParameters());
+		return Arrays.copyOf(results, 2, BigDecimal[].class);
+	}
 }

@@ -18,9 +18,9 @@ import org.primefaces.model.chart.OhlcChartModel;
 import org.primefaces.model.chart.OhlcChartSeries;
 
 import ph.mar.psereader.business.indicator.boundary.IndicatorManager;
-import ph.mar.psereader.business.indicator.entity.ActionType;
 import ph.mar.psereader.business.indicator.entity.DmiResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
+import ph.mar.psereader.business.indicator.entity.RecommendationType;
 import ph.mar.psereader.business.indicator.entity.SstoResult;
 import ph.mar.psereader.business.operation.boundary.OperationManager;
 import ph.mar.psereader.business.stock.entity.Quote;
@@ -41,7 +41,7 @@ public class IndicatorsPage implements Serializable {
 	private Date lastProcessedDate;
 	private List<IndicatorResult> results;
 	private List<IndicatorResult> filteredResults;
-	private String selectedAction;
+	private String selectedRecommendation;
 	private IndicatorResult selectedResult;
 	private OhlcChartModel quoteModel;
 	private LineChartModel emaModel;
@@ -54,14 +54,14 @@ public class IndicatorsPage implements Serializable {
 	void init() {
 		lastProcessedDate = operationManager.findLastProcessedDate();
 		results = indicatorManager.findAllByDate(lastProcessedDate);
-		selectedAction = ALL;
+		selectedRecommendation = ALL;
 	}
 
-	public void onActionChange() {
-		if (ALL.equals(selectedAction)) {
+	public void onRecommendationChange() {
+		if (ALL.equals(selectedRecommendation)) {
 			results = indicatorManager.findAllByDate(lastProcessedDate);
 		} else {
-			results = indicatorManager.findAllByDateAndAction(lastProcessedDate, ActionType.valueOf(selectedAction));
+			results = indicatorManager.findAllByDateAndAction(lastProcessedDate, RecommendationType.valueOf(selectedRecommendation));
 		}
 	}
 
@@ -171,12 +171,12 @@ public class IndicatorsPage implements Serializable {
 		this.filteredResults = filteredResults;
 	}
 
-	public String getSelectedAction() {
-		return selectedAction;
+	public String getSelectedRecommendation() {
+		return selectedRecommendation;
 	}
 
-	public void setSelectedAction(String selectedAction) {
-		this.selectedAction = selectedAction;
+	public void setSelectedRecommendation(String selectedRecommendation) {
+		this.selectedRecommendation = selectedRecommendation;
 	}
 
 	public OhlcChartModel getQuoteModel() {

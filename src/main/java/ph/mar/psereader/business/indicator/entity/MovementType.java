@@ -1,6 +1,6 @@
 package ph.mar.psereader.business.indicator.entity;
 
-public enum PriceMovementType {
+public enum MovementType {
 
 	GAIN,
 	LOSS,

@@ -30,21 +30,25 @@ import ph.mar.psereader.business.stock.entity.Stock;
 @Entity
 @Table(name = "indicator_result", uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
-	@NamedQuery(name = IndicatorResult.ALL_BY_STOCK_AND_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.stock = :stock AND ir.date <= :date ORDER BY ir.date DESC"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.trend, ir.action, ir.reason, ir.buyStop, ir.sellStop, ir.stopLoss, ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date ORDER BY ir.stock.symbol"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_ACTION, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.trend, ir.action, ir.reason, ir.buyStop, ir.sellStop, ir.stopLoss, ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date AND ir.action = :action ORDER BY ir.stock.symbol"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
+		@NamedQuery(name = IndicatorResult.ALL_BY_STOCK_AND_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.stock = :stock AND ir.date <= :date ORDER BY ir.date DESC"),
+		@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.trend, ir.recommendation, ir.reason, ir.buyRisk, ir.sellRisk, ir.movement, ir.buyStop, ir.sellStop, ir.stopLoss, ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date ORDER BY ir.stock.symbol"),
+		@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_RECOMMENDATION, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.trend, ir.recommendation, ir.reason, ir.buyRisk, ir.sellRisk, ir.movement, ir.buyStop, ir.sellStop, ir.stopLoss, ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date AND ir.recommendation = :recommendation ORDER BY ir.stock.symbol"),
+		@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
 public class IndicatorResult implements Serializable {
 
 	public static final String ALL_BY_STOCK_AND_DATE = "IndicatorResult.ALL_BY_STOCK_AND_DATE";
 	public static final String ALL_INDICATOR_DATA_BY_DATE = "IndicatorResult.ALL_INDICATOR_DATA_BY_DATE";
-	public static final String ALL_INDICATOR_DATA_BY_DATE_AND_ACTION = "IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_ACTION";
+	public static final String ALL_INDICATOR_DATA_BY_DATE_AND_RECOMMENDATION = "IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_RECOMMENDATION";
 	public static final String ALL_INDICATOR_DATA_BY_STOCK = "IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK";
 
 	private static final long serialVersionUID = 1L;
+	private static final BigDecimal BUY_DANGER_LEVEL = new BigDecimal("-0.08");
+	private static final BigDecimal SELL_DANGER_LEVEL = new BigDecimal("0.08");
+	private static final BigDecimal CRITICAL_LEVEL = BigDecimal.ZERO;
 	private static final BigDecimal TREND_SIGNAL = new BigDecimal("20");
-	private static final BigDecimal BUY = new BigDecimal("30");
-	private static final BigDecimal SELL = new BigDecimal("70");
+	private static final BigDecimal STRONG_TREND_SIGNAL = new BigDecimal("40");
+	private static final BigDecimal BUY_SIGNAL = new BigDecimal("30");
+	private static final BigDecimal SELL_SIGNAL = new BigDecimal("70");
 
 	@Id
 	@SequenceGenerator(name = "seq_indicator_result", sequenceName = "seq_indicator_result", allocationSize = 1)
@@ -56,16 +60,28 @@ public class IndicatorResult implements Serializable {
 	private Date date;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "trend", nullable = false, length = 11)
+	@Column(nullable = false, length = 11)
 	private TrendType trend;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "action", nullable = false, length = 12)
-	private ActionType action;
+	@Column(nullable = false, length = 12)
+	private RecommendationType recommendation;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "reason", length = 18)
+	@Column(length = 18)
 	private ReasonType reason;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "buy_risk", length = 8)
+	private RiskType buyRisk;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "sell_risk", length = 8)
+	private RiskType sellRisk;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, length = 10)
+	private MovementType movement;
 
 	@Column(name = "buy_stop", precision = 8, scale = 4)
 	private BigDecimal buyStop;
@@ -120,12 +136,15 @@ public class IndicatorResult implements Serializable {
 	/**
 	 * Used for displaying indicator results.
 	 */
-	public IndicatorResult(TrendType trend, ActionType action, ReasonType reason, BigDecimal buyStop, BigDecimal sellStop, BigDecimal stopLoss,
-			DmiResult dmiResult, SstoResult sstoResult, EmaResult emaResult, ObvResult obvResult, PriceActionResult priceActionResult, Stock stock,
-			Quote quote) {
+	public IndicatorResult(TrendType trend, RecommendationType recommendation, ReasonType reason, RiskType buyRisk, RiskType sellRisk,
+			MovementType movement, BigDecimal buyStop, BigDecimal sellStop, BigDecimal stopLoss, DmiResult dmiResult, SstoResult sstoResult,
+			EmaResult emaResult, ObvResult obvResult, PriceActionResult priceActionResult, Stock stock, Quote quote) {
 		this.trend = trend;
-		this.action = action;
+		this.recommendation = recommendation;
 		this.reason = reason;
+		this.buyRisk = buyRisk;
+		this.sellRisk = sellRisk;
+		this.movement = movement;
 		this.buyStop = buyStop;
 		this.sellStop = sellStop;
 		this.stopLoss = stopLoss;
@@ -140,17 +159,15 @@ public class IndicatorResult implements Serializable {
 
 	public void process(List<Quote> quotes, List<IndicatorResult> results) {
 		determineTrend();
+		determineMovement();
 
 		if (results.isEmpty()) {
-			action = ActionType.HOLD;
-			reason = null;
-			buyStop = null;
-			sellStop = null;
-			stopLoss = null;
+			recommendation = RecommendationType.HOLD;
 			return;
 		}
 
-		determineAction(results);
+		determineRecommendation(results);
+		determineRisk();
 		determineTrailingStop(quotes, results);
 	}
 
@@ -166,12 +183,24 @@ public class IndicatorResult implements Serializable {
 		return trend;
 	}
 
-	public ActionType getAction() {
-		return action;
+	public RecommendationType getRecommendation() {
+		return recommendation;
 	}
 
 	public ReasonType getReason() {
 		return reason;
+	}
+
+	public RiskType getBuyRisk() {
+		return buyRisk;
+	}
+
+	public RiskType getSellRisk() {
+		return sellRisk;
+	}
+
+	public MovementType getMovement() {
+		return movement;
 	}
 
 	public BigDecimal getBuyStop() {
@@ -237,9 +266,9 @@ public class IndicatorResult implements Serializable {
 	@Override
 	public String toString() {
 		return String
-				.format("IndicatorResult [id=%s, date=%s, trend=%s, action=%s, reason=%s, buyStop=%s, sellStop=%s, stopLoss=%s, dmiResult=%s, sstoResult=%s, emaResult=%s, obvResult=%s, priceActionResult=%s, stock=%s]",
-						id, date, trend, action, reason, buyStop, sellStop, stopLoss, dmiResult, sstoResult, emaResult, obvResult, priceActionResult,
-						stock == null ? null : stock.getId());
+				.format("IndicatorResult [id=%s, date=%s, trend=%s, recommendation=%s, reason=%s, buyRisk=%s, sellRisk=%s, movement=%s, buyStop=%s, sellStop=%s, stopLoss=%s, dmiResult=%s, sstoResult=%s, emaResult=%s, obvResult=%s, priceActionResult=%s, stock=%s]",
+						id, date, trend, recommendation, reason, buyRisk, sellRisk, movement, buyStop, sellStop, stopLoss, dmiResult, sstoResult,
+						emaResult, obvResult, priceActionResult, stock == null ? null : stock.getId());
 	}
 
 	private void determineTrend() {
@@ -251,37 +280,51 @@ public class IndicatorResult implements Serializable {
 		BigDecimal _plusDi = plusDi.divide(BigDecimal.ONE, 2, RoundingMode.HALF_UP);
 		BigDecimal _minusDi = minusDi.divide(BigDecimal.ONE, 2, RoundingMode.HALF_UP);
 
-		if (_adx.compareTo(TREND_SIGNAL) > 0) {
+		if (_adx.compareTo(STRONG_TREND_SIGNAL) > 0) {
+			trend = _plusDi.compareTo(_minusDi) > 0 ? TrendType.STRONG_UP : TrendType.STRONG_DOWN;
+		} else if (_adx.compareTo(TREND_SIGNAL) > 0) {
 			trend = _plusDi.compareTo(_minusDi) > 0 ? TrendType.UP : TrendType.DOWN;
 		} else {
 			trend = TrendType.SIDEWAYS;
 		}
 	}
 
-	private void determineAction(List<IndicatorResult> results) {
+	private void determineMovement() {
+		BigDecimal priceChange = priceActionResult.getPriceChange();
+
+		if (priceChange.compareTo(BigDecimal.ZERO) > 0) {
+			movement = MovementType.GAIN;
+		} else if (priceChange.compareTo(BigDecimal.ZERO) < 0) {
+			movement = MovementType.LOSS;
+		} else {
+			movement = MovementType.NO_CHANGED;
+		}
+	}
+
+	private void determineRecommendation(List<IndicatorResult> results) {
 		BigDecimal k = sstoResult.getSlowK();
 		BigDecimal d = sstoResult.getSlowD();
 
-		if (trend == TrendType.UP) {
+		if (trend == TrendType.UP || trend == TrendType.STRONG_UP) {
 			BigDecimal ema = emaResult.getEma();
 			BigDecimal previousEma = results.get(0).getEmaResult().getEma();
 
-			if ((k.compareTo(SELL) > 0 || d.compareTo(SELL) > 0) && ema.compareTo(previousEma) < 0) {
-				action = ActionType.SELL;
+			if ((k.compareTo(SELL_SIGNAL) > 0 || d.compareTo(SELL_SIGNAL) > 0) && ema.compareTo(previousEma) < 0) {
+				recommendation = RecommendationType.SELL;
 				reason = ReasonType.OVERBOUGHT;
 			} else {
-				action = ActionType.HOLD;
+				recommendation = RecommendationType.HOLD;
 				reason = null;
 			}
-		} else if (trend == TrendType.DOWN) {
+		} else if (trend == TrendType.DOWN || trend == TrendType.STRONG_DOWN) {
 			BigDecimal ema = emaResult.getEma();
 			BigDecimal previousEma = results.get(0).getEmaResult().getEma();
 
-			if ((k.compareTo(BUY) < 0 || d.compareTo(BUY) < 0) && ema.compareTo(previousEma) > 0) {
-				action = ActionType.BUY;
+			if ((k.compareTo(BUY_SIGNAL) < 0 || d.compareTo(BUY_SIGNAL) < 0) && ema.compareTo(previousEma) > 0) {
+				recommendation = RecommendationType.BUY;
 				reason = ReasonType.OVERSOLD;
 			} else {
-				action = ActionType.HOLD;
+				recommendation = RecommendationType.HOLD;
 				reason = null;
 			}
 		} else {
@@ -292,33 +335,58 @@ public class IndicatorResult implements Serializable {
 			BigDecimal prevK2 = previous2Ssto == null ? null : previous2Ssto.getSlowK();
 			BigDecimal prevD2 = previous2Ssto == null ? null : previous2Ssto.getSlowD();
 
-			if (prevK2 != null && prevK2.compareTo(BUY) > 0 && prevK1.compareTo(BUY) < 0 && k.compareTo(BUY) > 0 || prevD2 != null
-					&& prevD2.compareTo(BUY) > 0 && prevD1.compareTo(BUY) < 0 && d.compareTo(BUY) > 0) {
-				action = ActionType.BUY;
+			if (prevK2 != null && prevK2.compareTo(BUY_SIGNAL) > 0 && prevK1.compareTo(BUY_SIGNAL) < 0 && k.compareTo(BUY_SIGNAL) > 0
+					|| prevD2 != null && prevD2.compareTo(BUY_SIGNAL) > 0 && prevD1.compareTo(BUY_SIGNAL) < 0 && d.compareTo(BUY_SIGNAL) > 0) {
+				recommendation = RecommendationType.BUY;
 				reason = ReasonType.BULLISH_DIP;
-			} else if (prevK2 != null && prevK2.compareTo(SELL) < 0 && prevK1.compareTo(SELL) > 0 && k.compareTo(SELL) < 0 || prevD2 != null
-					&& prevD2.compareTo(SELL) < 0 && prevD1.compareTo(SELL) > 0 && d.compareTo(SELL) < 0) {
-				action = ActionType.SELL;
+			} else if (prevK2 != null && prevK2.compareTo(SELL_SIGNAL) < 0 && prevK1.compareTo(SELL_SIGNAL) > 0 && k.compareTo(SELL_SIGNAL) < 0
+					|| prevD2 != null && prevD2.compareTo(SELL_SIGNAL) < 0 && prevD1.compareTo(SELL_SIGNAL) > 0 && d.compareTo(SELL_SIGNAL) < 0) {
+				recommendation = RecommendationType.SELL;
 				reason = ReasonType.BEARISH_DIP;
 			} else if (prevK1.compareTo(prevD1) < 0 && k.compareTo(d) > 0) {
-				action = ActionType.BUY;
+				recommendation = RecommendationType.BUY;
 				reason = ReasonType.BULLISH_CROSSOVER;
 			} else if (prevK1.compareTo(prevD1) > 0 && k.compareTo(d) < 0) {
-				action = ActionType.SELL;
+				recommendation = RecommendationType.SELL;
 				reason = ReasonType.BEARISH_CROSSOVER;
 			} else {
-				action = ActionType.HOLD;
+				recommendation = RecommendationType.HOLD;
 				reason = null;
 			}
 		}
 	}
 
+	private void determineRisk() {
+
+		if (recommendation == RecommendationType.BUY) {
+			BigDecimal percentChangeFrom52WeekHigh = priceActionResult.getPercentChangeFrom52WeekHigh();
+
+			if (percentChangeFrom52WeekHigh.compareTo(CRITICAL_LEVEL) == 0) {
+				buyRisk = RiskType.CRITICAL;
+			} else if (percentChangeFrom52WeekHigh.compareTo(BUY_DANGER_LEVEL) >= 0) {
+				buyRisk = RiskType.DANGER;
+			} else {
+				buyRisk = RiskType.SAFE;
+			}
+		} else if (recommendation == RecommendationType.SELL) {
+			BigDecimal percentChangeFrom52WeekLow = priceActionResult.getPercentChangeFrom52WeekLow();
+
+			if (percentChangeFrom52WeekLow.compareTo(CRITICAL_LEVEL) == 0) {
+				sellRisk = RiskType.CRITICAL;
+			} else if (percentChangeFrom52WeekLow.compareTo(SELL_DANGER_LEVEL) <= 0) {
+				sellRisk = RiskType.DANGER;
+			} else {
+				sellRisk = RiskType.SAFE;
+			}
+		}
+	}
+
 	private void determineTrailingStop(List<Quote> quotes, List<IndicatorResult> results) {
-		if (action == ActionType.BUY) {
+		if (recommendation == RecommendationType.BUY) {
 			buyStop = buyStop(quotes, results);
 			sellStop = null;
 			stopLoss = stopLoss(quotes, results);
-		} else if (action == ActionType.SELL) {
+		} else if (recommendation == RecommendationType.SELL) {
 			buyStop = null;
 			sellStop = sellStop(quotes, results);
 			stopLoss = stopLoss(quotes, results);
@@ -376,10 +444,10 @@ public class IndicatorResult implements Serializable {
 	private BigDecimal stopLoss(List<Quote> quotes, List<IndicatorResult> results) {
 		BigDecimal _stopLoss;
 
-		if (action == ActionType.BUY) {
+		if (recommendation == RecommendationType.BUY) {
 			BigDecimal currentLow = quotes.get(0).getLow();
-			ActionType previousAction = results.get(0).getAction();
-			BigDecimal previousStopLoss = previousAction == ActionType.SELL ? null : results.get(0).getStopLoss();
+			RecommendationType previousAction = results.get(0).getRecommendation();
+			BigDecimal previousStopLoss = previousAction == RecommendationType.SELL ? null : results.get(0).getStopLoss();
 
 			if (previousStopLoss == null) {
 				_stopLoss = currentLow;
@@ -390,10 +458,10 @@ public class IndicatorResult implements Serializable {
 					_stopLoss = previousStopLoss;
 				}
 			}
-		} else if (action == ActionType.SELL) {
+		} else if (recommendation == RecommendationType.SELL) {
 			BigDecimal currentHigh = quotes.get(0).getHigh();
-			ActionType previousAction = results.get(0).getAction();
-			BigDecimal previousStopLoss = previousAction == ActionType.BUY ? null : results.get(0).getStopLoss();
+			RecommendationType previousAction = results.get(0).getRecommendation();
+			BigDecimal previousStopLoss = previousAction == RecommendationType.BUY ? null : results.get(0).getStopLoss();
 
 			if (previousStopLoss == null) {
 				_stopLoss = currentHigh;
