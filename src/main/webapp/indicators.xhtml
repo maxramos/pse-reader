@@ -280,14 +280,6 @@
 							<p:panelGrid styleClass="indicator-data-panelgrid no-border">
 								<p:row>
 									<p:column>
-										<h:outputText value="Trend" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.trend.name}" styleClass="trend #{result.trend}" />
-									</p:column>
-								</p:row>
-								<p:row>
-									<p:column>
 										<h:outputText value="Recommendation" />
 									</p:column>
 									<p:column>
@@ -345,24 +337,6 @@
 						</p:panel>
 						<p:panel header="Indicators" styleClass="indicator-data-panel no-border">
 							<p:panelGrid styleClass="indicator-data-panelgrid no-border">
-								<p:row>
-									<p:column>
-										<h:outputText value="DMI" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.dmiResult.adx}" styleClass="main">
-										<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" maxFractionDigits="2" />
-										</h:outputText>
-										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.dmiResult.plusDi}" styleClass="positive">
-											<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" maxFractionDigits="2" />
-										</h:outputText>
-										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.dmiResult.minusDi}" styleClass="negative">
-											<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" maxFractionDigits="2" />
-										</h:outputText>
-									</p:column>
-								</p:row>
 								<p:row>
 									<p:column>
 										<h:outputText value="SSTO" />
@@ -455,23 +429,6 @@
 				}},
 				{horizontalLine: {
 					y: 70,
-					color: "#000000",
-					lineWidth: 0.5,
-					shadow: false
-				}}
-			]
-		};
-	}
-	
-	function extendDmiModel() {
-		this.cfg.axes.xaxis.showTicks = false;
-		this.cfg.seriesDefaults.lineWidth = 1;
-		this.cfg.seriesDefaults.rendererOptions.smooth = true;
-		this.cfg.canvasOverlay = {
-			show: true,
-			objects: [
-				{horizontalLine: {
-					y: 20,
 					color: "#000000",
 					lineWidth: 0.5,
 					shadow: false

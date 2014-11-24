@@ -18,7 +18,6 @@ import org.primefaces.model.chart.OhlcChartModel;
 import org.primefaces.model.chart.OhlcChartSeries;
 
 import ph.mar.psereader.business.indicator.boundary.IndicatorManager;
-import ph.mar.psereader.business.indicator.entity.DmiResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.RecommendationType;
 import ph.mar.psereader.business.indicator.entity.SstoResult;
@@ -46,7 +45,6 @@ public class IndicatorsPage implements Serializable {
 	private OhlcChartModel quoteModel;
 	private LineChartModel emaModel;
 	private LineChartModel sstoModel;
-	private LineChartModel dmiModel;
 	private LineChartModel obvModel;
 	private LineChartModel atrModel;
 
@@ -122,36 +120,23 @@ public class IndicatorsPage implements Serializable {
 			priceSeries.set(i, result.getPriceActionResult().getPrice());
 			emaSeries.set(i, result.getEmaResult().getEma());
 
-			DmiResult dmiResult = result.getDmiResult();
-			adxSeries.set(i, dmiResult.getAdx());
-			plusDiSeries.set(i, dmiResult.getPlusDi());
-			minusDiSeries.set(i, dmiResult.getMinusDi());
-
 			SstoResult sstoResult = result.getSstoResult();
 			kSeries.set(i, sstoResult.getSlowK());
 			dSeries.set(i, sstoResult.getSlowD());
 
 			obvSeries.set(i, result.getObvResult().getObv());
 
-			atrSeries.set(i, result.getDmiResult().getAtr());
+			atrSeries.set(i, result.getAtrResult().getAtr());
 		}
 
 		emaModel.addSeries(priceSeries);
 		emaModel.addSeries(emaSeries);
 
-		sstoModel.clear();
 		sstoModel.addSeries(kSeries);
 		sstoModel.addSeries(dSeries);
 
-		dmiModel.clear();
-		dmiModel.addSeries(adxSeries);
-		dmiModel.addSeries(plusDiSeries);
-		dmiModel.addSeries(minusDiSeries);
-
-		obvModel.clear();
 		obvModel.addSeries(obvSeries);
 
-		atrModel.clear();
 		atrModel.addSeries(atrSeries);
 	}
 
@@ -191,10 +176,6 @@ public class IndicatorsPage implements Serializable {
 		return sstoModel;
 	}
 
-	public LineChartModel getDmiModel() {
-		return dmiModel;
-	}
-
 	public LineChartModel getObvModel() {
 		return obvModel;
 	}
@@ -230,16 +211,6 @@ public class IndicatorsPage implements Serializable {
 		sstoModel.setAnimate(true);
 		sstoModel.setZoom(true);
 		sstoModel.setExtender("extendSstoModel");
-
-		dmiModel = new LineChartModel();
-		dmiModel.setTitle("DMI");
-		dmiModel.setLegendPosition("nw");
-		dmiModel.setLegendCols(3);
-		dmiModel.setSeriesColors("000088, 008800, 880000");
-		dmiModel.setShadow(false);
-		dmiModel.setAnimate(true);
-		dmiModel.setZoom(true);
-		dmiModel.setExtender("extendDmiModel");
 
 		obvModel = new LineChartModel();
 		obvModel.setTitle("OBV");

@@ -2,7 +2,6 @@ package ph.mar.psereader.business.indicator.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 
@@ -30,10 +29,10 @@ import ph.mar.psereader.business.stock.entity.Stock;
 @Entity
 @Table(name = "indicator_result", uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
-		@NamedQuery(name = IndicatorResult.ALL_BY_STOCK_AND_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.stock = :stock AND ir.date <= :date ORDER BY ir.date DESC"),
-		@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.trend, ir.recommendation, ir.reason, ir.buyRisk, ir.sellRisk, ir.movement, ir.buyStop, ir.sellStop, ir.stopLoss, ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date ORDER BY ir.stock.symbol"),
-		@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_RECOMMENDATION, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.trend, ir.recommendation, ir.reason, ir.buyRisk, ir.sellRisk, ir.movement, ir.buyStop, ir.sellStop, ir.stopLoss, ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date AND ir.recommendation = :recommendation ORDER BY ir.stock.symbol"),
-		@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.dmiResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
+	@NamedQuery(name = IndicatorResult.ALL_BY_STOCK_AND_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.stock = :stock AND ir.date <= :date ORDER BY ir.date DESC"),
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.trend, ir.recommendation, ir.reason, ir.buyRisk, ir.sellRisk, ir.movement, ir.buyStop, ir.sellStop, ir.stopLoss, ir.atrResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date ORDER BY ir.stock.symbol"),
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_RECOMMENDATION, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.trend, ir.recommendation, ir.reason, ir.buyRisk, ir.sellRisk, ir.movement, ir.buyStop, ir.sellStop, ir.stopLoss, ir.atrResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date AND ir.recommendation = :recommendation ORDER BY ir.stock.symbol"),
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.atrResult, ir.sstoResult, ir.emaResult, ir.obvResult, ir.priceActionResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
 public class IndicatorResult implements Serializable {
 
 	public static final String ALL_BY_STOCK_AND_DATE = "IndicatorResult.ALL_BY_STOCK_AND_DATE";
@@ -45,8 +44,6 @@ public class IndicatorResult implements Serializable {
 	private static final BigDecimal BUY_DANGER_LEVEL = new BigDecimal("-0.08");
 	private static final BigDecimal SELL_DANGER_LEVEL = new BigDecimal("0.08");
 	private static final BigDecimal CRITICAL_LEVEL = BigDecimal.ZERO;
-	private static final BigDecimal TREND_SIGNAL = new BigDecimal("20");
-	private static final BigDecimal STRONG_TREND_SIGNAL = new BigDecimal("40");
 	private static final BigDecimal BUY_SIGNAL = new BigDecimal("30");
 	private static final BigDecimal SELL_SIGNAL = new BigDecimal("70");
 
@@ -93,7 +90,7 @@ public class IndicatorResult implements Serializable {
 	private BigDecimal stopLoss;
 
 	@Embedded
-	private DmiResult dmiResult;
+	private AtrResult atrResult;
 
 	@Embedded
 	private SstoResult sstoResult;
@@ -125,8 +122,8 @@ public class IndicatorResult implements Serializable {
 	/**
 	 * Used for processing indicator results.
 	 */
-	public IndicatorResult(DmiResult dmiResult, SstoResult sstoResult, EmaResult emaResult, ObvResult obvResult, PriceActionResult priceActionResult) {
-		this.dmiResult = dmiResult;
+	public IndicatorResult(AtrResult atrResult, SstoResult sstoResult, EmaResult emaResult, ObvResult obvResult, PriceActionResult priceActionResult) {
+		this.atrResult = atrResult;
 		this.sstoResult = sstoResult;
 		this.emaResult = emaResult;
 		this.obvResult = obvResult;
@@ -137,7 +134,7 @@ public class IndicatorResult implements Serializable {
 	 * Used for displaying indicator results.
 	 */
 	public IndicatorResult(TrendType trend, RecommendationType recommendation, ReasonType reason, RiskType buyRisk, RiskType sellRisk,
-			MovementType movement, BigDecimal buyStop, BigDecimal sellStop, BigDecimal stopLoss, DmiResult dmiResult, SstoResult sstoResult,
+			MovementType movement, BigDecimal buyStop, BigDecimal sellStop, BigDecimal stopLoss, AtrResult atrResult, SstoResult sstoResult,
 			EmaResult emaResult, ObvResult obvResult, PriceActionResult priceActionResult, Stock stock, Quote quote) {
 		this.trend = trend;
 		this.recommendation = recommendation;
@@ -148,7 +145,7 @@ public class IndicatorResult implements Serializable {
 		this.buyStop = buyStop;
 		this.sellStop = sellStop;
 		this.stopLoss = stopLoss;
-		this.dmiResult = dmiResult;
+		this.atrResult = atrResult;
 		this.sstoResult = sstoResult;
 		this.emaResult = emaResult;
 		this.obvResult = obvResult;
@@ -215,12 +212,12 @@ public class IndicatorResult implements Serializable {
 		return stopLoss;
 	}
 
-	public DmiResult getDmiResult() {
-		return dmiResult;
+	public AtrResult getAtrResult() {
+		return atrResult;
 	}
 
-	public void setDmiResult(DmiResult dmiResult) {
-		this.dmiResult = dmiResult;
+	public void setAtrResult(AtrResult atrResult) {
+		this.atrResult = atrResult;
 	}
 
 	public SstoResult getSstoResult() {
@@ -266,27 +263,13 @@ public class IndicatorResult implements Serializable {
 	@Override
 	public String toString() {
 		return String
-				.format("IndicatorResult [id=%s, date=%s, trend=%s, recommendation=%s, reason=%s, buyRisk=%s, sellRisk=%s, movement=%s, buyStop=%s, sellStop=%s, stopLoss=%s, dmiResult=%s, sstoResult=%s, emaResult=%s, obvResult=%s, priceActionResult=%s, stock=%s]",
-						id, date, trend, recommendation, reason, buyRisk, sellRisk, movement, buyStop, sellStop, stopLoss, dmiResult, sstoResult,
+				.format("IndicatorResult [id=%s, date=%s, trend=%s, recommendation=%s, reason=%s, buyRisk=%s, sellRisk=%s, movement=%s, buyStop=%s, sellStop=%s, stopLoss=%s, atrResult=%s, sstoResult=%s, emaResult=%s, obvResult=%s, priceActionResult=%s, stock=%s]",
+						id, date, trend, recommendation, reason, buyRisk, sellRisk, movement, buyStop, sellStop, stopLoss, atrResult, sstoResult,
 						emaResult, obvResult, priceActionResult, stock == null ? null : stock.getId());
 	}
 
 	private void determineTrend() {
-		BigDecimal adx = dmiResult.getAdx();
-		BigDecimal plusDi = dmiResult.getPlusDi();
-		BigDecimal minusDi = dmiResult.getMinusDi();
-
-		BigDecimal _adx = adx.divide(BigDecimal.ONE, 2, RoundingMode.HALF_UP);
-		BigDecimal _plusDi = plusDi.divide(BigDecimal.ONE, 2, RoundingMode.HALF_UP);
-		BigDecimal _minusDi = minusDi.divide(BigDecimal.ONE, 2, RoundingMode.HALF_UP);
-
-		if (_adx.compareTo(STRONG_TREND_SIGNAL) > 0) {
-			trend = _plusDi.compareTo(_minusDi) > 0 ? TrendType.STRONG_UP : TrendType.STRONG_DOWN;
-		} else if (_adx.compareTo(TREND_SIGNAL) > 0) {
-			trend = _plusDi.compareTo(_minusDi) > 0 ? TrendType.UP : TrendType.DOWN;
-		} else {
-			trend = TrendType.SIDEWAYS;
-		}
+		// TODO
 	}
 
 	private void determineMovement() {

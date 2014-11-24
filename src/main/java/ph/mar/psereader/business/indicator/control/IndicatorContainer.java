@@ -21,7 +21,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
-import ph.mar.psereader.business.indicator.entity.DmiResult;
+import ph.mar.psereader.business.indicator.entity.AtrResult;
 import ph.mar.psereader.business.indicator.entity.EmaResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.ObvResult;
@@ -49,19 +49,19 @@ public class IndicatorContainer {
 		List<IndicatorResult> results = findAllIndicatorResultsByStock(stock, indicatorResultSize);
 		BigDecimal[] highAndLow52Week = find52WeekHighAndLowByStockAndDate(stock, date);
 
-		Future<DmiResult> dmiResult = executorService.submit(new DMI(quotes, results));
+		Future<AtrResult> atrResult = executorService.submit(new ATR(quotes, results));
 		Future<SstoResult> sstoResult = executorService.submit(new SSTO(quotes, results));
 		Future<EmaResult> emaResult = executorService.submit(new EMA(quotes, results));
 		Future<ObvResult> obvResult = executorService.submit(new OBV(quotes, results));
 		Future<PriceActionResult> priceActionResult = executorService.submit(new PriceAction(quotes, highAndLow52Week));
 
-		while (!dmiResult.isDone() || !sstoResult.isDone() || !emaResult.isDone() || !obvResult.isDone() || !priceActionResult.isDone()) {
+		while (!atrResult.isDone() || !sstoResult.isDone() || !emaResult.isDone() || !obvResult.isDone() || !priceActionResult.isDone()) {
 			continue;
 		}
 
 		try {
 			IndicatorResult indicatorResult = new IndicatorResult(stock, date);
-			indicatorResult.setDmiResult(dmiResult.get());
+			indicatorResult.setAtrResult(atrResult.get());
 			indicatorResult.setSstoResult(sstoResult.get());
 			indicatorResult.setEmaResult(emaResult.get());
 			indicatorResult.setObvResult(obvResult.get());
