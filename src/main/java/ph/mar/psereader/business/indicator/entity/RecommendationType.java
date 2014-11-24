@@ -3,8 +3,12 @@ package ph.mar.psereader.business.indicator.entity;
 public enum RecommendationType {
 
 	BUY("Buy"),
+	TAKE_PROFIT("Take Profit"),
+	HOLD("Hold"),
 	SELL("Sell"),
-	HOLD("Hold");
+	SELL_ON_STRENGTH("Sell On Strength"),
+	RANGE_TRADE("Range Trade"),
+	LIGHTEN("Lighten");
 
 	private String name;
 

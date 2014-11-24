@@ -19,11 +19,10 @@ public class EMA implements Callable<EmaResult> {
 	private static final int PERIOD = 21;
 	private static final BigDecimal FACTOR = new BigDecimal("2").divide(new BigDecimal(PERIOD).add(BigDecimal.ONE), 10, RoundingMode.HALF_UP);
 
+	private static final BigDecimal SPIKE_LEVEL = new BigDecimal("0.20");
+
 	private List<Quote> _quotes;
 	private List<IndicatorResult> _results;
-
-	private TrendType trend;
-	private RecommendationType recommendation;
 
 	public EMA(List<Quote> quotes, List<IndicatorResult> results) {
 		_quotes = quotes;
@@ -42,7 +41,9 @@ public class EMA implements Callable<EmaResult> {
 		BigDecimal ema = IndicatorUtil.avg(closes, 10);
 		EmaResult result = new EmaResult(ema);
 
-		determineTrendAndRecommendation(ema);
+		Map<String, Object> trendAndRecommendation = determineTrendAndRecommendation(ema);
+		result.setTrend((TrendType) trendAndRecommendation.get("trend"));
+		result.setRecommendation((RecommendationType) trendAndRecommendation.get("recommendation"));
 		return result;
 	}
 
@@ -53,7 +54,9 @@ public class EMA implements Callable<EmaResult> {
 		BigDecimal ema = ema(close, previousEma, FACTOR, 10);
 		EmaResult result = new EmaResult(ema);
 
-		determineTrendAndRecommendation(ema);
+		Map<String, Object> trendAndRecommendation = determineTrendAndRecommendation(ema);
+		result.setTrend((TrendType) trendAndRecommendation.get("trend"));
+		result.setRecommendation((RecommendationType) trendAndRecommendation.get("recommendation"));
 		return result;
 	}
 
@@ -63,41 +66,57 @@ public class EMA implements Callable<EmaResult> {
 		return ema.divide(BigDecimal.ONE, decimalPlaces, RoundingMode.HALF_UP);
 	}
 
-	private void determineTrendAndRecommendation(BigDecimal ema) {
+	private Map<String, Object> determineTrendAndRecommendation(BigDecimal ema) {
 		List<Quote> quotes = _quotes.subList(0, 5);
 		List<IndicatorResult> results = _results.subList(0, 4);
-		Map<String, List<BigDecimal>> ohlc = extractOhlcs(quotes);
-		List<BigDecimal> opens = ohlc.get("open");
-		List<BigDecimal> highs = ohlc.get("high");
-		List<BigDecimal> lows = ohlc.get("low");
-		List<BigDecimal> closes = ohlc.get("close");
+		Map<String, List<BigDecimal>> highsAndLows = extractHighsAndLows(quotes);
+		List<BigDecimal> highs = highsAndLows.get("high");
+		List<BigDecimal> lows = highsAndLows.get("low");
 		List<BigDecimal> emas = extractEmas(ema, results);
+		BigDecimal price = quotes.get(0).getClose();
+		BigDecimal previousPrice = quotes.get(1).getClose();
+		TrendType trend;
+		RecommendationType recommendation;
 
 		if (higher(lows)) {
-			if (above(opens, closes, emas)) {
-
-			} else if (below(opens, closes, emas)) {
-
+			if (above(lows, emas)) {
+				trend = TrendType.STRONG_UP;
+				recommendation = spike(price, previousPrice) ? RecommendationType.TAKE_PROFIT : RecommendationType.BUY;
+			} else if (below(highs, emas)) {
+				trend = TrendType.DOWN;
+				recommendation = RecommendationType.SELL_ON_STRENGTH;
 			} else {
-
+				trend = TrendType.SIDEWAYS;
+				recommendation = spike(price, previousPrice) ? RecommendationType.TAKE_PROFIT : RecommendationType.RANGE_TRADE;
 			}
 		} else if (lower(highs)) {
-			if (above(opens, closes, emas)) {
-
-			} else if (below(opens, closes, emas)) {
-
+			if (above(lows, emas)) {
+				trend = TrendType.UP;
+				recommendation = RecommendationType.HOLD;
+			} else if (below(highs, emas)) {
+				trend = TrendType.STRONG_DOWN;
+				recommendation = RecommendationType.SELL;
 			} else {
-
+				trend = TrendType.SIDEWAYS;
+				recommendation = RecommendationType.LIGHTEN;
 			}
 		} else {
-			if (above(opens, closes, emas)) {
-
-			} else if (below(opens, closes, emas)) {
-
+			if (above(lows, emas)) {
+				trend = TrendType.UP;
+				recommendation = RecommendationType.HOLD;
+			} else if (below(highs, emas)) {
+				trend = TrendType.DOWN;
+				recommendation = RecommendationType.SELL;
 			} else {
-
+				trend = TrendType.SIDEWAYS;
+				recommendation = RecommendationType.HOLD;
 			}
 		}
+
+		Map<String, Object> trendAndRecommendation = new HashMap<>(2);
+		trendAndRecommendation.put("trend", trend);
+		trendAndRecommendation.put("recommendation", recommendation);
+		return trendAndRecommendation;
 	}
 
 	private boolean higher(List<BigDecimal> lows) {
@@ -108,9 +127,9 @@ public class EMA implements Callable<EmaResult> {
 		return lt(0, 2, highs) && lt(2, 4, highs);
 	}
 
-	private boolean above(List<BigDecimal> opens, List<BigDecimal> closes, List<BigDecimal> emas) {
+	private boolean above(List<BigDecimal> lows, List<BigDecimal> emas) {
 		for (int i = 0; i < emas.size(); i++) {
-			if (gt(i, opens, emas) && gt(i, closes, emas)) {
+			if (gt(i, lows, emas)) {
 				continue;
 			}
 
@@ -120,9 +139,9 @@ public class EMA implements Callable<EmaResult> {
 		return true;
 	}
 
-	private boolean below(List<BigDecimal> opens, List<BigDecimal> closes, List<BigDecimal> emas) {
+	private boolean below(List<BigDecimal> highs, List<BigDecimal> emas) {
 		for (int i = 0; i < emas.size(); i++) {
-			if (lt(i, opens, emas) && lt(i, closes, emas)) {
+			if (lt(i, highs, emas)) {
 				continue;
 			}
 
@@ -132,16 +151,22 @@ public class EMA implements Callable<EmaResult> {
 		return true;
 	}
 
-	private boolean gt(int current, int previous, List<BigDecimal> values) {
-		return values.get(current).compareTo(values.get(previous)) > 0;
+	private boolean spike(BigDecimal price, BigDecimal previousPrice) {
+		BigDecimal priceChange = price.subtract(previousPrice);
+		BigDecimal pricePercentChange = priceChange.divide(previousPrice, 4, RoundingMode.HALF_UP);
+		return pricePercentChange.compareTo(SPIKE_LEVEL) >= 0;
+	}
+
+	private boolean gt(int index1, int index2, List<BigDecimal> values) {
+		return values.get(index1).compareTo(values.get(index2)) > 0;
 	}
 
 	private boolean gt(int index, List<BigDecimal> values1, List<BigDecimal> values2) {
 		return values1.get(index).compareTo(values2.get(index)) > 0;
 	}
 
-	private boolean lt(int current, int previous, List<BigDecimal> values) {
-		return values.get(current).compareTo(values.get(previous)) < 0;
+	private boolean lt(int index1, int index2, List<BigDecimal> values) {
+		return values.get(index1).compareTo(values.get(index2)) < 0;
 	}
 
 	private boolean lt(int index, List<BigDecimal> values1, List<BigDecimal> values2) {
@@ -158,25 +183,19 @@ public class EMA implements Callable<EmaResult> {
 		return closes;
 	}
 
-	private Map<String, List<BigDecimal>> extractOhlcs(List<Quote> quotes) {
-		List<BigDecimal> opens = new ArrayList<>(quotes.size());
+	private Map<String, List<BigDecimal>> extractHighsAndLows(List<Quote> quotes) {
 		List<BigDecimal> highs = new ArrayList<>(quotes.size());
 		List<BigDecimal> lows = new ArrayList<>(quotes.size());
-		List<BigDecimal> closes = new ArrayList<>(quotes.size());
 
 		for (Quote quote : quotes) {
-			opens.add(quote.getOpen());
 			highs.add(quote.getHigh());
 			lows.add(quote.getLow());
-			closes.add(quote.getClose());
 		}
 
-		Map<String, List<BigDecimal>> ohlc = new HashMap<>(4);
-		ohlc.put("open", opens);
-		ohlc.put("high", highs);
-		ohlc.put("low", lows);
-		ohlc.put("close", closes);
-		return ohlc;
+		Map<String, List<BigDecimal>> highsAndLows = new HashMap<>(4);
+		highsAndLows.put("high", highs);
+		highsAndLows.put("low", lows);
+		return highsAndLows;
 	}
 
 	private List<BigDecimal> extractEmas(BigDecimal ema, List<IndicatorResult> results) {

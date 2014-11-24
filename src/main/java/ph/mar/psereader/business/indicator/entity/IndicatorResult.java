@@ -61,7 +61,7 @@ public class IndicatorResult implements Serializable {
 	private TrendType trend;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, length = 12)
+	@Column(nullable = false, length = 16)
 	private RecommendationType recommendation;
 
 	@Enumerated(EnumType.STRING)
@@ -269,7 +269,7 @@ public class IndicatorResult implements Serializable {
 	}
 
 	private void determineTrend() {
-		// TODO
+		trend = emaResult.getTrend();
 	}
 
 	private void determineMovement() {
