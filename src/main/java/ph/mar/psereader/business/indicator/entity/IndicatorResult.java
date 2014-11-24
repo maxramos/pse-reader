@@ -156,14 +156,13 @@ public class IndicatorResult implements Serializable {
 
 	public void process(List<Quote> quotes, List<IndicatorResult> results) {
 		determineTrend();
+		determineRecommendation();
 		determineMovement();
 
 		if (results.isEmpty()) {
-			recommendation = RecommendationType.HOLD;
 			return;
 		}
 
-		determineRecommendation(results);
 		determineRisk();
 		determineTrailingStop(quotes, results);
 	}
@@ -272,6 +271,10 @@ public class IndicatorResult implements Serializable {
 		trend = emaResult.getTrend();
 	}
 
+	private void determineRecommendation() {
+		recommendation = emaResult.getRecommendation();
+	}
+
 	private void determineMovement() {
 		BigDecimal priceChange = priceActionResult.getPriceChange();
 
@@ -281,61 +284,6 @@ public class IndicatorResult implements Serializable {
 			movement = MovementType.LOSS;
 		} else {
 			movement = MovementType.NO_CHANGED;
-		}
-	}
-
-	private void determineRecommendation(List<IndicatorResult> results) {
-		BigDecimal k = sstoResult.getSlowK();
-		BigDecimal d = sstoResult.getSlowD();
-
-		if (trend == TrendType.UP || trend == TrendType.STRONG_UP) {
-			BigDecimal ema = emaResult.getEma();
-			BigDecimal previousEma = results.get(0).getEmaResult().getEma();
-
-			if ((k.compareTo(SELL_SIGNAL) > 0 || d.compareTo(SELL_SIGNAL) > 0) && ema.compareTo(previousEma) < 0) {
-				recommendation = RecommendationType.SELL;
-				reason = ReasonType.OVERBOUGHT;
-			} else {
-				recommendation = RecommendationType.HOLD;
-				reason = null;
-			}
-		} else if (trend == TrendType.DOWN || trend == TrendType.STRONG_DOWN) {
-			BigDecimal ema = emaResult.getEma();
-			BigDecimal previousEma = results.get(0).getEmaResult().getEma();
-
-			if ((k.compareTo(BUY_SIGNAL) < 0 || d.compareTo(BUY_SIGNAL) < 0) && ema.compareTo(previousEma) > 0) {
-				recommendation = RecommendationType.BUY;
-				reason = ReasonType.OVERSOLD;
-			} else {
-				recommendation = RecommendationType.HOLD;
-				reason = null;
-			}
-		} else {
-			SstoResult previous1Ssto = results.get(0).getSstoResult();
-			BigDecimal prevK1 = previous1Ssto.getSlowK();
-			BigDecimal prevD1 = previous1Ssto.getSlowD();
-			SstoResult previous2Ssto = results.size() >= 2 ? results.get(1).getSstoResult() : null;
-			BigDecimal prevK2 = previous2Ssto == null ? null : previous2Ssto.getSlowK();
-			BigDecimal prevD2 = previous2Ssto == null ? null : previous2Ssto.getSlowD();
-
-			if (prevK2 != null && prevK2.compareTo(BUY_SIGNAL) > 0 && prevK1.compareTo(BUY_SIGNAL) < 0 && k.compareTo(BUY_SIGNAL) > 0
-					|| prevD2 != null && prevD2.compareTo(BUY_SIGNAL) > 0 && prevD1.compareTo(BUY_SIGNAL) < 0 && d.compareTo(BUY_SIGNAL) > 0) {
-				recommendation = RecommendationType.BUY;
-				reason = ReasonType.BULLISH_DIP;
-			} else if (prevK2 != null && prevK2.compareTo(SELL_SIGNAL) < 0 && prevK1.compareTo(SELL_SIGNAL) > 0 && k.compareTo(SELL_SIGNAL) < 0
-					|| prevD2 != null && prevD2.compareTo(SELL_SIGNAL) < 0 && prevD1.compareTo(SELL_SIGNAL) > 0 && d.compareTo(SELL_SIGNAL) < 0) {
-				recommendation = RecommendationType.SELL;
-				reason = ReasonType.BEARISH_DIP;
-			} else if (prevK1.compareTo(prevD1) < 0 && k.compareTo(d) > 0) {
-				recommendation = RecommendationType.BUY;
-				reason = ReasonType.BULLISH_CROSSOVER;
-			} else if (prevK1.compareTo(prevD1) > 0 && k.compareTo(d) < 0) {
-				recommendation = RecommendationType.SELL;
-				reason = ReasonType.BEARISH_CROSSOVER;
-			} else {
-				recommendation = RecommendationType.HOLD;
-				reason = null;
-			}
 		}
 	}
 
