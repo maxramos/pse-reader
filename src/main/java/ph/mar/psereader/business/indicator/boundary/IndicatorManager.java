@@ -39,7 +39,7 @@ public class IndicatorManager {
 	IndicatorContainer indicatorContainer;
 
 	int quoteSize = 21;
-	int indicatorResultSize = 2;
+	int indicatorResultSize = 4;
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void process(Date date) {
@@ -62,8 +62,8 @@ public class IndicatorManager {
 	}
 
 	public List<IndicatorResult> findAllByDateAndAction(Date date, RecommendationType recommendation) {
-		return repository.find(IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_RECOMMENDATION,
-				with("date", date).and("recommendation", recommendation).asParameters(), IndicatorResult.class);
+		return repository.find(IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_RECOMMENDATION, with("date", date)
+				.and("recommendation", recommendation).asParameters(), IndicatorResult.class);
 	}
 
 	public List<IndicatorResult> findAllByStockAndDate(Stock stock, Date date, int maxSize) {

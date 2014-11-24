@@ -280,6 +280,14 @@
 							<p:panelGrid styleClass="indicator-data-panelgrid no-border">
 								<p:row>
 									<p:column>
+										<h:outputText value="Trend" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.trend.name}" styleClass="trend #{result.trend}" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
 										<h:outputText value="Recommendation" />
 									</p:column>
 									<p:column>
