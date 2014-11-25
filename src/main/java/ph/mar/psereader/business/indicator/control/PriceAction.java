@@ -29,10 +29,7 @@ public class PriceAction implements Callable<PriceActionResult> {
 		BigDecimal pricePercentChange = priceChange.divide(previousPrice, 4, RoundingMode.HALF_UP);
 		BigDecimal changeFrom52WeekHigh = price.subtract(high52Week);
 		BigDecimal percentChangeFrom52WeekHigh = changeFrom52WeekHigh.divide(high52Week, 4, RoundingMode.HALF_UP);
-		BigDecimal changeFrom52WeekLow = price.subtract(low52Week);
-		BigDecimal percentChangeFrom52WeekLow = changeFrom52WeekLow.divide(price, 4, RoundingMode.HALF_UP);
-		return new PriceActionResult(price, priceChange, pricePercentChange, high52Week, low52Week, changeFrom52WeekHigh,
-				percentChangeFrom52WeekHigh, changeFrom52WeekLow, percentChangeFrom52WeekLow);
+		return new PriceActionResult(price, priceChange, pricePercentChange, high52Week, low52Week, changeFrom52WeekHigh, percentChangeFrom52WeekHigh);
 	}
 
 }

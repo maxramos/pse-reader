@@ -54,8 +54,7 @@
 		</p:column>
 		
 		<p:column headerText="Risk" styleClass="text">
-			<h:outputText value="#{result.buyRisk.name}" styleClass="risk #{result.buyRisk}" rendered="#{result.recommendation eq 'BUY'}" />
-			<h:outputText value="#{result.sellRisk.name}" styleClass="risk #{result.sellRisk}" rendered="#{result.recommendation eq 'SELL'}" />
+			<h:outputText value="#{result.risk.name}" styleClass="risk #{result.risk}" />
 		</p:column>
 		
 		<p:rowExpansion id="indicatorRowExpansion">
@@ -68,7 +67,6 @@
 								<p:chart type="ohlc" model="#{indicatorsPage.quoteModel}" rendered="#{indicatorsPage.quoteModel ne null}" styleClass="chart" />
 								<p:chart type="line" model="#{indicatorsPage.emaModel}" rendered="#{indicatorsPage.emaModel ne null}" styleClass="chart" />
 								<p:chart type="line" model="#{indicatorsPage.sstoModel}" rendered="#{indicatorsPage.sstoModel ne null}" styleClass="chart" />
-								<p:chart type="line" model="#{indicatorsPage.dmiModel}" rendered="#{indicatorsPage.dmiModel ne null}" styleClass="chart" />
 								<p:chart type="line" model="#{indicatorsPage.obvModel}" rendered="#{indicatorsPage.obvModel ne null}" styleClass="chart" />
 								<p:chart type="line" model="#{indicatorsPage.atrModel}" rendered="#{indicatorsPage.atrModel ne null}" styleClass="chart" />
 							</p:panelGrid>
@@ -164,11 +162,11 @@
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
 										<h:outputText value="(" />
-										<h:outputText value="#{result.priceActionResult.changeFrom52WeekHigh}" styleClass="#{result.buyRisk}">
+										<h:outputText value="#{result.priceActionResult.changeFrom52WeekHigh}" styleClass="#{result.risk}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.priceActionResult.percentChangeFrom52WeekHigh}" styleClass="#{result.buyRisk}">
+										<h:outputText value="#{result.priceActionResult.percentChangeFrom52WeekHigh}" styleClass="#{result.risk}">
 											<f:convertNumber type="percent" minFractionDigits="2" />
 										</h:outputText>
 										<h:outputText value=")" />
@@ -182,16 +180,6 @@
 										<h:outputText value="#{result.priceActionResult.low52Week}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
-										<p:spacer style="width: 1em;" />
-										<h:outputText value="(" />
-										<h:outputText value="#{result.priceActionResult.changeFrom52WeekLow}" styleClass="#{result.sellRisk}">
-											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-										</h:outputText>
-										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.priceActionResult.percentChangeFrom52WeekLow}" styleClass="#{result.sellRisk}">
-											<f:convertNumber type="percent" minFractionDigits="2" />
-										</h:outputText>
-										<h:outputText value=")" />
 									</p:column>
 								</p:row>
 								<p:row>
@@ -294,51 +282,12 @@
 										<h:outputText value="#{result.recommendation.name}" styleClass="recommendation #{result.recommendation}" />
 									</p:column>
 								</p:row>
-								<p:row rendered="#{result.recommendation eq 'BUY' or result.recommendation eq 'SELL'}">
-									<p:column>
-										<h:outputText value="Reason" rendered="#{result.recommendation eq 'BUY' or result.recommendation eq 'SELL'}" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.reason.name}" styleClass="reason #{result.recommendation}" />
-									</p:column>
-								</p:row>
-								<p:row rendered="#{result.recommendation ne 'HOLD'}">
+								<p:row>
 									<p:column>
 										<h:outputText value="Risk" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.buyRisk.name}" styleClass="risk #{result.buyRisk}" rendered="#{result.recommendation eq 'BUY'}" />
-										<h:outputText value="#{result.sellRisk.name}" styleClass="risk #{result.sellRisk}" rendered="#{result.recommendation eq 'SELL'}" />
-									</p:column>
-								</p:row>
-								<p:row rendered="#{result.recommendation eq 'BUY'}">
-									<p:column>
-										<h:outputText value="Buy Stop" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.buyStop}" styleClass="buy-stop">
-											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-										</h:outputText>
-									</p:column>
-								</p:row>
-								<p:row rendered="#{result.recommendation eq 'SELL'}">
-									<p:column>
-										<h:outputText value="Sell Stop" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.sellStop}" styleClass="sell-stop">
-											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-										</h:outputText>
-									</p:column>
-								</p:row>
-								<p:row rendered="#{result.recommendation eq 'BUY' or result.recommendation eq 'SELL'}">
-									<p:column>
-										<h:outputText value="Stop Loss" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.stopLoss}" styleClass="stop-loss">
-											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-										</h:outputText>
+										<h:outputText value="#{result.risk.name}" styleClass="risk #{result.risk}" />
 									</p:column>
 								</p:row>
 							</p:panelGrid>
@@ -347,22 +296,22 @@
 							<p:panelGrid styleClass="indicator-data-panelgrid no-border">
 								<p:row>
 									<p:column>
-										<h:outputText value="SSTO" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.sstoResult.slowK}" styleClass="main" minFractionDigits="2" />
-										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.sstoResult.slowD}" styleClass="signal" minFractionDigits="2" />
-									</p:column>
-								</p:row>
-								<p:row>
-									<p:column>
 										<h:outputText value="EMA" />
 									</p:column>
 									<p:column>
 										<h:outputText value="#{result.emaResult.ema}" styleClass="main">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<h:outputText value="SSTO" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.sstoResult.slowK}" styleClass="main" minFractionDigits="2" />
+										<p:spacer style="width: 1em;" />
+										<h:outputText value="#{result.sstoResult.slowD}" styleClass="signal" minFractionDigits="2" />
 									</p:column>
 								</p:row>
 								<p:row>

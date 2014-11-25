@@ -26,7 +26,7 @@ import ph.mar.psereader.business.report.entity.PseReportRow;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
-	@NamedQuery(name = Quote.ALL_CHART_DATA_BY_STOCK_AND_DATE, query = "SELECT NEW ph.mar.psereader.business.stock.entity.Quote(q.date, q.open, q.high, q.low, q.close, q.volume) FROM Quote q WHERE q.stock = :stock AND q.date <= :date ORDER BY q.date DESC"),
+	@NamedQuery(name = Quote.ALL_CHART_DATA_BY_STOCK_AND_DATE, query = "SELECT NEW ph.mar.psereader.business.stock.entity.Quote(q.date, q.open, q.high, q.low, q.close, q.volume) FROM Quote q WHERE q.stock = :stock AND q.date BETWEEN :start AND :end ORDER BY q.date DESC"),
 	@NamedQuery(name = Quote.ALL_INDICATOR_DATA_BY_STOCK_AND_DATE, query = "SELECT NEW ph.mar.psereader.business.stock.entity.Quote(q.date, q.open, q.high, q.low, q.close, q.volume) FROM Quote q WHERE q.stock = :stock AND q.date <= :date ORDER BY q.date DESC"),
 	@NamedQuery(name = Quote.ALL_REPORT_ROW_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.report.entity.PseReportRow(q.stock.name, q.stock.symbol, q.bid, q.ask, q.open, q.high, q.low, q.close, q.volume, q.value, q.foreignBuySell, q.stock.sector, q.stock.subSector) FROM Quote q WHERE q.date = :date ORDER BY q.stock.symbol"),
 	@NamedQuery(name = Quote.BY_STOCK, query = "SELECT q FROM Quote q WHERE q.stock = :stock ORDER BY q.date DESC"),

@@ -2,6 +2,8 @@ package ph.mar.psereader.business.indicator.boundary;
 
 import static ph.mar.psereader.business.repository.control.QueryParameter.with;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -66,13 +68,22 @@ public class IndicatorManager {
 				.and("recommendation", recommendation).asParameters(), IndicatorResult.class);
 	}
 
-	public List<IndicatorResult> findAllByStockAndDate(Stock stock, Date date, int maxSize) {
-		return repository.find(IndicatorResult.ALL_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(), IndicatorResult.class,
-				maxSize);
+	public List<IndicatorResult> findAllByStockAndDate(Stock stock, Date date) {
+		LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		localDate = localDate.minusYears(1);
+		Date start = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		Date end = date;
+		return repository.find(IndicatorResult.ALL_BY_STOCK_AND_DATE, with("stock", stock).and("start", start).and("end", end).asParameters(),
+				IndicatorResult.class);
 	}
 
-	public List<Quote> findAllQuoteByStockAndDate(Stock stock, Date date, int maxSize) {
-		return repository.find(Quote.ALL_CHART_DATA_BY_STOCK_AND_DATE, with("stock", stock).and("date", date).asParameters(), Quote.class, maxSize);
+	public List<Quote> findAllQuoteByStockAndDate(Stock stock, Date date) {
+		LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		localDate = localDate.minusYears(1);
+		Date start = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		Date end = date;
+		return repository.find(Quote.ALL_CHART_DATA_BY_STOCK_AND_DATE, with("stock", stock).and("start", start).and("end", end).asParameters(),
+				Quote.class);
 	}
 
 	private void addIndicatorResults(Date date, List<Future<Stock>> results) {

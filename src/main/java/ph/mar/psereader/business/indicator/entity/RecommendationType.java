@@ -6,7 +6,7 @@ public enum RecommendationType {
 	TAKE_PROFIT("Take Profit"),
 	HOLD("Hold"),
 	SELL("Sell"),
-	SELL_ON_STRENGTH("Sell On Strength"),
+	SELL_INTO_STRENGTH("Sell Into Strength"),
 	RANGE_TRADE("Range Trade"),
 	LIGHTEN("Lighten");
 

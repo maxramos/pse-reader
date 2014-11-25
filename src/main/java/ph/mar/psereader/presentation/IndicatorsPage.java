@@ -73,9 +73,9 @@ public class IndicatorsPage implements Serializable {
 	}
 
 	public void updateCharts() {
-		List<Quote> quotes = indicatorManager.findAllQuoteByStockAndDate(selectedResult.getStock(), lastProcessedDate, 200);
+		List<Quote> quotes = indicatorManager.findAllQuoteByStockAndDate(selectedResult.getStock(), lastProcessedDate);
 		Collections.reverse(quotes);
-		List<IndicatorResult> indicatorResults = indicatorManager.findAllByStockAndDate(selectedResult.getStock(), lastProcessedDate, 200);
+		List<IndicatorResult> indicatorResults = indicatorManager.findAllByStockAndDate(selectedResult.getStock(), lastProcessedDate);
 		Collections.reverse(indicatorResults);
 
 		LineChartSeries priceSeries = new LineChartSeries();
@@ -91,16 +91,6 @@ public class IndicatorsPage implements Serializable {
 		LineChartSeries dSeries = new LineChartSeries();
 		dSeries.setLabel("%D");
 		dSeries.setShowMarker(false);
-
-		LineChartSeries adxSeries = new LineChartSeries();
-		adxSeries.setLabel("ADX");
-		adxSeries.setShowMarker(false);
-		LineChartSeries plusDiSeries = new LineChartSeries();
-		plusDiSeries.setLabel("+DI");
-		plusDiSeries.setShowMarker(false);
-		LineChartSeries minusDiSeries = new LineChartSeries();
-		minusDiSeries.setLabel("-DI");
-		minusDiSeries.setShowMarker(false);
 
 		LineChartSeries obvSeries = new LineChartSeries();
 		obvSeries.setShowMarker(false);

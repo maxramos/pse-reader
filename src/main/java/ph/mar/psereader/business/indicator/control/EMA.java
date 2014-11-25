@@ -89,37 +89,30 @@ public class EMA implements Callable<EmaResult> {
 		TrendType trend;
 		RecommendationType recommendation;
 
-		if (higher(lows)) {
-			if (above(lows, emas)) {
+		if (above(lows, emas)) {
+			if (higher(lows)) {
 				trend = TrendType.STRONG_UP;
 				recommendation = spike(price, previousPrice) ? RecommendationType.TAKE_PROFIT : RecommendationType.BUY;
-			} else if (below(highs, emas)) {
-				trend = TrendType.DOWN;
-				recommendation = RecommendationType.SELL_ON_STRENGTH;
 			} else {
-				trend = TrendType.SIDEWAYS;
-				recommendation = spike(price, previousPrice) ? RecommendationType.TAKE_PROFIT : RecommendationType.RANGE_TRADE;
-			}
-		} else if (lower(highs)) {
-			if (above(lows, emas)) {
 				trend = TrendType.UP;
-				recommendation = RecommendationType.HOLD;
-			} else if (below(highs, emas)) {
+				recommendation = spike(price, previousPrice) ? RecommendationType.TAKE_PROFIT : RecommendationType.HOLD;
+			}
+		} else if (below(highs, emas)) {
+			if (lower(highs)) {
 				trend = TrendType.STRONG_DOWN;
 				recommendation = RecommendationType.SELL;
 			} else {
-				trend = TrendType.SIDEWAYS;
-				recommendation = RecommendationType.LIGHTEN;
+				trend = TrendType.DOWN;
+				recommendation = higher(lows) ? RecommendationType.SELL_INTO_STRENGTH : RecommendationType.SELL;
 			}
 		} else {
-			if (above(lows, emas)) {
-				trend = TrendType.UP;
-				recommendation = RecommendationType.HOLD;
-			} else if (below(highs, emas)) {
-				trend = TrendType.DOWN;
-				recommendation = RecommendationType.SELL;
+			trend = TrendType.SIDEWAYS;
+
+			if (higher(lows)) {
+				recommendation = spike(price, previousPrice) ? RecommendationType.TAKE_PROFIT : RecommendationType.RANGE_TRADE;
+			} else if (lower(highs)) {
+				recommendation = RecommendationType.LIGHTEN;
 			} else {
-				trend = TrendType.SIDEWAYS;
 				recommendation = RecommendationType.HOLD;
 			}
 		}
