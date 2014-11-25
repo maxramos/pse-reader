@@ -16,12 +16,17 @@
 			<p:panelGrid id="header" styleClass="header">
 				<p:row>
 					<p:column styleClass="left">
-						<p:selectOneButton value="#{indicatorsPage.selectedRecommendation}">
+						<p:selectOneMenu id="selectedRecommendation" value="#{indicatorsPage.selectedRecommendation}">
 							<p:ajax listener="#{indicatorsPage.onRecommendationChange}" oncomplete="PF('indicatorResultsDataTable').filter();" />
 							<f:selectItem itemLabel="All" itemValue="ALL" />
 							<f:selectItem itemLabel="Buy" itemValue="BUY" />
+							<f:selectItem itemLabel="Take Profit" itemValue="TAKE_PROFIT" />
+							<f:selectItem itemLabel="Range Trade" itemValue="RANGE_TRADE" />
+							<f:selectItem itemLabel="Lighten" itemValue="LIGHTEN" />
 							<f:selectItem itemLabel="Sell" itemValue="SELL" />
-						</p:selectOneButton>
+							<f:selectItem itemLabel="Sell Into Strength" itemValue="SELL_INTO_STRENGTH" />
+							<f:selectItem itemLabel="Hold" itemValue="HOLD" />
+						</p:selectOneMenu>
 					</p:column>
 					<p:column styleClass="middle">
 						<h:outputText value="Indicators" rendered="#{not empty indicatorsPage.results}" />
@@ -329,7 +334,7 @@
 										<h:outputText value="ATR" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.dmiResult.atr}" styleClass="main">
+										<h:outputText value="#{result.atrResult.atr}" styleClass="main">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="7" />
 										</h:outputText>
 									</p:column>
