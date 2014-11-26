@@ -75,7 +75,6 @@ public class EMA implements Callable<EmaResult> {
 		}
 
 		List<Quote> quotes = _quotes.subList(0, 5);
-
 		Map<String, List<BigDecimal>> highsAndLows = extractHighsAndLows(quotes);
 		List<BigDecimal> highs = highsAndLows.get("high");
 		List<BigDecimal> lows = highsAndLows.get("low");
@@ -123,14 +122,6 @@ public class EMA implements Callable<EmaResult> {
 		return trendAndRecommendation;
 	}
 
-	private boolean higher(List<BigDecimal> lows) {
-		return gt(0, 2, lows) && gt(2, 4, lows);
-	}
-
-	private boolean lower(List<BigDecimal> highs) {
-		return lt(0, 2, highs) && lt(2, 4, highs);
-	}
-
 	private boolean above(List<BigDecimal> lows, List<BigDecimal> emas) {
 		for (int i = 0; i < emas.size(); i++) {
 			if (gt(i, lows, emas)) {
@@ -153,6 +144,14 @@ public class EMA implements Callable<EmaResult> {
 		}
 
 		return true;
+	}
+
+	private boolean higher(List<BigDecimal> lows) {
+		return gt(0, 2, lows) && gt(2, 4, lows);
+	}
+
+	private boolean lower(List<BigDecimal> highs) {
+		return lt(0, 2, highs) && lt(2, 4, highs);
 	}
 
 	private boolean spike(BigDecimal price, BigDecimal previousPrice) {
