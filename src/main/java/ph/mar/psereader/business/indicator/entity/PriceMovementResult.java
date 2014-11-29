@@ -7,7 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class PriceActionResult implements Serializable {
+public class PriceMovementResult implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -32,11 +32,11 @@ public class PriceActionResult implements Serializable {
 	@Column(name = "pct_change_from_52_week_high", nullable = false, precision = 5, scale = 4)
 	private BigDecimal percentChangeFrom52WeekHigh;
 
-	public PriceActionResult() {
+	public PriceMovementResult() {
 		super();
 	}
 
-	public PriceActionResult(BigDecimal price, BigDecimal priceChange, BigDecimal pricePercentChange, BigDecimal high52Week, BigDecimal low52Week,
+	public PriceMovementResult(BigDecimal price, BigDecimal priceChange, BigDecimal pricePercentChange, BigDecimal high52Week, BigDecimal low52Week,
 			BigDecimal changeFrom52WeekHigh, BigDecimal percentChangeFrom52WeekHigh) {
 		this.price = price;
 		this.priceChange = priceChange;
@@ -78,7 +78,7 @@ public class PriceActionResult implements Serializable {
 	@Override
 	public String toString() {
 		return String
-				.format("PriceActionResult [price=%s, priceChange=%s, pricePercentChange=%s, high52Week=%s, low52Week=%s, changeFrom52WeekHigh=%s, percentChangeFrom52WeekHigh=%s]",
+				.format("PriceMovementResult [price=%s, priceChange=%s, pricePercentChange=%s, high52Week=%s, low52Week=%s, changeFrom52WeekHigh=%s, percentChangeFrom52WeekHigh=%s]",
 						price, priceChange, pricePercentChange, high52Week, low52Week, changeFrom52WeekHigh, percentChangeFrom52WeekHigh);
 	}
 

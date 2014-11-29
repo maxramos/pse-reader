@@ -71,7 +71,7 @@
 							<p:panelGrid columns="2">
 								<p:chart type="ohlc" model="#{indicatorsPage.quoteModel}" rendered="#{indicatorsPage.quoteModel ne null}" styleClass="chart" />
 								<p:chart type="line" model="#{indicatorsPage.emaModel}" rendered="#{indicatorsPage.emaModel ne null}" styleClass="chart" />
-								<p:chart type="line" model="#{indicatorsPage.sstoModel}" rendered="#{indicatorsPage.sstoModel ne null}" styleClass="chart" />
+								<p:chart type="line" model="#{indicatorsPage.fstoModel}" rendered="#{indicatorsPage.fstoModel ne null}" styleClass="chart" />
 								<p:chart type="line" model="#{indicatorsPage.obvModel}" rendered="#{indicatorsPage.obvModel ne null}" styleClass="chart" />
 								<p:chart type="line" model="#{indicatorsPage.atrModel}" rendered="#{indicatorsPage.atrModel ne null}" styleClass="chart" />
 							</p:panelGrid>
@@ -142,16 +142,16 @@
 										<h:outputText value="Price" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.priceActionResult.price}" styleClass="#{result.movement}">
+										<h:outputText value="#{result.priceMovementResult.price}" styleClass="#{result.movement}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
 										<h:outputText value="(" />
-										<h:outputText value="#{result.priceActionResult.priceChange}" styleClass="#{result.movement}">
+										<h:outputText value="#{result.priceMovementResult.priceChange}" styleClass="#{result.movement}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.priceActionResult.pricePercentChange}" styleClass="#{result.movement}">
+										<h:outputText value="#{result.priceMovementResult.pricePercentChange}" styleClass="#{result.movement}">
 											<f:convertNumber type="percent" minFractionDigits="2" />
 										</h:outputText>
 										<h:outputText value=")" />
@@ -162,16 +162,16 @@
 										<h:outputText value="52 Week High" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.priceActionResult.high52Week}">
+										<h:outputText value="#{result.priceMovementResult.high52Week}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
 										<h:outputText value="(" />
-										<h:outputText value="#{result.priceActionResult.changeFrom52WeekHigh}" styleClass="#{result.risk}">
+										<h:outputText value="#{result.priceMovementResult.changeFrom52WeekHigh}" styleClass="#{result.risk}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.priceActionResult.percentChangeFrom52WeekHigh}" styleClass="#{result.risk}">
+										<h:outputText value="#{result.priceMovementResult.percentChangeFrom52WeekHigh}" styleClass="#{result.risk}">
 											<f:convertNumber type="percent" minFractionDigits="2" />
 										</h:outputText>
 										<h:outputText value=")" />
@@ -182,7 +182,7 @@
 										<h:outputText value="52 Week Low" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.priceActionResult.low52Week}">
+										<h:outputText value="#{result.priceMovementResult.low52Week}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 									</p:column>
@@ -311,12 +311,12 @@
 								</p:row>
 								<p:row>
 									<p:column>
-										<h:outputText value="SSTO" />
+										<h:outputText value="FSTO" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.sstoResult.slowK}" styleClass="main" minFractionDigits="2" />
+										<h:outputText value="#{result.fstoResult.fastK}" styleClass="main" minFractionDigits="2" />
 										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.sstoResult.slowD}" styleClass="signal" minFractionDigits="2" />
+										<h:outputText value="#{result.fstoResult.fastD}" styleClass="signal" minFractionDigits="2" />
 									</p:column>
 								</p:row>
 								<p:row>
@@ -376,7 +376,7 @@
 		this.cfg.seriesDefaults.rendererOptions.smooth = true;
 	}
 	
-	function extendSstoModel() {
+	function extendFstoModel() {
 		this.cfg.axes.xaxis.showTicks = false;
 		this.cfg.seriesDefaults.lineWidth = 1;
 		this.cfg.seriesDefaults.rendererOptions.smooth = true;

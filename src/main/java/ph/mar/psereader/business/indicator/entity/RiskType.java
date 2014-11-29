@@ -2,9 +2,9 @@ package ph.mar.psereader.business.indicator.entity;
 
 public enum RiskType {
 
-	SAFE("Safe"),
-	DANGER("Danger"),
-	CRITICAL("Critical");
+	LOW("Low"),
+	MODERATE("Moderate"),
+	HIGH("High");
 
 	private String name;
 

@@ -25,8 +25,8 @@ import ph.mar.psereader.business.indicator.entity.AtrResult;
 import ph.mar.psereader.business.indicator.entity.EmaResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.ObvResult;
-import ph.mar.psereader.business.indicator.entity.PriceActionResult;
-import ph.mar.psereader.business.indicator.entity.SstoResult;
+import ph.mar.psereader.business.indicator.entity.PriceMovementResult;
+import ph.mar.psereader.business.indicator.entity.FstoResult;
 import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
 import ph.mar.psereader.business.stock.entity.Stock;
@@ -49,24 +49,31 @@ public class IndicatorContainer {
 		List<IndicatorResult> results = findAllIndicatorResultsByStock(stock, indicatorResultSize);
 		BigDecimal[] highAndLow52Week = find52WeekHighAndLowByStockAndDate(stock, date);
 
-		Future<EmaResult> emaResult = executorService.submit(new EMA(quotes, results));
-		Future<AtrResult> atrResult = executorService.submit(new ATR(quotes, results));
-		Future<SstoResult> sstoResult = executorService.submit(new SSTO(quotes, results));
-		Future<ObvResult> obvResult = executorService.submit(new OBV(quotes, results));
-		Future<PriceActionResult> priceActionResult = executorService.submit(new PriceAction(quotes, highAndLow52Week));
+		PriceMovement priceMovement = new PriceMovement(quotes, highAndLow52Week);
+		EMA ema = new EMA(quotes, results);
+		FSTO fsto = new FSTO(quotes, results);
 
-		while (!emaResult.isDone() || !atrResult.isDone() || !sstoResult.isDone() || !obvResult.isDone() || !priceActionResult.isDone()) {
+		Future<PriceMovementResult> priceMovementResult = executorService.submit(priceMovement);
+		Future<EmaResult> emaResult = executorService.submit(ema);
+		Future<FstoResult> fstoResult = executorService.submit(fsto);
+		Future<ObvResult> obvResult = executorService.submit(new OBV(quotes, results));
+		Future<AtrResult> atrResult = executorService.submit(new ATR(quotes, results));
+
+		while (!priceMovementResult.isDone() || !emaResult.isDone() || !fstoResult.isDone() || !obvResult.isDone() || !atrResult.isDone()) {
 			continue;
 		}
 
 		try {
 			IndicatorResult indicatorResult = new IndicatorResult(stock, date);
+			indicatorResult.setMovement(priceMovement.getMovement());
+			indicatorResult.setTrend(ema.getTrend());
+			indicatorResult.setRecommendation(ema.getRecommendation());
+			indicatorResult.setRisk(fsto.getRisk());
+			indicatorResult.setPriceMovementResult(priceMovementResult.get());
 			indicatorResult.setEmaResult(emaResult.get());
-			indicatorResult.setAtrResult(atrResult.get());
-			indicatorResult.setSstoResult(sstoResult.get());
+			indicatorResult.setFstoResult(fstoResult.get());
 			indicatorResult.setObvResult(obvResult.get());
-			indicatorResult.setPriceActionResult(priceActionResult.get());
-			indicatorResult.process(quotes, results);
+			indicatorResult.setAtrResult(atrResult.get());
 			stock.add(indicatorResult);
 			log.info("{} processed.", stock.getSymbol());
 			return new AsyncResult<>(stock);

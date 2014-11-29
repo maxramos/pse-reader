@@ -18,9 +18,9 @@ import org.primefaces.model.chart.OhlcChartModel;
 import org.primefaces.model.chart.OhlcChartSeries;
 
 import ph.mar.psereader.business.indicator.boundary.IndicatorManager;
+import ph.mar.psereader.business.indicator.entity.FstoResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.RecommendationType;
-import ph.mar.psereader.business.indicator.entity.SstoResult;
 import ph.mar.psereader.business.operation.boundary.OperationManager;
 import ph.mar.psereader.business.stock.entity.Quote;
 
@@ -44,7 +44,7 @@ public class IndicatorsPage implements Serializable {
 	private IndicatorResult selectedResult;
 	private OhlcChartModel quoteModel;
 	private LineChartModel emaModel;
-	private LineChartModel sstoModel;
+	private LineChartModel fstoModel;
 	private LineChartModel obvModel;
 	private LineChartModel atrModel;
 
@@ -107,12 +107,12 @@ public class IndicatorsPage implements Serializable {
 		for (int i = 0; i < indicatorResults.size(); i++) {
 			IndicatorResult result = indicatorResults.get(i);
 
-			priceSeries.set(i, result.getPriceActionResult().getPrice());
+			priceSeries.set(i, result.getPriceMovementResult().getPrice());
 			emaSeries.set(i, result.getEmaResult().getEma());
 
-			SstoResult sstoResult = result.getSstoResult();
-			kSeries.set(i, sstoResult.getSlowK());
-			dSeries.set(i, sstoResult.getSlowD());
+			FstoResult fstoResult = result.getFstoResult();
+			kSeries.set(i, fstoResult.getFastK());
+			dSeries.set(i, fstoResult.getFastD());
 
 			obvSeries.set(i, result.getObvResult().getObv());
 
@@ -122,8 +122,8 @@ public class IndicatorsPage implements Serializable {
 		emaModel.addSeries(priceSeries);
 		emaModel.addSeries(emaSeries);
 
-		sstoModel.addSeries(kSeries);
-		sstoModel.addSeries(dSeries);
+		fstoModel.addSeries(kSeries);
+		fstoModel.addSeries(dSeries);
 
 		obvModel.addSeries(obvSeries);
 
@@ -162,8 +162,8 @@ public class IndicatorsPage implements Serializable {
 		return emaModel;
 	}
 
-	public LineChartModel getSstoModel() {
-		return sstoModel;
+	public LineChartModel getFstoModel() {
+		return fstoModel;
 	}
 
 	public LineChartModel getObvModel() {
@@ -192,15 +192,15 @@ public class IndicatorsPage implements Serializable {
 		emaModel.setZoom(true);
 		emaModel.setExtender("extendEmaModel");
 
-		sstoModel = new LineChartModel();
-		sstoModel.setTitle("SSTO");
-		sstoModel.setLegendPosition("nw");
-		sstoModel.setLegendCols(2);
-		sstoModel.setSeriesColors("000088, 880000");
-		sstoModel.setShadow(false);
-		sstoModel.setAnimate(true);
-		sstoModel.setZoom(true);
-		sstoModel.setExtender("extendSstoModel");
+		fstoModel = new LineChartModel();
+		fstoModel.setTitle("FSTO");
+		fstoModel.setLegendPosition("nw");
+		fstoModel.setLegendCols(2);
+		fstoModel.setSeriesColors("000088, 880000");
+		fstoModel.setShadow(false);
+		fstoModel.setAnimate(true);
+		fstoModel.setZoom(true);
+		fstoModel.setExtender("extendFstoModel");
 
 		obvModel = new LineChartModel();
 		obvModel.setTitle("OBV");

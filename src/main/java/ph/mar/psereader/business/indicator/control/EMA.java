@@ -24,6 +24,9 @@ public class EMA implements Callable<EmaResult> {
 	private List<Quote> _quotes;
 	private List<IndicatorResult> _results;
 
+	private TrendType trend;
+	private RecommendationType recommendation;
+
 	public EMA(List<Quote> quotes, List<IndicatorResult> results) {
 		_quotes = quotes;
 		_results = results;
@@ -34,6 +37,14 @@ public class EMA implements Callable<EmaResult> {
 		return _results.isEmpty() ? initialEma() : succeedingEma();
 	}
 
+	public TrendType getTrend() {
+		return trend;
+	}
+
+	public RecommendationType getRecommendation() {
+		return recommendation;
+	}
+
 	private EmaResult initialEma() {
 		List<Quote> period = _quotes.subList(0, PERIOD);
 		List<BigDecimal> closes = extractCloses(period);
@@ -41,9 +52,8 @@ public class EMA implements Callable<EmaResult> {
 		BigDecimal ema = IndicatorUtil.avg(closes, 10);
 		EmaResult result = new EmaResult(ema);
 
-		Map<String, Object> trendAndRecommendation = determineTrendAndRecommendation(ema);
-		result.setTrend((TrendType) trendAndRecommendation.get("trend"));
-		result.setRecommendation((RecommendationType) trendAndRecommendation.get("recommendation"));
+		determineTrendAndRecommendation(ema);
+
 		return result;
 	}
 
@@ -54,9 +64,8 @@ public class EMA implements Callable<EmaResult> {
 		BigDecimal ema = ema(close, previousEma, FACTOR, 10);
 		EmaResult result = new EmaResult(ema);
 
-		Map<String, Object> trendAndRecommendation = determineTrendAndRecommendation(ema);
-		result.setTrend((TrendType) trendAndRecommendation.get("trend"));
-		result.setRecommendation((RecommendationType) trendAndRecommendation.get("recommendation"));
+		determineTrendAndRecommendation(ema);
+
 		return result;
 	}
 
@@ -66,12 +75,11 @@ public class EMA implements Callable<EmaResult> {
 		return ema.divide(BigDecimal.ONE, decimalPlaces, RoundingMode.HALF_UP);
 	}
 
-	private Map<String, Object> determineTrendAndRecommendation(BigDecimal ema) {
+	private void determineTrendAndRecommendation(BigDecimal ema) {
 		if (_results.size() < 4) {
-			Map<String, Object> trendAndRecommendation = new HashMap<>(2);
-			trendAndRecommendation.put("trend", TrendType.SIDEWAYS);
-			trendAndRecommendation.put("recommendation", RecommendationType.HOLD);
-			return trendAndRecommendation;
+			trend = TrendType.SIDEWAYS;
+			recommendation = RecommendationType.HOLD;
+			return;
 		}
 
 		List<Quote> quotes = _quotes.subList(0, 5);
@@ -84,9 +92,6 @@ public class EMA implements Callable<EmaResult> {
 
 		BigDecimal price = quotes.get(0).getClose();
 		BigDecimal previousPrice = quotes.get(1).getClose();
-
-		TrendType trend;
-		RecommendationType recommendation;
 
 		if (above(lows, emas)) {
 			if (higher(lows)) {
@@ -115,11 +120,6 @@ public class EMA implements Callable<EmaResult> {
 				recommendation = RecommendationType.HOLD;
 			}
 		}
-
-		Map<String, Object> trendAndRecommendation = new HashMap<>(2);
-		trendAndRecommendation.put("trend", trend);
-		trendAndRecommendation.put("recommendation", recommendation);
-		return trendAndRecommendation;
 	}
 
 	private boolean above(List<BigDecimal> lows, List<BigDecimal> emas) {

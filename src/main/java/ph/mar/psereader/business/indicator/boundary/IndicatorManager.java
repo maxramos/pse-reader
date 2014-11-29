@@ -40,7 +40,7 @@ public class IndicatorManager {
 	@Inject
 	IndicatorContainer indicatorContainer;
 
-	int quoteSize = 21;
+	int quoteSize = 23;
 	int indicatorResultSize = 4;
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
