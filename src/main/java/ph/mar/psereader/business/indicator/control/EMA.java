@@ -93,7 +93,7 @@ public class EMA implements Callable<EmaResult> {
 		BigDecimal price = quotes.get(0).getClose();
 		BigDecimal previousPrice = quotes.get(1).getClose();
 
-		if (above(lows, emas)) {
+		if (rising(emas)) {
 			if (higher(lows)) {
 				trend = TrendType.STRONG_UP;
 				recommendation = spike(price, previousPrice) ? RecommendationType.TAKE_PROFIT : RecommendationType.BUY;
@@ -101,7 +101,7 @@ public class EMA implements Callable<EmaResult> {
 				trend = TrendType.UP;
 				recommendation = spike(price, previousPrice) ? RecommendationType.TAKE_PROFIT : RecommendationType.HOLD;
 			}
-		} else if (below(highs, emas)) {
+		} else if (falling(emas)) {
 			if (lower(highs)) {
 				trend = TrendType.STRONG_DOWN;
 				recommendation = RecommendationType.SELL;
@@ -122,9 +122,9 @@ public class EMA implements Callable<EmaResult> {
 		}
 	}
 
-	private boolean above(List<BigDecimal> lows, List<BigDecimal> emas) {
-		for (int i = 0; i < emas.size(); i++) {
-			if (gt(i, lows, emas)) {
+	private boolean rising(List<BigDecimal> emas) {
+		for (int i = 0; i < emas.size() - 1; i++) {
+			if (gt(i, i + 1, emas)) {
 				continue;
 			}
 
@@ -134,9 +134,9 @@ public class EMA implements Callable<EmaResult> {
 		return true;
 	}
 
-	private boolean below(List<BigDecimal> highs, List<BigDecimal> emas) {
-		for (int i = 0; i < emas.size(); i++) {
-			if (lt(i, highs, emas)) {
+	private boolean falling(List<BigDecimal> emas) {
+		for (int i = 0; i < emas.size() - 1; i++) {
+			if (lt(i, i + 1, emas)) {
 				continue;
 			}
 
@@ -160,20 +160,12 @@ public class EMA implements Callable<EmaResult> {
 		return pricePercentChange.compareTo(SPIKE_LEVEL) >= 0;
 	}
 
-	private boolean gt(int index1, int index2, List<BigDecimal> values) {
-		return values.get(index1).compareTo(values.get(index2)) > 0;
+	private boolean gt(int current, int previous, List<BigDecimal> values) {
+		return values.get(current).compareTo(values.get(previous)) > 0;
 	}
 
-	private boolean gt(int index, List<BigDecimal> values1, List<BigDecimal> values2) {
-		return values1.get(index).compareTo(values2.get(index)) > 0;
-	}
-
-	private boolean lt(int index1, int index2, List<BigDecimal> values) {
-		return values.get(index1).compareTo(values.get(index2)) < 0;
-	}
-
-	private boolean lt(int index, List<BigDecimal> values1, List<BigDecimal> values2) {
-		return values1.get(index).compareTo(values2.get(index)) < 0;
+	private boolean lt(int current, int previous, List<BigDecimal> values) {
+		return values.get(current).compareTo(values.get(previous)) < 0;
 	}
 
 	private List<BigDecimal> extractCloses(List<Quote> quotes) {
