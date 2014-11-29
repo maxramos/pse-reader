@@ -43,5 +43,4 @@ body { font-size: 0.8em !important; }
 
 .trend, .recommendation, .risk { font-weight: bold; white-space: nowrap; }
 .main { color: #000088; }
-.signal, .negative { color: #880000; }
-.positive { color: #008800; }
+.signal { color: #880000; }

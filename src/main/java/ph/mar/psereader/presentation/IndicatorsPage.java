@@ -12,6 +12,8 @@ import javax.inject.Named;
 
 import org.primefaces.event.ToggleEvent;
 import org.primefaces.model.Visibility;
+import org.primefaces.model.chart.BarChartModel;
+import org.primefaces.model.chart.BarChartSeries;
 import org.primefaces.model.chart.LineChartModel;
 import org.primefaces.model.chart.LineChartSeries;
 import org.primefaces.model.chart.OhlcChartModel;
@@ -43,6 +45,7 @@ public class IndicatorsPage implements Serializable {
 	private String selectedRecommendation;
 	private IndicatorResult selectedResult;
 	private OhlcChartModel quoteModel;
+	private BarChartModel volumeModel;
 	private LineChartModel emaModel;
 	private LineChartModel fstoModel;
 	private LineChartModel obvModel;
@@ -85,6 +88,10 @@ public class IndicatorsPage implements Serializable {
 		emaSeries.setLabel("EMA");
 		emaSeries.setShowMarker(false);
 
+		BarChartSeries volumeSeries = new BarChartSeries();
+		volumeSeries.setLabel("Volume");
+		priceSeries.setShowMarker(false);
+
 		LineChartSeries kSeries = new LineChartSeries();
 		kSeries.setLabel("%K");
 		kSeries.setShowMarker(false);
@@ -102,6 +109,8 @@ public class IndicatorsPage implements Serializable {
 			Quote quote = quotes.get(i);
 			quoteModel.add(new OhlcChartSeries(i, quote.getOpen().doubleValue(), quote.getHigh().doubleValue(), quote.getLow().doubleValue(), quote
 					.getClose().doubleValue()));
+
+			volumeSeries.set(i, quote.getVolume());
 		}
 
 		for (int i = 0; i < indicatorResults.size(); i++) {
@@ -118,6 +127,8 @@ public class IndicatorsPage implements Serializable {
 
 			atrSeries.set(i, result.getAtrResult().getAtr());
 		}
+
+		volumeModel.addSeries(volumeSeries);
 
 		emaModel.addSeries(priceSeries);
 		emaModel.addSeries(emaSeries);
@@ -158,6 +169,10 @@ public class IndicatorsPage implements Serializable {
 		return quoteModel;
 	}
 
+	public BarChartModel getVolumeModel() {
+		return volumeModel;
+	}
+
 	public LineChartModel getEmaModel() {
 		return emaModel;
 	}
@@ -181,6 +196,13 @@ public class IndicatorsPage implements Serializable {
 		quoteModel.setAnimate(true);
 		quoteModel.setZoom(true);
 		quoteModel.setExtender("extendQuoteModel");
+
+		volumeModel = new BarChartModel();
+		volumeModel.setTitle("Volume");
+		volumeModel.setShadow(false);
+		volumeModel.setAnimate(true);
+		volumeModel.setZoom(true);
+		volumeModel.setExtender("extendVolumeModel");
 
 		emaModel = new LineChartModel();
 		emaModel.setTitle("EMA");

@@ -70,6 +70,7 @@
 						<p:outputPanel id="chartOutputPanel" styleClass="table no-border">
 							<p:panelGrid columns="2">
 								<p:chart type="ohlc" model="#{indicatorsPage.quoteModel}" rendered="#{indicatorsPage.quoteModel ne null}" styleClass="chart" />
+								<p:chart type="bar" model="#{indicatorsPage.volumeModel}" rendered="#{indicatorsPage.volumeModel ne null}" styleClass="chart" />
 								<p:chart type="line" model="#{indicatorsPage.emaModel}" rendered="#{indicatorsPage.emaModel ne null}" styleClass="chart" />
 								<p:chart type="line" model="#{indicatorsPage.fstoModel}" rendered="#{indicatorsPage.fstoModel ne null}" styleClass="chart" />
 								<p:chart type="line" model="#{indicatorsPage.obvModel}" rendered="#{indicatorsPage.obvModel ne null}" styleClass="chart" />
@@ -167,11 +168,11 @@
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
 										<h:outputText value="(" />
-										<h:outputText value="#{result.priceMovementResult.changeFrom52WeekHigh}" styleClass="#{result.risk}">
+										<h:outputText value="#{result.priceMovementResult.changeFrom52WeekHigh}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.priceMovementResult.percentChangeFrom52WeekHigh}" styleClass="#{result.risk}">
+										<h:outputText value="#{result.priceMovementResult.percentChangeFrom52WeekHigh}">
 											<f:convertNumber type="percent" minFractionDigits="2" />
 										</h:outputText>
 										<h:outputText value=")" />
@@ -351,6 +352,7 @@
 <script type="text/javascript">
 	function extendQuoteModel() {
 		this.cfg.axes.xaxis.showTicks = false;
+		this.cfg.axes.xaxis.tickOptions.showGridline = false;
 		this.cfg.seriesDefaults.rendererOptions.candleStick = true;
 		this.cfg.seriesDefaults.rendererOptions.upBodyColor = "#008800";
 		this.cfg.seriesDefaults.rendererOptions.downBodyColor = "#880000";
@@ -370,14 +372,21 @@
 			}
 	}
 	
+	function extendVolumeModel() {
+		this.cfg.axes.xaxis.showTicks = false;
+		this.cfg.axes.xaxis.tickOptions.showGridline = false;
+	}
+	
 	function extendEmaModel() {
 		this.cfg.axes.xaxis.showTicks = false;
+		this.cfg.axes.xaxis.tickOptions.showGridline = false;
 		this.cfg.seriesDefaults.lineWidth = 1;
 		this.cfg.seriesDefaults.rendererOptions.smooth = true;
 	}
 	
 	function extendFstoModel() {
 		this.cfg.axes.xaxis.showTicks = false;
+		this.cfg.axes.xaxis.tickOptions.showGridline = false;
 		this.cfg.seriesDefaults.lineWidth = 1;
 		this.cfg.seriesDefaults.rendererOptions.smooth = true;
 		this.cfg.canvasOverlay = {
@@ -401,12 +410,14 @@
 	
 	function extendObvModel() {
 		this.cfg.axes.xaxis.showTicks = false;
+		this.cfg.axes.xaxis.tickOptions.showGridline = false;
 		this.cfg.seriesDefaults.lineWidth = 1;
 		this.cfg.seriesDefaults.rendererOptions.smooth = true;
 	}
 	
 	function extendAtrModel() {
 		this.cfg.axes.xaxis.showTicks = false;
+		this.cfg.axes.xaxis.tickOptions.showGridline = false;
 		this.cfg.seriesDefaults.lineWidth = 1;
 		this.cfg.seriesDefaults.rendererOptions.smooth = true;
 	}
