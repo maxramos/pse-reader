@@ -20,7 +20,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
-import ph.mar.psereader.business.indicator.entity.BoardLotAndPriceFluctuation;
 import ph.mar.psereader.business.report.entity.PseReportRow;
 
 @Entity

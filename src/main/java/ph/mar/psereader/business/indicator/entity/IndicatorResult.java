@@ -28,9 +28,9 @@ import ph.mar.psereader.business.stock.entity.Stock;
 @Table(name = "indicator_result", uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
 	@NamedQuery(name = IndicatorResult.ALL_BY_STOCK_AND_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.stock = :stock AND ir.date BETWEEN :start AND :end ORDER BY ir.date DESC"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.movement, ir.trend, ir.recommendation, ir.risk, ir.priceMovementResult, ir.emaResult, ir.fstoResult, ir.obvResult, ir.atrResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date ORDER BY ir.stock.symbol"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_RECOMMENDATION, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.movement, ir.trend, ir.recommendation, ir.risk, ir.priceMovementResult, ir.emaResult, ir.fstoResult, ir.obvResult, ir.atrResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date AND ir.recommendation = :recommendation ORDER BY ir.stock.symbol"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.priceMovementResult, ir.emaResult, ir.fstoResult, ir.obvResult, ir.atrResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.movement, ir.trend, ir.recommendation, ir.risk, ir.pmovResult, ir.emaResult, ir.fstoResult, ir.obvResult, ir.atrResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date ORDER BY ir.stock.symbol"),
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_RECOMMENDATION, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.movement, ir.trend, ir.recommendation, ir.risk, ir.pmovResult, ir.emaResult, ir.fstoResult, ir.obvResult, ir.atrResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date AND ir.recommendation = :recommendation ORDER BY ir.stock.symbol"),
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.pmovResult, ir.emaResult, ir.fstoResult, ir.obvResult, ir.atrResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
 public class IndicatorResult implements Serializable {
 
 	public static final String ALL_BY_STOCK_AND_DATE = "IndicatorResult.ALL_BY_STOCK_AND_DATE";
@@ -66,7 +66,7 @@ public class IndicatorResult implements Serializable {
 	private RiskType risk;
 
 	@Embedded
-	private PriceMovementResult priceMovementResult;
+	private PmovResult pmovResult;
 
 	@Embedded
 	private EmaResult emaResult;
@@ -98,9 +98,8 @@ public class IndicatorResult implements Serializable {
 	/**
 	 * Used for processing indicator results.
 	 */
-	public IndicatorResult(PriceMovementResult priceMovementResult, EmaResult emaResult, FstoResult fstoResult, ObvResult obvResult,
-			AtrResult atrResult) {
-		this.priceMovementResult = priceMovementResult;
+	public IndicatorResult(PmovResult pmovResult, EmaResult emaResult, FstoResult fstoResult, ObvResult obvResult, AtrResult atrResult) {
+		this.pmovResult = pmovResult;
 		this.emaResult = emaResult;
 		this.fstoResult = fstoResult;
 		this.obvResult = obvResult;
@@ -110,14 +109,13 @@ public class IndicatorResult implements Serializable {
 	/**
 	 * Used for displaying indicator results.
 	 */
-	public IndicatorResult(MovementType movement, TrendType trend, RecommendationType recommendation, RiskType risk,
-			PriceMovementResult priceMovementResult, EmaResult emaResult, FstoResult fstoResult, ObvResult obvResult, AtrResult atrResult,
-			Stock stock, Quote quote) {
+	public IndicatorResult(MovementType movement, TrendType trend, RecommendationType recommendation, RiskType risk, PmovResult pmovResult,
+			EmaResult emaResult, FstoResult fstoResult, ObvResult obvResult, AtrResult atrResult, Stock stock, Quote quote) {
 		this.movement = movement;
 		this.trend = trend;
 		this.recommendation = recommendation;
 		this.risk = risk;
-		this.priceMovementResult = priceMovementResult;
+		this.pmovResult = pmovResult;
 		this.emaResult = emaResult;
 		this.fstoResult = fstoResult;
 		this.obvResult = obvResult;
@@ -166,12 +164,12 @@ public class IndicatorResult implements Serializable {
 		this.risk = risk;
 	}
 
-	public PriceMovementResult getPriceMovementResult() {
-		return priceMovementResult;
+	public PmovResult getPmovResult() {
+		return pmovResult;
 	}
 
-	public void setPriceMovementResult(PriceMovementResult priceMovementResult) {
-		this.priceMovementResult = priceMovementResult;
+	public void setPmovResult(PmovResult pmovResult) {
+		this.pmovResult = pmovResult;
 	}
 
 	public EmaResult getEmaResult() {
@@ -217,8 +215,8 @@ public class IndicatorResult implements Serializable {
 	@Override
 	public String toString() {
 		return String
-				.format("IndicatorResult [id=%s, date=%s, movement=%s, trend=%s, recommendation=%s, risk=%s, priceMovementResult=%s, emaResult=%s, fstoResult=%s, obvResult=%s, atrResult=%s, stock=%s]",
-						id, date, movement, trend, recommendation, risk, priceMovementResult, emaResult, fstoResult, obvResult, atrResult,
+				.format("IndicatorResult [id=%s, date=%s, movement=%s, trend=%s, recommendation=%s, risk=%s, pmovResult=%s, emaResult=%s, fstoResult=%s, obvResult=%s, atrResult=%s, stock=%s]",
+						id, date, movement, trend, recommendation, risk, pmovResult, emaResult, fstoResult, obvResult, atrResult,
 						stock == null ? null : stock.getId());
 	}
 

@@ -1,4 +1,4 @@
-package ph.mar.psereader.business.indicator.entity;
+package ph.mar.psereader.business.stock.entity;
 
 import java.math.BigDecimal;
 

@@ -143,16 +143,16 @@
 										<h:outputText value="Price" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.priceMovementResult.price}" styleClass="#{result.movement}">
+										<h:outputText value="#{result.pmovResult.price}" styleClass="#{result.movement}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
 										<h:outputText value="(" />
-										<h:outputText value="#{result.priceMovementResult.priceChange}" styleClass="#{result.movement}">
+										<h:outputText value="#{result.pmovResult.priceChange}" styleClass="#{result.movement}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.priceMovementResult.pricePercentChange}" styleClass="#{result.movement}">
+										<h:outputText value="#{result.pmovResult.pricePercentChange}" styleClass="#{result.movement}">
 											<f:convertNumber type="percent" minFractionDigits="2" />
 										</h:outputText>
 										<h:outputText value=")" />
@@ -163,16 +163,16 @@
 										<h:outputText value="52 Week High" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.priceMovementResult.high52Week}">
+										<h:outputText value="#{result.pmovResult.high52Week}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
 										<h:outputText value="(" />
-										<h:outputText value="#{result.priceMovementResult.changeFrom52WeekHigh}">
+										<h:outputText value="#{result.pmovResult.changeFrom52WeekHigh}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 										<p:spacer style="width: 1em;" />
-										<h:outputText value="#{result.priceMovementResult.percentChangeFrom52WeekHigh}">
+										<h:outputText value="#{result.pmovResult.percentChangeFrom52WeekHigh}">
 											<f:convertNumber type="percent" minFractionDigits="2" />
 										</h:outputText>
 										<h:outputText value=")" />
@@ -183,7 +183,7 @@
 										<h:outputText value="52 Week Low" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.priceMovementResult.low52Week}">
+										<h:outputText value="#{result.pmovResult.low52Week}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
 									</p:column>

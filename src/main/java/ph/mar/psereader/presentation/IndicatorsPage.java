@@ -116,7 +116,7 @@ public class IndicatorsPage implements Serializable {
 		for (int i = 0; i < indicatorResults.size(); i++) {
 			IndicatorResult result = indicatorResults.get(i);
 
-			priceSeries.set(i, result.getPriceMovementResult().getPrice());
+			priceSeries.set(i, result.getPmovResult().getPrice());
 			emaSeries.set(i, result.getEmaResult().getEma());
 
 			FstoResult fstoResult = result.getFstoResult();

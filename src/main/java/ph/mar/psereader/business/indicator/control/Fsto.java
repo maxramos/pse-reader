@@ -12,7 +12,7 @@ import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.RiskType;
 import ph.mar.psereader.business.stock.entity.Quote;
 
-public class FSTO implements Callable<FstoResult> {
+public class Fsto implements Callable<FstoResult> {
 
 	private static final int PERIOD = 21;
 	private static final int SMOOTHING = 3;
@@ -26,7 +26,7 @@ public class FSTO implements Callable<FstoResult> {
 
 	private RiskType risk;
 
-	public FSTO(List<Quote> quotes, List<IndicatorResult> results) {
+	public Fsto(List<Quote> quotes, List<IndicatorResult> results) {
 		_quotes = quotes;
 		_results = results;
 	}

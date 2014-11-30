@@ -11,10 +11,10 @@ public class FstoResult implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Column(name = "fsto_fast_k", nullable = false, precision = 5, scale = 2)
+	@Column(name = "fast_k", nullable = false, precision = 5, scale = 2)
 	private BigDecimal fastK;
 
-	@Column(name = "fsto_fast_d", nullable = false, precision = 5, scale = 2)
+	@Column(name = "fast_d", nullable = false, precision = 5, scale = 2)
 	private BigDecimal fastD;
 
 	public FstoResult() {

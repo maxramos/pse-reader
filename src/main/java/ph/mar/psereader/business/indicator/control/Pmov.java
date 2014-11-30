@@ -6,23 +6,23 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import ph.mar.psereader.business.indicator.entity.MovementType;
-import ph.mar.psereader.business.indicator.entity.PriceMovementResult;
+import ph.mar.psereader.business.indicator.entity.PmovResult;
 import ph.mar.psereader.business.stock.entity.Quote;
 
-public class PriceMovement implements Callable<PriceMovementResult> {
+public class Pmov implements Callable<PmovResult> {
 
 	private List<Quote> _quotes;
 	BigDecimal[] _highAndLow52Week;
 
 	private MovementType movement;
 
-	public PriceMovement(List<Quote> quotes, BigDecimal[] highAndLow52Week) {
+	public Pmov(List<Quote> quotes, BigDecimal[] highAndLow52Week) {
 		_quotes = quotes;
 		_highAndLow52Week = highAndLow52Week;
 	}
 
 	@Override
-	public PriceMovementResult call() throws Exception {
+	public PmovResult call() throws Exception {
 		BigDecimal previousPrice = _quotes.get(1).getClose();
 
 		BigDecimal price = _quotes.get(0).getClose();
@@ -32,7 +32,7 @@ public class PriceMovement implements Callable<PriceMovementResult> {
 		BigDecimal low52Week = _highAndLow52Week[1];
 		BigDecimal changeFrom52WeekHigh = price.subtract(high52Week);
 		BigDecimal percentChangeFrom52WeekHigh = changeFrom52WeekHigh.divide(high52Week, 4, RoundingMode.HALF_UP);
-		PriceMovementResult result = new PriceMovementResult(price, priceChange, pricePercentChange, high52Week, low52Week, changeFrom52WeekHigh,
+		PmovResult result = new PmovResult(price, priceChange, pricePercentChange, high52Week, low52Week, changeFrom52WeekHigh,
 				percentChangeFrom52WeekHigh);
 
 		determineMovement(priceChange);

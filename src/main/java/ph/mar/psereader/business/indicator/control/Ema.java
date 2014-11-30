@@ -14,7 +14,7 @@ import ph.mar.psereader.business.indicator.entity.RecommendationType;
 import ph.mar.psereader.business.indicator.entity.TrendType;
 import ph.mar.psereader.business.stock.entity.Quote;
 
-public class EMA implements Callable<EmaResult> {
+public class Ema implements Callable<EmaResult> {
 
 	private static final int PERIOD = 21;
 	private static final BigDecimal FACTOR = new BigDecimal("2").divide(new BigDecimal(PERIOD).add(BigDecimal.ONE), 10, RoundingMode.HALF_UP);
@@ -27,7 +27,7 @@ public class EMA implements Callable<EmaResult> {
 	private TrendType trend;
 	private RecommendationType recommendation;
 
-	public EMA(List<Quote> quotes, List<IndicatorResult> results) {
+	public Ema(List<Quote> quotes, List<IndicatorResult> results) {
 		_quotes = quotes;
 		_results = results;
 	}

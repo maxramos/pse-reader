@@ -10,14 +10,14 @@ import ph.mar.psereader.business.indicator.entity.AtrResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.stock.entity.Quote;
 
-public class ATR implements Callable<AtrResult> {
+public class Atr implements Callable<AtrResult> {
 
 	private static final int PERIOD = 8;
 
 	private List<Quote> _quotes;
 	private List<IndicatorResult> _results;
 
-	public ATR(List<Quote> quotes, List<IndicatorResult> results) {
+	public Atr(List<Quote> quotes, List<IndicatorResult> results) {
 		_quotes = quotes;
 		_results = results;
 	}

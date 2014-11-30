@@ -7,36 +7,36 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class PriceMovementResult implements Serializable {
+public class PmovResult implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@Column(nullable = false, precision = 8, scale = 4)
 	private BigDecimal price;
 
-	@Column(name = "price_change", nullable = false, precision = 8, scale = 4)
+	@Column(name = "price_chg", nullable = false, precision = 8, scale = 4)
 	private BigDecimal priceChange;
 
-	@Column(name = "price_pct_change", nullable = false, precision = 6, scale = 4)
+	@Column(name = "price_pct_chg", nullable = false, precision = 6, scale = 4)
 	private BigDecimal pricePercentChange;
 
-	@Column(name = "high_52_week", nullable = false, precision = 8, scale = 4)
+	@Column(name = "high_52_wk", nullable = false, precision = 8, scale = 4)
 	private BigDecimal high52Week;
 
-	@Column(name = "low_52_week", nullable = false, precision = 8, scale = 4)
+	@Column(name = "low_52_wk", nullable = false, precision = 8, scale = 4)
 	private BigDecimal low52Week;
 
-	@Column(name = "change_from_52_week_high", nullable = false, precision = 8, scale = 4)
+	@Column(name = "chg_fr_52_wk_high", nullable = false, precision = 8, scale = 4)
 	private BigDecimal changeFrom52WeekHigh;
 
-	@Column(name = "pct_change_from_52_week_high", nullable = false, precision = 5, scale = 4)
+	@Column(name = "pct_chg_fr_52_wk_high", nullable = false, precision = 5, scale = 4)
 	private BigDecimal percentChangeFrom52WeekHigh;
 
-	public PriceMovementResult() {
+	public PmovResult() {
 		super();
 	}
 
-	public PriceMovementResult(BigDecimal price, BigDecimal priceChange, BigDecimal pricePercentChange, BigDecimal high52Week, BigDecimal low52Week,
+	public PmovResult(BigDecimal price, BigDecimal priceChange, BigDecimal pricePercentChange, BigDecimal high52Week, BigDecimal low52Week,
 			BigDecimal changeFrom52WeekHigh, BigDecimal percentChangeFrom52WeekHigh) {
 		this.price = price;
 		this.priceChange = priceChange;
@@ -78,7 +78,7 @@ public class PriceMovementResult implements Serializable {
 	@Override
 	public String toString() {
 		return String
-				.format("PriceMovementResult [price=%s, priceChange=%s, pricePercentChange=%s, high52Week=%s, low52Week=%s, changeFrom52WeekHigh=%s, percentChangeFrom52WeekHigh=%s]",
+				.format("PmovResult [price=%s, priceChange=%s, pricePercentChange=%s, high52Week=%s, low52Week=%s, changeFrom52WeekHigh=%s, percentChangeFrom52WeekHigh=%s]",
 						price, priceChange, pricePercentChange, high52Week, low52Week, changeFrom52WeekHigh, percentChangeFrom52WeekHigh);
 	}
 

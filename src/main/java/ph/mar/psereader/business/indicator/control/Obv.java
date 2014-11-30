@@ -8,12 +8,12 @@ import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.ObvResult;
 import ph.mar.psereader.business.stock.entity.Quote;
 
-public class OBV implements Callable<ObvResult> {
+public class Obv implements Callable<ObvResult> {
 
 	private List<Quote> _quotes;
 	private List<IndicatorResult> _results;
 
-	public OBV(List<Quote> quotes, List<IndicatorResult> results) {
+	public Obv(List<Quote> quotes, List<IndicatorResult> results) {
 		_quotes = quotes;
 		_results = results;
 	}
