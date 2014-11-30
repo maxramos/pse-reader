@@ -17,6 +17,7 @@ body { font-size: 0.8em !important; }
 .table-row { display: table-row; }
 .table-cell { display: table-cell; }
 
+.menu { width: 210px; border: none; }
 .menu .selected { color: #FFFFFF; background: #6580A1; }
 
 .header, .header tr, .header td { background: none; border: none !important; padding: 0em !important; }

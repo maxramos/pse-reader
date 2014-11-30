@@ -9,7 +9,7 @@
 
 <ui:define name="content">
 <h:outputScript name="jqplot.canvasOverlay.js" library="js" />
-<h:form id="indicatorForm">
+<h:form id="indicatorDetailedForm">
 	<p:dataTable id="indicatorResultsDataTable" widgetVar="indicatorResultsDataTable" var="result" value="#{indicatorsPage.results}" filteredValue="#{indicatorsPage.filteredResults}" rowExpandMode="single">
 		<p:ajax event="rowToggle" listener="#{indicatorsPage.onRowToggle}" />
 		<f:facet name="header">
@@ -48,6 +48,24 @@
 		
 		<p:column headerText="Symbol" sortBy="#{result.stock.symbol}" filterBy="#{result.stock.symbol}" filterMatchMode="exact" styleClass="text" >
 			<h:outputText value="#{result.stock.symbol}" />
+		</p:column>
+		
+		<p:column headerText="%Chg Price" sortBy="#{result.pmovResult.pricePercentChange}" styleClass="numeric">
+			<h:outputText value="#{result.pmovResult.pricePercentChange}" styleClass="#{result.movement}">
+				<f:convertNumber type="percent" minFractionDigits="2" />
+			</h:outputText>
+		</p:column>
+		
+		<p:column headerText="%Chg 52 Wk High" sortBy="#{result.pmovResult.percentChangeFrom52WeekHigh}" styleClass="numeric">
+			<h:outputText value="#{result.pmovResult.percentChangeFrom52WeekHigh}">
+				<f:convertNumber type="percent" minFractionDigits="2" />
+			</h:outputText>
+		</p:column>
+		
+		<p:column headerText="%Ytd Yield" sortBy="#{result.pmovResult.percentYearToDateYield}" styleClass="numeric">
+			<h:outputText value="#{result.pmovResult.percentYearToDateYield}">
+				<f:convertNumber type="percent" minFractionDigits="2" />
+			</h:outputText>
 		</p:column>
 		
 		<p:column headerText="Trend" styleClass="text">
@@ -140,6 +158,100 @@
 							<p:panelGrid styleClass="indicator-data-panelgrid no-border">
 								<p:row>
 									<p:column>
+										<h:outputText value="Bid" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.quote.bid}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<h:outputText value="Ask" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.quote.ask}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<h:outputText value="Open" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.quote.open}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<h:outputText value="High" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.quote.high}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<h:outputText value="Low" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.quote.low}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<h:outputText value="Close" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.quote.close}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<h:outputText value="Volume" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.quote.volume}">
+											<f:convertNumber type="number" groupingUsed="true" />
+										</h:outputText>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<h:outputText value="Value" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.quote.value}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
+										<h:outputText value="Foreign" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{result.quote.foreignBuySell}">
+											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										</h:outputText>
+									</p:column>
+								</p:row>
+							</p:panelGrid>
+						</p:panel>
+						<p:panel header="Statistics" styleClass="indicator-data-panel no-border">
+							<p:panelGrid styleClass="indicator-data-panelgrid no-border">
+								<p:row>
+									<p:column>
 										<h:outputText value="Price" />
 									</p:column>
 									<p:column>
@@ -190,82 +302,18 @@
 								</p:row>
 								<p:row>
 									<p:column>
-										<h:outputText value="Open" />
+										<h:outputText value="Ytd Yield" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{result.quote.open}">
+										<h:outputText value="#{result.pmovResult.yearToDateYield}">
 											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 										</h:outputText>
-									</p:column>
-								</p:row>
-								<p:row>
-									<p:column>
-										<h:outputText value="High" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.quote.high}">
-											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+										<p:spacer style="width: 1em;" />
+										<h:outputText value="(" />
+										<h:outputText value="#{result.pmovResult.percentYearToDateYield}">
+											<f:convertNumber type="percent" minFractionDigits="2" />
 										</h:outputText>
-									</p:column>
-								</p:row>
-								<p:row>
-									<p:column>
-										<h:outputText value="Low" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.quote.low}">
-											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-										</h:outputText>
-									</p:column>
-								</p:row>
-								<p:row>
-									<p:column>
-										<h:outputText value="Bid" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.quote.bid}">
-											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-										</h:outputText>
-									</p:column>
-								</p:row>
-								<p:row>
-									<p:column>
-										<h:outputText value="Ask" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.quote.ask}">
-											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-										</h:outputText>
-									</p:column>
-								</p:row>
-								<p:row>
-									<p:column>
-										<h:outputText value="Volume" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.quote.volume}">
-											<f:convertNumber type="number" groupingUsed="true" />
-										</h:outputText>
-									</p:column>
-								</p:row>
-								<p:row>
-									<p:column>
-										<h:outputText value="Value" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.quote.value}">
-											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-										</h:outputText>
-									</p:column>
-								</p:row>
-								<p:row>
-									<p:column>
-										<h:outputText value="Foreign" />
-									</p:column>
-									<p:column>
-										<h:outputText value="#{result.quote.foreignBuySell}">
-											<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-										</h:outputText>
+										<h:outputText value=")" />
 									</p:column>
 								</p:row>
 							</p:panelGrid>

@@ -12,18 +12,21 @@ import ph.mar.psereader.business.stock.entity.Quote;
 public class Pmov implements Callable<PmovResult> {
 
 	private List<Quote> _quotes;
-	BigDecimal[] _highAndLow52Week;
+	private BigDecimal[] _highAndLow52Week;
+	private Quote _currentYearFirstQuote;
 
 	private MovementType movement;
 
-	public Pmov(List<Quote> quotes, BigDecimal[] highAndLow52Week) {
+	public Pmov(List<Quote> quotes, BigDecimal[] highAndLow52Week, Quote currentYearFirstQuote) {
 		_quotes = quotes;
 		_highAndLow52Week = highAndLow52Week;
+		_currentYearFirstQuote = currentYearFirstQuote;
 	}
 
 	@Override
 	public PmovResult call() throws Exception {
 		BigDecimal previousPrice = _quotes.get(1).getClose();
+		BigDecimal currentYearFirstClose = _currentYearFirstQuote.getClose();
 
 		BigDecimal price = _quotes.get(0).getClose();
 		BigDecimal priceChange = price.subtract(previousPrice);
@@ -32,8 +35,10 @@ public class Pmov implements Callable<PmovResult> {
 		BigDecimal low52Week = _highAndLow52Week[1];
 		BigDecimal changeFrom52WeekHigh = price.subtract(high52Week);
 		BigDecimal percentChangeFrom52WeekHigh = changeFrom52WeekHigh.divide(high52Week, 4, RoundingMode.HALF_UP);
+		BigDecimal yearToDateYield = price.subtract(currentYearFirstClose);
+		BigDecimal percentYearToDateYield = yearToDateYield.divide(currentYearFirstClose, 4, RoundingMode.HALF_UP);
 		PmovResult result = new PmovResult(price, priceChange, pricePercentChange, high52Week, low52Week, changeFrom52WeekHigh,
-				percentChangeFrom52WeekHigh);
+				percentChangeFrom52WeekHigh, yearToDateYield, percentYearToDateYield);
 
 		determineMovement(priceChange);
 

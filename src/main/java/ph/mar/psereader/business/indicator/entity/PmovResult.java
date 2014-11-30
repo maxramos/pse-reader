@@ -32,12 +32,18 @@ public class PmovResult implements Serializable {
 	@Column(name = "pct_chg_fr_52_wk_high", nullable = false, precision = 5, scale = 4)
 	private BigDecimal percentChangeFrom52WeekHigh;
 
+	@Column(name = "year_to_date_yield", nullable = false, precision = 8, scale = 4)
+	private BigDecimal yearToDateYield;
+
+	@Column(name = "pct_year_to_date_yield", nullable = false, precision = 6, scale = 4)
+	private BigDecimal percentYearToDateYield;
+
 	public PmovResult() {
 		super();
 	}
 
 	public PmovResult(BigDecimal price, BigDecimal priceChange, BigDecimal pricePercentChange, BigDecimal high52Week, BigDecimal low52Week,
-			BigDecimal changeFrom52WeekHigh, BigDecimal percentChangeFrom52WeekHigh) {
+			BigDecimal changeFrom52WeekHigh, BigDecimal percentChangeFrom52WeekHigh, BigDecimal yearToDateYield, BigDecimal percentYearToDateYield) {
 		this.price = price;
 		this.priceChange = priceChange;
 		this.pricePercentChange = pricePercentChange;
@@ -45,6 +51,8 @@ public class PmovResult implements Serializable {
 		this.low52Week = low52Week;
 		this.changeFrom52WeekHigh = changeFrom52WeekHigh;
 		this.percentChangeFrom52WeekHigh = percentChangeFrom52WeekHigh;
+		this.yearToDateYield = yearToDateYield;
+		this.percentYearToDateYield = percentYearToDateYield;
 	}
 
 	public BigDecimal getPrice() {
@@ -75,11 +83,20 @@ public class PmovResult implements Serializable {
 		return percentChangeFrom52WeekHigh;
 	}
 
+	public BigDecimal getYearToDateYield() {
+		return yearToDateYield;
+	}
+
+	public BigDecimal getPercentYearToDateYield() {
+		return percentYearToDateYield;
+	}
+
 	@Override
 	public String toString() {
 		return String
-				.format("PmovResult [price=%s, priceChange=%s, pricePercentChange=%s, high52Week=%s, low52Week=%s, changeFrom52WeekHigh=%s, percentChangeFrom52WeekHigh=%s]",
-						price, priceChange, pricePercentChange, high52Week, low52Week, changeFrom52WeekHigh, percentChangeFrom52WeekHigh);
+				.format("PmovResult [price=%s, priceChange=%s, pricePercentChange=%s, high52Week=%s, low52Week=%s, changeFrom52WeekHigh=%s, percentChangeFrom52WeekHigh=%s, yearToDateYield=%s, percentYearToDateYield=%s]",
+						price, priceChange, pricePercentChange, high52Week, low52Week, changeFrom52WeekHigh, percentChangeFrom52WeekHigh,
+						yearToDateYield, percentYearToDateYield);
 	}
 
 }

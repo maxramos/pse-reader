@@ -23,10 +23,10 @@ import org.slf4j.Logger;
 
 import ph.mar.psereader.business.indicator.entity.AtrResult;
 import ph.mar.psereader.business.indicator.entity.EmaResult;
+import ph.mar.psereader.business.indicator.entity.FstoResult;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.indicator.entity.ObvResult;
 import ph.mar.psereader.business.indicator.entity.PmovResult;
-import ph.mar.psereader.business.indicator.entity.FstoResult;
 import ph.mar.psereader.business.repository.control.Repository;
 import ph.mar.psereader.business.stock.entity.Quote;
 import ph.mar.psereader.business.stock.entity.Stock;
@@ -48,8 +48,9 @@ public class IndicatorContainer {
 		List<Quote> quotes = findAllQuotesByStockAndDate(stock, date, quoteSize);
 		List<IndicatorResult> results = findAllIndicatorResultsByStock(stock, indicatorResultSize);
 		BigDecimal[] highAndLow52Week = find52WeekHighAndLowByStockAndDate(stock, date);
+		Quote currentYearFirstQuote = findCurrentYearFirstQuote(stock, date);
 
-		Pmov pmov = new Pmov(quotes, highAndLow52Week);
+		Pmov pmov = new Pmov(quotes, highAndLow52Week, currentYearFirstQuote);
 		Ema ema = new Ema(quotes, results);
 		Fsto fsto = new Fsto(quotes, results);
 
@@ -102,4 +103,14 @@ public class IndicatorContainer {
 				.asParameters());
 		return Arrays.copyOf(results, 2, BigDecimal[].class);
 	}
+
+	private Quote findCurrentYearFirstQuote(Stock stock, Date date) {
+		LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		localDate = localDate.withDayOfMonth(1).withMonth(1);
+		Date firstDateOfTheYear = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		List<Quote> quotes = repository.find(Quote.FIRST_QUOTE_BY_STOCK_AND_DATE,
+				with("stock", stock).and("date", firstDateOfTheYear).asParameters(), Quote.class, 1);
+		return quotes.get(0);
+	}
+
 }
