@@ -46,6 +46,7 @@ public class PseReportReader {
 	private static final Pattern TRADES_COUNT = Pattern.compile("NO. OF TRADES: (\\d+)\n");
 	private static final Pattern TOTAL_FOREIGN_BUY = Pattern.compile("FOREIGN BUYING: Php (\\d+(\\.\\d+)?)\n");
 	private static final Pattern TOTAL_FOREIGN_SELL = Pattern.compile("FOREIGN SELLING: Php (\\d+(\\.\\d+)?)\n");
+	private static final Pattern PSE_INDECES = Pattern.compile("(?s)S E C T O R A L S U M M A R Y\n(.*)GRAND TOTAL");
 	private static final Pattern SUSPENDED_STOCKS = Pattern
 			.compile("(?s)Securities Under Suspension by the Exchange as of [a-zA-Z]{3,9} \\d{2} \\d{4}\n(.*)");
 
@@ -60,10 +61,10 @@ public class PseReportReader {
 		}
 	}
 
-	public PseReport read(String filename) {
+	public String read(String filename) {
 		try (PDDocument document = PDDocument.load(new File(filename))) {
-			return parseReport(extractContent(document));
-		} catch (IOException | ParseException e) {
+			return extractContent(document);
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -180,10 +181,11 @@ public class PseReportReader {
 	}
 
 	private void parsePseIndeces(PseReport report, String marketSummaryData) {
+		String pseIndeces = extractSummaryData(PSE_INDECES, marketSummaryData);
 		List<PseIndex> indeces = new ArrayList<>();
 
 		for (PseIndex.Type type : PseIndex.Type.values()) {
-			String indexData = extractSummaryData(type.getRegex(), marketSummaryData);
+			String indexData = extractSummaryData(type.getRegex(), pseIndeces);
 
 			if (indexData == null) {
 				continue;
