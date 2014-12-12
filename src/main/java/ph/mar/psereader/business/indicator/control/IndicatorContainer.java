@@ -51,7 +51,7 @@ public class IndicatorContainer {
 		Quote currentYearFirstQuote = findCurrentYearFirstQuote(stock, date);
 
 		Pmov pmov = new Pmov(quotes, highAndLow52Week, currentYearFirstQuote);
-		Ema ema = new Ema(quotes, results);
+		Ema ema = new Ema(quotes, results, indicatorResultSize);
 		Fsto fsto = new Fsto(quotes, results);
 
 		Future<PmovResult> pmovResult = executorService.submit(pmov);

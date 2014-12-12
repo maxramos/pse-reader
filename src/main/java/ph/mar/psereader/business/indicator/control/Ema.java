@@ -23,13 +23,15 @@ public class Ema implements Callable<EmaResult> {
 
 	private List<Quote> _quotes;
 	private List<IndicatorResult> _results;
+	private int _minResultSize;
 
 	private TrendType trend;
 	private RecommendationType recommendation;
 
-	public Ema(List<Quote> quotes, List<IndicatorResult> results) {
+	public Ema(List<Quote> quotes, List<IndicatorResult> results, int minResultSize) {
 		_quotes = quotes;
 		_results = results;
+		_minResultSize = minResultSize;
 	}
 
 	@Override
@@ -76,25 +78,25 @@ public class Ema implements Callable<EmaResult> {
 	}
 
 	private void determineTrendAndRecommendation(BigDecimal ema) {
-		if (_results.size() < 4) {
+		if (_results.size() < _minResultSize) {
 			trend = TrendType.SIDEWAYS;
 			recommendation = RecommendationType.HOLD;
 			return;
 		}
 
-		List<Quote> quotes = _quotes.subList(0, 5);
+		List<Quote> quotes = _quotes.subList(0, _minResultSize + 1);
 		Map<String, List<BigDecimal>> highsAndLows = extractHighsAndLows(quotes);
 		List<BigDecimal> highs = highsAndLows.get("high");
 		List<BigDecimal> lows = highsAndLows.get("low");
 
-		List<IndicatorResult> results = _results.subList(0, 4);
+		List<IndicatorResult> results = _results.subList(0, _minResultSize);
 		List<BigDecimal> emas = extractEmas(ema, results);
 
 		BigDecimal price = quotes.get(0).getClose();
 		BigDecimal previousPrice = quotes.get(1).getClose();
 
 		if (rising(emas)) {
-			if (higher(lows)) {
+			if (rising(lows)) {
 				trend = TrendType.STRONG_UP;
 				recommendation = spike(price, previousPrice) ? RecommendationType.TAKE_PROFIT : RecommendationType.BUY;
 			} else {
@@ -102,19 +104,19 @@ public class Ema implements Callable<EmaResult> {
 				recommendation = spike(price, previousPrice) ? RecommendationType.TAKE_PROFIT : RecommendationType.HOLD;
 			}
 		} else if (falling(emas)) {
-			if (lower(highs)) {
+			if (falling(highs)) {
 				trend = TrendType.STRONG_DOWN;
 				recommendation = RecommendationType.SELL;
 			} else {
 				trend = TrendType.DOWN;
-				recommendation = higher(lows) ? RecommendationType.SELL_INTO_STRENGTH : RecommendationType.SELL;
+				recommendation = rising(lows) ? RecommendationType.SELL_INTO_STRENGTH : RecommendationType.SELL;
 			}
 		} else {
 			trend = TrendType.SIDEWAYS;
 
-			if (higher(lows)) {
+			if (rising(lows)) {
 				recommendation = spike(price, previousPrice) ? RecommendationType.TAKE_PROFIT : RecommendationType.RANGE_TRADE;
-			} else if (lower(highs)) {
+			} else if (falling(highs)) {
 				recommendation = RecommendationType.LIGHTEN;
 			} else {
 				recommendation = RecommendationType.HOLD;
@@ -122,9 +124,9 @@ public class Ema implements Callable<EmaResult> {
 		}
 	}
 
-	private boolean rising(List<BigDecimal> emas) {
-		for (int i = 0; i < emas.size() - 1; i++) {
-			if (gt(i, i + 1, emas)) {
+	private boolean rising(List<BigDecimal> values) {
+		for (int i = 0; i < values.size() - 1; i++) {
+			if (gt(i, i + 1, values)) {
 				continue;
 			}
 
@@ -134,9 +136,9 @@ public class Ema implements Callable<EmaResult> {
 		return true;
 	}
 
-	private boolean falling(List<BigDecimal> emas) {
-		for (int i = 0; i < emas.size() - 1; i++) {
-			if (lt(i, i + 1, emas)) {
+	private boolean falling(List<BigDecimal> values) {
+		for (int i = 0; i < values.size() - 1; i++) {
+			if (lt(i, i + 1, values)) {
 				continue;
 			}
 
@@ -144,14 +146,6 @@ public class Ema implements Callable<EmaResult> {
 		}
 
 		return true;
-	}
-
-	private boolean higher(List<BigDecimal> lows) {
-		return gt(0, 2, lows) && gt(2, 4, lows);
-	}
-
-	private boolean lower(List<BigDecimal> highs) {
-		return lt(0, 2, highs) && lt(2, 4, highs);
 	}
 
 	private boolean spike(BigDecimal price, BigDecimal previousPrice) {
