@@ -26,17 +26,27 @@ body { font-size: 0.8em !important; }
 .header .right { width: 25%; text-align: right; }
 .header .caption { font-size: 0.6em; }
 
+.files-uploaded thead { display: none; }
+.files-uploaded .ui-datatable-header { padding: 10px !important; }
+
+.data { width: 31.6em; }
+.data .table-cell:first-child { width: 11em; }
+.data table { width: 35em; }
+.data .ui-panel-title { margin: 0em !important; }
+
+.inplace .ui-inplace-editor { vertical-align: super; }
+
 .text { text-align: center; }
 .numeric { text-align: right; }
 
 .chart { width: 500px; height: 250px; }
 
-.indicator-data-panel .ui-panel-content { padding: 0em !important; }
+.panel .ui-panel-content { padding: 0em !important; }
 
-.indicator-data-panelgrid { font-size: 0.9em !important; }
-.indicator-data-panelgrid td  { border: 1px solid #CCCCCC !important; }
-.indicator-data-panelgrid td:first-child { width: 10em !important; vertical-align: top; background-color: rgba(225,225,225, 0.6); }
-.indicator-data-panelgrid .ui-panelgrid-even { background-color: #FFFFFF; }
+.panelgrid { font-size: 0.9em !important; }
+.panelgrid td { border: 1px solid #CCCCCC !important; }
+.panelgrid td:first-child { width: 11em !important; background-color: rgba(225,225,225, 0.6); }
+.panelgrid .ui-panelgrid-even { background-color: #FFFFFF; }
 
 .GAIN, .UP, .STRONG_UP, .BUY, .TAKE_PROFIT, .LOW { color: #008800; }
 .LOSS, .DOWN, .STRONG_DOWN, .SELL, .SELL_INTO_STRENGTH, .HIGH { color: #880000; }

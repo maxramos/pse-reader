@@ -1,0 +1,101 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions"
+	template="/WEB-INF/template/template.xhtml">
+
+<ui:define name="content">
+<h:form id="profileForm">
+	<p:panel styleClass="data panel no-border">
+		<f:facet name="header">
+			<div class="table">
+				<div class="table-row">
+					<div class="table-cell">
+						<p:selectOneMenu id="selectedStockSymbol" value="#{stockProfilePage.selectedSymbol}" filter="true">
+							<p:ajax update="profileForm" listener="#{stockProfilePage.onSymbolChange}" />
+							<f:selectItems value="#{stockProfilePage.symbols}" />
+						</p:selectOneMenu>							
+					</div>
+					<div class="table-cell" style=" vertical-align: middle;">
+						<h:outputText value="#{stockProfilePage.stock.name}" />
+					</div>
+				</div>
+			</div>
+		</f:facet>
+		<p:panelGrid styleClass="panelgrid no-border">
+			<p:row>
+				<p:column>
+					<h:outputText value="Sector" />
+				</p:column>
+				<p:column>
+					<h:outputText value="#{stockProfilePage.stock.sector.name}" />
+				</p:column>
+			</p:row>
+			<p:row>
+				<p:column>
+					<h:outputText value="Sub Sector" />
+				</p:column>
+				<p:column>
+					<h:outputText value="#{stockProfilePage.stock.subSector.name}" />
+				</p:column>
+			</p:row>
+			<p:row>
+				<p:column>
+					<h:outputText value="PSEi" />
+				</p:column>
+				<p:column>
+					<p:inplace editor="true" styleClass="inplace">
+						<p:ajax event="save" update="@(.inplace)" listener="#{stockProfilePage.updateStock}" />
+						<f:facet name="output">
+							<h:outputText value="#{stockProfilePage.stock.psei}" />
+						</f:facet>
+						<f:facet name="input">
+							<p:selectBooleanCheckbox value="#{stockProfilePage.stock.psei}" />
+						</f:facet>
+					</p:inplace>
+				</p:column>
+			</p:row>
+			<p:row>
+				<p:column>
+					<h:outputText value="All Shares" />
+				</p:column>
+				<p:column>
+					<p:inplace editor="true" styleClass="inplace">
+						<p:ajax event="save" update="@(.inplace)" listener="#{stockProfilePage.updateStock}" />
+						<f:facet name="output">
+							<h:outputText value="#{stockProfilePage.stock.allShares}" />
+						</f:facet>
+						<f:facet name="input">
+							<p:selectBooleanCheckbox value="#{stockProfilePage.stock.allShares}" />
+						</f:facet>
+					</p:inplace>
+				</p:column>
+			</p:row>
+			<p:row>
+				<p:column>
+					<h:outputText value="Sectoral Index" />
+				</p:column>
+				<p:column>
+					<p:inplace editor="true" styleClass="inplace">
+						<p:ajax event="save" update="@(.inplace)" listener="#{stockProfilePage.updateStock}" />
+						<f:facet name="output">
+							<h:outputText value="none" rendered="#{empty stockProfilePage.stock.sectoralIndex}" />
+							<h:outputText value="#{stockProfilePage.stock.sectoralIndex.name}" rendered="#{not empty stockProfilePage.stock.sectoralIndex}" />
+						</f:facet>
+						<f:facet name="input">
+							<p:selectOneMenu value="#{stockProfilePage.stock.sectoralIndex}">
+								<f:selectItem itemValue="" />
+								<f:selectItems value="#{stockProfilePage.sectoralIndeces}" var="si" itemLabel="#{si.name}" />
+							</p:selectOneMenu>
+						</f:facet>
+					</p:inplace>
+				</p:column>
+			</p:row>
+		</p:panelGrid>
+	</p:panel>
+</h:form>
+</ui:define>
+
+</ui:composition>

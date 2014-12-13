@@ -108,6 +108,10 @@ public class PseIndex implements Serializable {
 			return regex;
 		}
 
+		public static Type[] getSectoralIndeces() {
+			return new Type[] { FIN, HLDG, IND, MO, PRO, SVC };
+		}
+
 	}
 
 }

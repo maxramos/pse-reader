@@ -7,22 +7,22 @@
 	template="/WEB-INF/template/template.xhtml">
 
 <ui:define name="content">
-<h:form id="stockForm">	
-	<p:dataTable id="stockDataTable" widgetVar="stockDataTable" var="quote" value="#{stocksPage.quotes}">
+<h:form id="quotesForm">
+	<p:dataTable id="stockDataTable" widgetVar="stockDataTable" var="quote" value="#{quotesPage.quotes}">
 		<f:facet name="header">
 			<p:panelGrid id="header" styleClass="header">
 				<p:row>
 					<p:column styleClass="left">
-						<p:selectOneMenu id="selectedStockSymbol" value="#{stocksPage.selectedSymbol}" filter="true">
-							<p:ajax update="title" listener="#{stocksPage.onSymbolChange}" oncomplete="PF('stockDataTable').filter();" />
-							<f:selectItems value="#{stocksPage.symbols}" />
+						<p:selectOneMenu id="selectedStockSymbol" value="#{quotesPage.selectedSymbol}" filter="true">
+							<p:ajax update="title" listener="#{quotesPage.onSymbolChange}" oncomplete="PF('stockDataTable').filter();" />
+							<f:selectItems value="#{quotesPage.symbols}" />
 						</p:selectOneMenu>
 					</p:column>
 					<p:column styleClass="middle">
 						<p:outputPanel id="title">
-							<h:outputText value="#{stocksPage.stock.name}" />
+							<h:outputText value="#{quotesPage.stock.name}" />
 							<br />
-							<h:outputText value="#{stocksPage.stock.sector.name} > #{stocksPage.stock.subSector.name}" styleClass="caption" rendered="#{not empty stocksPage.symbols}" />
+							<h:outputText value="#{quotesPage.stock.sector.name} > #{quotesPage.stock.subSector.name}" styleClass="caption" rendered="#{not empty quotesPage.symbols}" />
 						</p:outputPanel>
 					</p:column>
 					<p:column styleClass="right">

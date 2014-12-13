@@ -13,8 +13,11 @@
 					<p:fileUpload id="reportUpload" fileUploadListener="#{uploadPage.onUpload}" update="filesUploaded" allowTypes="/(\.pdf)$/" multiple="true" />
 				</p:column>
 				<p:column style="vertical-align: top; text-align: center;">
-					<p:dataTable id="filesUploaded" var="fileName" value="#{uploadPage.fileNames}">
-						<p:column headerText="File/s Uploaded">
+					<p:dataTable id="filesUploaded" styleClass="files-uploaded" var="fileName" value="#{uploadPage.fileNames}">
+						<f:facet name="header">
+							<h:outputText value="File/s Uploaded" />
+						</f:facet>
+						<p:column>
 							<h:outputText value="#{fileName}" />
 						</p:column>
 					</p:dataTable>

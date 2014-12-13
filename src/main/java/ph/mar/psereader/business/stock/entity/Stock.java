@@ -19,6 +19,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import ph.mar.psereader.business.index.entity.PseIndex;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.report.entity.PseReportRow;
 
@@ -29,7 +30,7 @@ import ph.mar.psereader.business.report.entity.PseReportRow;
 	@NamedQuery(name = Stock.ALL_SYMBOLS, query = "SELECT s.symbol FROM Stock s ORDER BY s.symbol"),
 	@NamedQuery(name = Stock.ALL_WITH_QUOTES_BY_SYMBOL, query = "SELECT DISTINCT s FROM Stock s JOIN FETCH s.quotes WHERE s.symbol = :symbol"),
 	@NamedQuery(name = Stock.ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT, query = "SELECT DISTINCT s FROM Stock s LEFT JOIN FETCH s.indicatorResults WHERE EXISTS (SELECT q FROM Quote q WHERE q.stock = s AND q.date = :date) AND (SELECT COUNT(q) FROM Quote q WHERE q.stock = s AND q.date <= :date) >= :count AND s.suspended = FALSE ORDER BY s.symbol"),
-	@NamedQuery(name = Stock.BY_SYMBOL, query = "SELECT s FROM Stock s WHERE s.symbol = :symbol ORDER BY s.symbol") })
+	@NamedQuery(name = Stock.BY_SYMBOL, query = "SELECT s FROM Stock s WHERE s.symbol = :symbol") })
 public class Stock implements Serializable {
 
 	public static final String ALL = "Stock.ALL";
@@ -60,6 +61,18 @@ public class Stock implements Serializable {
 	@Column(name = "sub_sector", nullable = false, length = 5)
 	private SubSectorType subSector;
 
+	@Column(nullable = false)
+	private boolean suspended;
+
+	private boolean psei;
+
+	@Column(name = "all_shares")
+	private boolean allShares;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "sectoral_index", length = 4)
+	private PseIndex.Type sectoralIndex;
+
 	@OrderBy("date DESC")
 	@OneToMany(mappedBy = "stock", cascade = CascadeType.ALL)
 	private List<Quote> quotes;
@@ -67,9 +80,6 @@ public class Stock implements Serializable {
 	@OrderBy("date DESC")
 	@OneToMany(mappedBy = "stock", cascade = CascadeType.ALL)
 	private List<IndicatorResult> indicatorResults;
-
-	@Column(nullable = false)
-	private boolean suspended;
 
 	public Stock() {
 		super();
@@ -80,9 +90,9 @@ public class Stock implements Serializable {
 		this.name = name;
 		this.sector = sector;
 		this.subSector = subSector;
+		suspended = false;
 		quotes = new ArrayList<>();
 		indicatorResults = new ArrayList<>();
-		suspended = false;
 	}
 
 	public static Stock convert(PseReportRow row) {
@@ -118,14 +128,6 @@ public class Stock implements Serializable {
 		return subSector;
 	}
 
-	public List<Quote> getQuotes() {
-		return quotes;
-	}
-
-	public List<IndicatorResult> getIndicatorResults() {
-		return indicatorResults;
-	}
-
 	public boolean isSuspended() {
 		return suspended;
 	}
@@ -134,10 +136,43 @@ public class Stock implements Serializable {
 		this.suspended = suspended;
 	}
 
+	public boolean isPsei() {
+		return psei;
+	}
+
+	public void setPsei(boolean psei) {
+		this.psei = psei;
+	}
+
+	public boolean isAllShares() {
+		return allShares;
+	}
+
+	public void setAllShares(boolean allShares) {
+		this.allShares = allShares;
+	}
+
+	public PseIndex.Type getSectoralIndex() {
+		return sectoralIndex;
+	}
+
+	public void setSectoralIndex(PseIndex.Type sectoralIndex) {
+		this.sectoralIndex = sectoralIndex;
+	}
+
+	public List<Quote> getQuotes() {
+		return quotes;
+	}
+
+	public List<IndicatorResult> getIndicatorResults() {
+		return indicatorResults;
+	}
+
 	@Override
 	public String toString() {
-		return String.format("Stock [id=%s, symbol=%s, name=%s, sector=%s, subSector=%s, quotes=%s, indicatorResults=%s, suspended=%s]", id, symbol,
-				name, sector, subSector, quotes, indicatorResults, suspended);
+		return String
+				.format("Stock [id=%s, symbol=%s, name=%s, sector=%s, subSector=%s, suspended=%s, psei=%s, allShares=%s, sectoralIndex=%s, quotes=%s, indicatorResults=%s]",
+						id, symbol, name, sector, subSector, suspended, psei, allShares, sectoralIndex, quotes, indicatorResults);
 	}
 
 }

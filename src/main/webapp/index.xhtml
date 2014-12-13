@@ -6,61 +6,113 @@
 	template="/WEB-INF/template/template.xhtml">
 
 <ui:define name="content">
-	<p:panelGrid columns="2" styleClass="no-border" rendered="#{indexPage.marketSummary ne null}">
-		<f:facet name="header">
-			<h:outputText value="Market Statistics" />
-		</f:facet>
-	
-		<h:outputText value="As of:" />
-		<h:outputText value="#{indexPage.marketSummary.date}">
-			<f:convertDateTime pattern="MMM dd, yyyy" />
-		</h:outputText>
-	
-		<h:outputText value="No. of Advances:" />
-		<h:outputText value="#{indexPage.marketSummary.advancesCount}">
-			<f:convertNumber type="number" groupingUsed="true" />
-		</h:outputText>
-		
-		<h:outputText value="No. of Declines:" />
-		<h:outputText value="#{indexPage.marketSummary.declinesCount}">
-			<f:convertNumber type="number" groupingUsed="true" />
-		</h:outputText>
-		
-		<h:outputText value="No. of Unchanged:" />
-		<h:outputText value="#{indexPage.marketSummary.unchangedCount}">
-			<f:convertNumber type="number" groupingUsed="true" />
-		</h:outputText>
-		
-		<h:outputText value="No. of Traded Stocks:" />
-		<h:outputText value="#{indexPage.marketSummary.tradedStocksCount}">
-			<f:convertNumber type="number" groupingUsed="true" />
-		</h:outputText>
-		
-		<h:outputText value="No. of Trades:" />
-		<h:outputText value="#{indexPage.marketSummary.tradesCount}">
-			<f:convertNumber type="number" groupingUsed="true" />
-		</h:outputText>
-		
-		<h:outputText value="Foreign Buying:" />
-		<h:outputText value="#{indexPage.marketSummary.totalForeignBuy}">
-			<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-		</h:outputText>
-		
-		<h:outputText value="Foreign Selling:" />
-		<h:outputText value="#{indexPage.marketSummary.totalForeignSell}">
-			<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-		</h:outputText>
-		
-		<h:outputText value="Net Foreign:" />
-		<h:outputText value="#{indexPage.marketSummary.netForeign}">
-			<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-		</h:outputText>
-		
-		<h:outputText value="Total Foreign:" />
-		<h:outputText value="#{indexPage.marketSummary.totalForeign}">
-			<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
-		</h:outputText>
+<p:panel styleClass="data panel no-border">
+	<f:facet name="header">
+		<h:outputText value="Market Statistics" />
+	</f:facet>
+	<p:panelGrid styleClass="panelgrid no-border" rendered="#{indexPage.marketSummary ne null}">
+		<p:row>
+			<p:column>
+				<h:outputText value="As of" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{indexPage.marketSummary.date}">
+					<f:convertDateTime pattern="MMM dd, yyyy" />
+				</h:outputText>
+			</p:column>
+		</p:row>
+		<p:row>
+			<p:column>
+				<h:outputText value="No. of Advances" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{indexPage.marketSummary.advancesCount}">
+					<f:convertNumber type="number" groupingUsed="true" />
+				</h:outputText>
+			</p:column>
+		</p:row>
+		<p:row>
+			<p:column>
+				<h:outputText value="No. of Declines" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{indexPage.marketSummary.declinesCount}">
+					<f:convertNumber type="number" groupingUsed="true" />
+				</h:outputText>
+			</p:column>
+		</p:row>
+		<p:row>
+			<p:column>
+				<h:outputText value="No. of Unchanged" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{indexPage.marketSummary.unchangedCount}">
+					<f:convertNumber type="number" groupingUsed="true" />
+				</h:outputText>
+			</p:column>
+		</p:row>
+		<p:row>
+			<p:column>
+				<h:outputText value="No. of Traded Stocks" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{indexPage.marketSummary.tradedStocksCount}">
+					<f:convertNumber type="number" groupingUsed="true" />
+				</h:outputText>
+			</p:column>
+		</p:row>
+		<p:row>
+			<p:column>
+				<h:outputText value="No. of Trades" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{indexPage.marketSummary.tradesCount}">
+					<f:convertNumber type="number" groupingUsed="true" />
+				</h:outputText>
+			</p:column>
+		</p:row>
+		<p:row>
+			<p:column>
+				<h:outputText value="Foreign Buying" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{indexPage.marketSummary.totalForeignBuy}">
+					<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+				</h:outputText>
+			</p:column>
+		</p:row>
+		<p:row>
+			<p:column>
+				<h:outputText value="Foreign Selling" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{indexPage.marketSummary.totalForeignSell}">
+					<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+				</h:outputText>
+			</p:column>
+		</p:row>
+		<p:row>
+			<p:column>
+				<h:outputText value="Net Foreign" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{indexPage.marketSummary.netForeign}">
+					<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+				</h:outputText>
+			</p:column>
+		</p:row>
+		<p:row>
+			<p:column>
+				<h:outputText value="Total Foreign" />
+			</p:column>
+			<p:column>
+				<h:outputText value="#{indexPage.marketSummary.totalForeign}">
+					<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+				</h:outputText>
+			</p:column>
+		</p:row>
 	</p:panelGrid>
+</p:panel>
 </ui:define>
 
 </ui:composition>

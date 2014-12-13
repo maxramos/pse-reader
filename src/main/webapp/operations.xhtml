@@ -6,17 +6,14 @@
 	template="/WEB-INF/template/template.xhtml">
 
 <ui:define name="content">
-	<p:panelGrid styleClass="no-border" style="width: 30em;">
-		<f:facet name="header">
-			<p:row>
-				<p:column colspan="2">
-					<h:outputText value="Settings" />
-				</p:column>
-			</p:row>
-		</f:facet>
+<p:panel styleClass="data panel no-border">
+	<f:facet name="header">
+		<h:outputText value="Settings" />
+	</f:facet>
+	<p:panelGrid styleClass="panelgrid no-border">
 		<p:row>
 			<p:column>
-				<h:outputLabel value="Indicators last run:" />
+				<h:outputLabel value="Indicators last run" />
 			</p:column>
 			<p:column>
 				<h:outputText value="#{operationsPage.settings.lastProcessedDate}">
@@ -26,7 +23,7 @@
 		</p:row>
 		<p:row>
 			<p:column>
-				<h:outputLabel value="Suspended stocks as of:" />
+				<h:outputLabel value="Suspended stocks as of" />
 			</p:column>
 			<p:column>
 				<h:outputText value="#{operationsPage.settings.suspensionDate}">
@@ -35,17 +32,18 @@
 			</p:column>
 		</p:row>
 	</p:panelGrid>
-	
-	<h:form id="operationForm">
-		<p:panelGrid styleClass="no-border" style="width: 30em; text-align: center;">
-			<f:facet name="header">
-				<p:row>
-					<p:column>
-						<h:outputText value="Controls" />
-					</p:column>
-				</p:row>
-			</f:facet>
+</p:panel>
+
+<h:form id="operationForm">
+	<p:panel styleClass="data panel no-border">
+		<f:facet name="header">
+			<h:outputText value="Controls" />
+		</f:facet>
+		<p:panelGrid styleClass="panelgrid no-border">
 			<p:row>
+				<p:column>
+					<h:outputLabel value="Stock Indicators" />
+				</p:column>
 				<p:column>
 					<p:commandButton id="run" value="Run" actionListener="#{operationsPage.run}" partialSubmit="true" />
 				</p:column>
@@ -55,6 +53,7 @@
 		<p:blockUI block="@(html)" trigger="run">
 			<p:graphicImage library="img" name="loading.gif" />  
 		</p:blockUI>
-	</h:form>
+	</p:panel>
+</h:form>
 </ui:define>
 </ui:composition>
