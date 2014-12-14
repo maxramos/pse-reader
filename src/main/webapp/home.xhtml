@@ -10,13 +10,13 @@
 	<f:facet name="header">
 		<h:outputText value="Market Statistics" />
 	</f:facet>
-	<p:panelGrid styleClass="panelgrid no-border" rendered="#{indexPage.marketSummary ne null}">
+	<p:panelGrid styleClass="panelgrid no-border" rendered="#{homePage.marketSummary ne null}">
 		<p:row>
 			<p:column>
 				<h:outputText value="As of" />
 			</p:column>
 			<p:column>
-				<h:outputText value="#{indexPage.marketSummary.date}">
+				<h:outputText value="#{homePage.marketSummary.date}">
 					<f:convertDateTime pattern="MMM dd, yyyy" />
 				</h:outputText>
 			</p:column>
@@ -26,7 +26,7 @@
 				<h:outputText value="No. of Advances" />
 			</p:column>
 			<p:column>
-				<h:outputText value="#{indexPage.marketSummary.advancesCount}">
+				<h:outputText value="#{homePage.marketSummary.advancesCount}">
 					<f:convertNumber type="number" groupingUsed="true" />
 				</h:outputText>
 			</p:column>
@@ -36,7 +36,7 @@
 				<h:outputText value="No. of Declines" />
 			</p:column>
 			<p:column>
-				<h:outputText value="#{indexPage.marketSummary.declinesCount}">
+				<h:outputText value="#{homePage.marketSummary.declinesCount}">
 					<f:convertNumber type="number" groupingUsed="true" />
 				</h:outputText>
 			</p:column>
@@ -46,7 +46,7 @@
 				<h:outputText value="No. of Unchanged" />
 			</p:column>
 			<p:column>
-				<h:outputText value="#{indexPage.marketSummary.unchangedCount}">
+				<h:outputText value="#{homePage.marketSummary.unchangedCount}">
 					<f:convertNumber type="number" groupingUsed="true" />
 				</h:outputText>
 			</p:column>
@@ -56,7 +56,7 @@
 				<h:outputText value="No. of Traded Stocks" />
 			</p:column>
 			<p:column>
-				<h:outputText value="#{indexPage.marketSummary.tradedStocksCount}">
+				<h:outputText value="#{homePage.marketSummary.tradedStocksCount}">
 					<f:convertNumber type="number" groupingUsed="true" />
 				</h:outputText>
 			</p:column>
@@ -66,7 +66,7 @@
 				<h:outputText value="No. of Trades" />
 			</p:column>
 			<p:column>
-				<h:outputText value="#{indexPage.marketSummary.tradesCount}">
+				<h:outputText value="#{homePage.marketSummary.tradesCount}">
 					<f:convertNumber type="number" groupingUsed="true" />
 				</h:outputText>
 			</p:column>
@@ -76,7 +76,7 @@
 				<h:outputText value="Foreign Buying" />
 			</p:column>
 			<p:column>
-				<h:outputText value="#{indexPage.marketSummary.totalForeignBuy}">
+				<h:outputText value="#{homePage.marketSummary.totalForeignBuy}">
 					<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 				</h:outputText>
 			</p:column>
@@ -86,7 +86,7 @@
 				<h:outputText value="Foreign Selling" />
 			</p:column>
 			<p:column>
-				<h:outputText value="#{indexPage.marketSummary.totalForeignSell}">
+				<h:outputText value="#{homePage.marketSummary.totalForeignSell}">
 					<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 				</h:outputText>
 			</p:column>
@@ -96,7 +96,7 @@
 				<h:outputText value="Net Foreign" />
 			</p:column>
 			<p:column>
-				<h:outputText value="#{indexPage.marketSummary.netForeign}">
+				<h:outputText value="#{homePage.marketSummary.netForeign}">
 					<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 				</h:outputText>
 			</p:column>
@@ -106,7 +106,7 @@
 				<h:outputText value="Total Foreign" />
 			</p:column>
 			<p:column>
-				<h:outputText value="#{indexPage.marketSummary.totalForeign}">
+				<h:outputText value="#{homePage.marketSummary.totalForeign}">
 					<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
 				</h:outputText>
 			</p:column>

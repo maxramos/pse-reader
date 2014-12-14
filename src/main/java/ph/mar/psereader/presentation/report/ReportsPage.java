@@ -1,4 +1,4 @@
-package ph.mar.psereader.presentation;
+package ph.mar.psereader.presentation.report;
 
 import java.io.Serializable;
 import java.text.DateFormat;

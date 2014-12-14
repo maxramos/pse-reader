@@ -14,7 +14,7 @@ import ph.mar.psereader.business.market.entity.MarketSummary;
 
 @Named
 @ViewScoped
-public class IndexPage implements Serializable {
+public class HomePage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
