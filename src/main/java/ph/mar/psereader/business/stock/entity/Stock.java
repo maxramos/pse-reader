@@ -19,8 +19,8 @@ import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import ph.mar.psereader.business.index.entity.PseIndex;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
+import ph.mar.psereader.business.pseindex.entity.PseIndex;
 import ph.mar.psereader.business.report.entity.PseReportRow;
 
 @Entity

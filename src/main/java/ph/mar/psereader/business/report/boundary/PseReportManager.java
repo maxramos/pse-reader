@@ -15,9 +15,9 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
-import ph.mar.psereader.business.index.entity.PseIndex;
 import ph.mar.psereader.business.market.entity.MarketSummary;
 import ph.mar.psereader.business.operation.entity.Settings;
+import ph.mar.psereader.business.pseindex.entity.PseIndex;
 import ph.mar.psereader.business.report.control.PseReportReader;
 import ph.mar.psereader.business.report.entity.PseReport;
 import ph.mar.psereader.business.report.entity.PseReportRow;
@@ -65,11 +65,11 @@ public class PseReportManager {
 			addedStocksCount += add(stock) ? 1 : 0;
 		}
 
-		List<PseIndex> pseIndeces = new ArrayList<>(tempPseIndexMap.values());
-		int addedPseIndeces = 0;
+		List<PseIndex> pseIndices = new ArrayList<>(tempPseIndexMap.values());
+		int addedPseIndices = 0;
 
-		for (PseIndex index : pseIndeces) {
-			addedPseIndeces += add(index) ? 1 : 0;
+		for (PseIndex index : pseIndices) {
+			addedPseIndices += add(index) ? 1 : 0;
 		}
 
 		int newlySuspendedCount = updateSuspendedStocks(addedReports);
@@ -78,7 +78,7 @@ public class PseReportManager {
 		results.put("reports", addedReports.size());
 		results.put("stocks", addedStocksCount);
 		results.put("suspended", newlySuspendedCount);
-		results.put("indeces", addedPseIndeces);
+		results.put("indices", addedPseIndices);
 		return results;
 	}
 
@@ -87,7 +87,7 @@ public class PseReportManager {
 			repository.add(report.getMarketSummary());
 			log.info("Report {} processed.", Quote.DATE_FORMAT.format(report.getDate()));
 			processStocks(report.getRows());
-			processPseIndeces(report.getIndeces());
+			processPseIndices(report.getIndices());
 			return true;
 		}
 
@@ -176,18 +176,18 @@ public class PseReportManager {
 		}
 	}
 
-	private void processPseIndeces(List<PseIndex> indeces) {
-		for (PseIndex index : indeces) {
+	private void processPseIndices(List<PseIndex> indices) {
+		for (PseIndex index : indices) {
 			PseIndex.Type type = index.getType();
 			PseIndex tempIndex = tempPseIndexMap.get(type);
 
 			if (tempIndex == null) {
-				List<PseIndex> managedIndeces = repository.find(PseIndex.ALL_WITH_QUOTES_BY_TYPE, with("type", type).asParameters(), PseIndex.class);
+				List<PseIndex> managedIndices = repository.find(PseIndex.ALL_WITH_QUOTES_BY_TYPE, with("type", type).asParameters(), PseIndex.class);
 
-				if (managedIndeces.isEmpty()) {
+				if (managedIndices.isEmpty()) {
 					tempIndex = index;
 				} else {
-					tempIndex = managedIndeces.get(0);
+					tempIndex = managedIndices.get(0);
 					repository.detach(tempIndex);
 					tempIndex.addAll(index.getQuotes());
 				}

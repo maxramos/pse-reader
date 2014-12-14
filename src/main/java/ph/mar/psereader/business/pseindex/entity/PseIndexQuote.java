@@ -1,4 +1,4 @@
-package ph.mar.psereader.business.index.entity;
+package ph.mar.psereader.business.pseindex.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

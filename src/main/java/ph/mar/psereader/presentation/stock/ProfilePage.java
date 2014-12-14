@@ -10,7 +10,7 @@ import javax.inject.Named;
 
 import org.slf4j.Logger;
 
-import ph.mar.psereader.business.index.entity.PseIndex;
+import ph.mar.psereader.business.pseindex.entity.PseIndex;
 import ph.mar.psereader.business.stock.boundary.StockManager;
 import ph.mar.psereader.business.stock.entity.SectorType;
 import ph.mar.psereader.business.stock.entity.Stock;
@@ -72,8 +72,8 @@ public class ProfilePage implements Serializable {
 		return SubSectorType.subSectorsOf(stock.getSector());
 	}
 
-	public PseIndex.Type[] getSectoralIndeces() {
-		return PseIndex.Type.getSectoralIndeces();
+	public PseIndex.Type[] getSectoralIndices() {
+		return PseIndex.Type.getSectoralIndices();
 	}
 
 	public List<String> getSymbols() {

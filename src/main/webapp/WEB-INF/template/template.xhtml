@@ -20,8 +20,8 @@
 						<p:menuitem value="Indicators" url="/indicators" async="true" styleClass="#{request.servletPath eq '/indicators.xhtml' ? 'selected' : ''}" />
 						<p:menuitem value="Stock" url="/stock/profile" async="true" 
 							styleClass="#{request.servletPath eq '/stock/profile.xhtml' or request.servletPath eq '/stock/quotes.xhtml' ? 'selected' : ''}" />
-						<p:menuitem value="Report" url="/report/reports" async="true"
-							styleClass="#{request.servletPath eq '/report/reports.xhtml' or request.servletPath eq '/report/upload.xhtml' ? 'selected' : ''}" />
+						<p:menuitem value="Report" url="/report/stock-reports" async="true"
+							styleClass="#{request.servletPath eq '/report/stock-reports.xhtml' or request.servletPath eq '/report/upload.xhtml' ? 'selected' : ''}" />
 						<p:menuitem value="Operations" url="/operations" async="true" styleClass="#{request.servletPath eq '/operations.xhtml' ? 'selected' : ''}" />
 					</p:submenu>
 				</p:menu>
@@ -32,9 +32,9 @@
 						<p:menuitem value="Quotes" url="/stock/quotes" async="true" styleClass="#{request.servletPath eq '/stock/quotes.xhtml' ? 'selected' : ''}" />
 					</p:submenu>
 				</p:menu>
-				<p:menu id="reportSubmenu" styleClass="menu" rendered="#{request.servletPath eq '/report/reports.xhtml' or request.servletPath eq '/report/upload.xhtml'}">
+				<p:menu id="reportSubmenu" styleClass="menu" rendered="#{request.servletPath eq '/report/stock-reports.xhtml' or request.servletPath eq '/report/upload.xhtml'}">
 					<p:submenu label="Sub Menu">
-						<p:menuitem value="Reports" url="/report/reports" async="true" styleClass="#{request.servletPath eq '/report/reports.xhtml' ? 'selected' : ''}" />
+						<p:menuitem value="Stock Reports" url="/report/stock-reports" async="true" styleClass="#{request.servletPath eq '/report/stock-reports.xhtml' ? 'selected' : ''}" />
 						<p:menuitem value="Upload" url="/report/upload" async="true" styleClass="#{request.servletPath eq '/report/upload.xhtml' ? 'selected' : ''}" />
 					</p:submenu>
 				</p:menu>

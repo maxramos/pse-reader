@@ -23,9 +23,9 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.slf4j.Logger;
 
-import ph.mar.psereader.business.index.entity.PseIndex;
-import ph.mar.psereader.business.index.entity.PseIndexQuote;
 import ph.mar.psereader.business.market.entity.MarketSummary;
+import ph.mar.psereader.business.pseindex.entity.PseIndex;
+import ph.mar.psereader.business.pseindex.entity.PseIndexQuote;
 import ph.mar.psereader.business.report.entity.PseReport;
 import ph.mar.psereader.business.report.entity.PseReportRow;
 import ph.mar.psereader.business.stock.entity.SectorType;
@@ -46,7 +46,7 @@ public class PseReportReader {
 	private static final Pattern TRADES_COUNT = Pattern.compile("NO. OF TRADES: (\\d+)\n");
 	private static final Pattern TOTAL_FOREIGN_BUY = Pattern.compile("FOREIGN BUYING: Php (\\d+(\\.\\d+)?)\n");
 	private static final Pattern TOTAL_FOREIGN_SELL = Pattern.compile("FOREIGN SELLING: Php (\\d+(\\.\\d+)?)\n");
-	private static final Pattern PSE_INDECES = Pattern.compile("(?s)S E C T O R A L S U M M A R Y\n(.*)GRAND TOTAL");
+	private static final Pattern PSE_INDICES = Pattern.compile("(?s)S E C T O R A L S U M M A R Y\n(.*)GRAND TOTAL");
 	private static final Pattern SUSPENDED_STOCKS = Pattern
 			.compile("(?s)Securities Under Suspension by the Exchange as of [a-zA-Z]{3,9} \\d{2} \\d{4}\n(.*)");
 
@@ -158,7 +158,7 @@ public class PseReportReader {
 		marketSummaryData = marketSummaryData.replace(",", "").replaceAll("\\h{2,}", " ");
 
 		parseMarketSummaryStats(report, marketSummaryData);
-		parsePseIndeces(report, marketSummaryData);
+		parsePseIndices(report, marketSummaryData);
 		parseSuspendedStocks(report, marketSummaryData);
 	}
 
@@ -180,12 +180,12 @@ public class PseReportReader {
 		report.setMarketSummary(marketSummary);
 	}
 
-	private void parsePseIndeces(PseReport report, String marketSummaryData) {
-		String pseIndeces = extractSummaryData(PSE_INDECES, marketSummaryData);
-		List<PseIndex> indeces = new ArrayList<>();
+	private void parsePseIndices(PseReport report, String marketSummaryData) {
+		String pseIndices = extractSummaryData(PSE_INDICES, marketSummaryData);
+		List<PseIndex> indices = new ArrayList<>();
 
 		for (PseIndex.Type type : PseIndex.Type.values()) {
-			String indexData = extractSummaryData(type.getRegex(), pseIndeces);
+			String indexData = extractSummaryData(type.getRegex(), pseIndices);
 
 			if (indexData == null) {
 				continue;
@@ -221,10 +221,10 @@ public class PseReportReader {
 
 			indexQuote.setIndex(index);
 			index.add(indexQuote);
-			indeces.add(index);
+			indices.add(index);
 		}
 
-		report.setIndeces(indeces);
+		report.setIndices(indices);
 	}
 
 	private void parseSuspendedStocks(PseReport report, String marketSummaryData) {

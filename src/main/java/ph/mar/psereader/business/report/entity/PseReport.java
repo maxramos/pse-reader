@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import ph.mar.psereader.business.index.entity.PseIndex;
 import ph.mar.psereader.business.market.entity.MarketSummary;
+import ph.mar.psereader.business.pseindex.entity.PseIndex;
 
 public class PseReport implements Serializable {
 
@@ -15,7 +15,7 @@ public class PseReport implements Serializable {
 	private Date date;
 	private List<PseReportRow> rows;
 	private MarketSummary marketSummary;
-	private List<PseIndex> indeces;
+	private List<PseIndex> indices;
 	private List<String> suspendedStocks;
 
 	public PseReport() {
@@ -47,12 +47,12 @@ public class PseReport implements Serializable {
 		this.marketSummary = marketSummary;
 	}
 
-	public List<PseIndex> getIndeces() {
-		return indeces;
+	public List<PseIndex> getIndices() {
+		return indices;
 	}
 
-	public void setIndeces(List<PseIndex> indeces) {
-		this.indeces = indeces;
+	public void setIndices(List<PseIndex> indices) {
+		this.indices = indices;
 	}
 
 	public List<String> getSuspendedStocks() {
@@ -65,7 +65,7 @@ public class PseReport implements Serializable {
 
 	@Override
 	public String toString() {
-		return String.format("PseReport [date=%s, rows=%s, marketSummary=%s, indeces=%s, suspendedStocks=%s]", date, rows, marketSummary, indeces,
+		return String.format("PseReport [date=%s, rows=%s, marketSummary=%s, indices=%s, suspendedStocks=%s]", date, rows, marketSummary, indices,
 				suspendedStocks);
 	}
 

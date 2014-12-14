@@ -21,7 +21,7 @@ import ph.mar.psereader.business.report.entity.PseReportRow;
 
 @Named
 @ViewScoped
-public class ReportsPage implements Serializable {
+public class StockReportsPage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd, yyyy");

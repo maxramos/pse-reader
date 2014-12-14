@@ -67,9 +67,9 @@ public class UploadPage implements Serializable {
 			messages.add(String.format("%s stock/s suspended.", results.get("suspended")));
 		}
 
-		if (results.get("indeces") != 0) {
-			log.info("{} indeces added.", results.get("indeces"));
-			messages.add(String.format("%s indeces added.", results.get("indeces")));
+		if (results.get("indices") != 0) {
+			log.info("{} indices added.", results.get("indices"));
+			messages.add(String.format("%s indices added.", results.get("indices")));
 		}
 
 		MessageUtil.sendInfo(messages);

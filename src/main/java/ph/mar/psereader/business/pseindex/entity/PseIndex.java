@@ -1,4 +1,4 @@
-package ph.mar.psereader.business.index.entity;
+package ph.mar.psereader.business.pseindex.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -108,7 +108,7 @@ public class PseIndex implements Serializable {
 			return regex;
 		}
 
-		public static Type[] getSectoralIndeces() {
+		public static Type[] getSectoralIndices() {
 			return new Type[] { FIN, HLDG, IND, MO, PRO, SVC };
 		}
 
