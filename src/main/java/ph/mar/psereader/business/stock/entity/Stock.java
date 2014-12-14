@@ -26,18 +26,24 @@ import ph.mar.psereader.business.report.entity.PseReportRow;
 @Entity
 @Table(indexes = @Index(columnList = "symbol"))
 @NamedQueries({
-		@NamedQuery(name = Stock.ALL, query = "SELECT s FROM Stock s ORDER BY s.symbol"),
-		@NamedQuery(name = Stock.ALL_SYMBOLS, query = "SELECT s.symbol FROM Stock s ORDER BY s.symbol"),
-		@NamedQuery(name = Stock.ALL_WITH_QUOTES_BY_SYMBOL, query = "SELECT DISTINCT s FROM Stock s JOIN FETCH s.quotes WHERE s.symbol = :symbol"),
-		@NamedQuery(name = Stock.ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT, query = "SELECT DISTINCT s FROM Stock s LEFT JOIN FETCH s.indicatorResults WHERE EXISTS (SELECT q FROM Quote q WHERE q.stock = s AND q.date = :date) AND (SELECT COUNT(q) FROM Quote q WHERE q.stock = s AND q.date <= :date) >= :count AND s.suspended = FALSE ORDER BY s.symbol"),
-		@NamedQuery(name = Stock.BY_SYMBOL, query = "SELECT s FROM Stock s WHERE s.symbol = :symbol") })
+	@NamedQuery(name = Stock.ALL, query = "SELECT s FROM Stock s ORDER BY s.symbol"),
+	@NamedQuery(name = Stock.ALL_ALL_SHARES, query = "SELECT s FROM Stock s WHERE s.allShares = TRUE ORDER BY s.symbol"),
+	@NamedQuery(name = Stock.ALL_PSEI, query = "SELECT s FROM Stock s WHERE s.psei = TRUE ORDER BY s.symbol"),
+	@NamedQuery(name = Stock.ALL_SYMBOLS, query = "SELECT s.symbol FROM Stock s ORDER BY s.symbol"),
+	@NamedQuery(name = Stock.ALL_WITH_QUOTES_BY_SYMBOL, query = "SELECT DISTINCT s FROM Stock s JOIN FETCH s.quotes WHERE s.symbol = :symbol"),
+	@NamedQuery(name = Stock.ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT, query = "SELECT DISTINCT s FROM Stock s LEFT JOIN FETCH s.indicatorResults WHERE EXISTS (SELECT q FROM Quote q WHERE q.stock = s AND q.date = :date) AND (SELECT COUNT(q) FROM Quote q WHERE q.stock = s AND q.date <= :date) >= :count AND s.suspended = FALSE ORDER BY s.symbol"),
+	@NamedQuery(name = Stock.BY_SECTORAL_INDEX, query = "SELECT s FROM Stock s WHERE s.sectoralIndex = :sectoralIndex ORDER BY s.symbol"),
+	@NamedQuery(name = Stock.BY_SYMBOL, query = "SELECT s FROM Stock s WHERE s.symbol = :symbol") })
 public class Stock implements Serializable {
 
 	public static final String ALL = "Stock.ALL";
+	public static final String ALL_ALL_SHARES = "Stock.ALL_ALL_SHARES";
+	public static final String ALL_PSEI = "Stock.ALL_PSEI";
 	public static final String ALL_SYMBOLS = "Stock.ALL_SYMBOLS";
 	public static final String ALL_WITH_QUOTES_BY_SYMBOL = "Stock.ALL_WITH_QUOTES_BY_SYMBOL";
 	// WOWO means with or without
 	public static final String ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT = "Stock.ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT";
+	public static final String BY_SECTORAL_INDEX = "Stock.BY_SECTORAL_INDEX";
 	public static final String BY_SYMBOL = "Stock.BY_SYMBOL";
 
 	private static final long serialVersionUID = 1L;

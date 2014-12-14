@@ -112,6 +112,10 @@ public class PseIndex implements Serializable {
 			return new Type[] { FIN, HLDG, IND, MO, PRO, SVC };
 		}
 
+		public static Type[] getIndices() {
+			return new Type[] { PSEI, ALL, FIN, HLDG, IND, MO, PRO, SVC };
+		}
+
 	}
 
 }

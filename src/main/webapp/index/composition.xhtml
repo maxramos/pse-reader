@@ -1,0 +1,55 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/template/template.xhtml">
+
+<ui:define name="content">
+<h:form id="compositionForm">
+	<p:dataTable id="compositionDataTable" widgetVar="compositionDataTable" var="stock" value="#{compositionPage.stocks}" rowIndexVar="rowIndex">
+		<f:facet name="header">
+			<p:panelGrid id="header" styleClass="header">
+				<p:row>
+					<p:column styleClass="left">
+						<p:selectOneMenu id="selectedIndex" value="#{compositionPage.selectedIndex}">
+							<p:ajax update="compositionDataTable" listener="#{compositionPage.onIndexChange}" />
+							<f:selectItems value="#{compositionPage.indices}" var="i" itemLabel="#{i.name}" />
+						</p:selectOneMenu>
+					</p:column>
+					<p:column styleClass="middle">
+						<p:outputPanel id="title">
+							<h:outputText value="#{compositionPage.selectedIndex.name}" />
+						</p:outputPanel>
+					</p:column>
+					<p:column styleClass="right">
+						<p:spacer />
+					</p:column>
+				</p:row>
+        	</p:panelGrid>
+		</f:facet>
+		
+		<p:column style="width: 2em;" styleClass="numeric">
+			<h:outputText value="#{rowIndex + 1}" />
+		</p:column>
+		
+		<p:column headerText="Symbol" sortBy="#{stock.symbol}" styleClass="text">
+			<h:outputText value="#{stock.symbol}" />
+		</p:column>
+		
+		<p:column headerText="Name" sortBy="#{stock.name}" styleClass="text">
+			<h:outputText value="#{stock.name}" />
+		</p:column>
+		
+		<p:column headerText="Sector" sortBy="#{stock.sector}" styleClass="text">
+			<h:outputText value="#{stock.sector.name}" />
+		</p:column>
+		
+		<p:column headerText="Sub Sector" sortBy="#{stock.subSector}" styleClass="text">
+			<h:outputText value="#{stock.subSector.name}" />
+		</p:column>
+	</p:dataTable>
+</h:form>
+</ui:define>
+
+</ui:composition>
