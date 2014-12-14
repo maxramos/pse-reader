@@ -42,4 +42,8 @@ public class StockManager {
 		return repository.find(Quote.BY_STOCK, with("stock", stock).asParameters(), Quote.class);
 	}
 
+	public Stock update(Stock stock) {
+		return repository.update(stock);
+	}
+
 }

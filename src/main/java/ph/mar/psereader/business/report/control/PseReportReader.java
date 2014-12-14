@@ -105,7 +105,7 @@ public class PseReportReader {
 
 			if (sector != null) {
 				currentSector = sector;
-				currentSubSector = currentSector.getFirstSubSector();
+				currentSubSector = SubSectorType.valueOf(currentSector.getFirstSubSector());
 				continue;
 			}
 

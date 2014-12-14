@@ -30,7 +30,17 @@
 					<h:outputText value="Sector" />
 				</p:column>
 				<p:column>
-					<h:outputText value="#{stockProfilePage.stock.sector.name}" />
+					<p:inplace editor="true" styleClass="inplace" toggleable="#{stockProfilePage.stock.sector.stockRelated}">
+						<p:ajax event="save" update="@(.inplace)" listener="#{stockProfilePage.onSectorChange}" />
+						<f:facet name="output">
+							<h:outputText value="#{stockProfilePage.stock.sector.name}" />
+						</f:facet>
+						<f:facet name="input">
+							<p:selectOneMenu value="#{stockProfilePage.stock.sector}">
+								<f:selectItems value="#{stockProfilePage.sectors}" var="s" itemLabel="#{s.name}" />
+							</p:selectOneMenu>
+						</f:facet>
+					</p:inplace>
 				</p:column>
 			</p:row>
 			<p:row>
@@ -38,7 +48,18 @@
 					<h:outputText value="Sub Sector" />
 				</p:column>
 				<p:column>
-					<h:outputText value="#{stockProfilePage.stock.subSector.name}" />
+					<p:inplace editor="true" styleClass="inplace" toggleable="#{stockProfilePage.stock.subSector.sector ne null}">
+						<p:ajax event="save" update="@(.inplace)" listener="#{stockProfilePage.updateStock}" />
+						<f:facet name="output">
+							<h:outputText value="n/a" rendered="#{stockProfilePage.stock.subSector.sector eq null}" />
+							<h:outputText value="#{stockProfilePage.stock.subSector.name}" rendered="#{stockProfilePage.stock.subSector.sector ne null}" />
+						</f:facet>
+						<f:facet name="input">
+							<p:selectOneMenu value="#{stockProfilePage.stock.subSector}">
+								<f:selectItems value="#{stockProfilePage.subSectors}" var="ss" itemLabel="#{ss.name}" />
+							</p:selectOneMenu>
+						</f:facet>
+					</p:inplace>
 				</p:column>
 			</p:row>
 			<p:row>
@@ -47,7 +68,7 @@
 				</p:column>
 				<p:column>
 					<p:inplace editor="true" styleClass="inplace">
-						<p:ajax event="save" update="@(.inplace)" listener="#{stockProfilePage.updateStock}" />
+						<p:ajax event="save" update="@(.inplace)" listener="#{stockProfilePage.onIndexChange}" />
 						<f:facet name="output">
 							<h:outputText value="#{stockProfilePage.stock.psei}" />
 						</f:facet>
@@ -62,7 +83,7 @@
 					<h:outputText value="All Shares" />
 				</p:column>
 				<p:column>
-					<p:inplace editor="true" styleClass="inplace">
+					<p:inplace editor="true" styleClass="inplace" toggleable="#{not stockProfilePage.stock.psei and empty stockProfilePage.stock.sectoralIndex}">
 						<p:ajax event="save" update="@(.inplace)" listener="#{stockProfilePage.updateStock}" />
 						<f:facet name="output">
 							<h:outputText value="#{stockProfilePage.stock.allShares}" />
@@ -79,7 +100,7 @@
 				</p:column>
 				<p:column>
 					<p:inplace editor="true" styleClass="inplace">
-						<p:ajax event="save" update="@(.inplace)" listener="#{stockProfilePage.updateStock}" />
+						<p:ajax event="save" update="@(.inplace)" listener="#{stockProfilePage.onIndexChange}" />
 						<f:facet name="output">
 							<h:outputText value="none" rendered="#{empty stockProfilePage.stock.sectoralIndex}" />
 							<h:outputText value="#{stockProfilePage.stock.sectoralIndex.name}" rendered="#{not empty stockProfilePage.stock.sectoralIndex}" />

@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 
 import ph.mar.psereader.business.index.entity.PseIndex;
 import ph.mar.psereader.business.stock.boundary.StockManager;
+import ph.mar.psereader.business.stock.entity.SectorType;
 import ph.mar.psereader.business.stock.entity.Stock;
+import ph.mar.psereader.business.stock.entity.SubSectorType;
 
 @Named
 @ViewScoped
@@ -44,10 +46,30 @@ public class StockProfilePage implements Serializable {
 		stock = stockManager.findBySymbol(selectedSymbol);
 	}
 
-	public void updateStock() {
+	public void onSectorChange() {
+		String subSector = stock.getSector().getFirstSubSector();
+		stock.setSubSector(SubSectorType.valueOf(subSector));
+		updateStock();
+	}
+
+	public void onIndexChange() {
 		if (stock.isPsei() || stock.getSectoralIndex() != null) {
 			stock.setAllShares(true);
 		}
+
+		updateStock();
+	}
+
+	public void updateStock() {
+		stock = stockManager.update(stock);
+	}
+
+	public SectorType[] getSectors() {
+		return SectorType.getStockRelatedSectors();
+	}
+
+	public SubSectorType[] getSubSectors() {
+		return SubSectorType.subSectorsOf(stock.getSector());
 	}
 
 	public PseIndex.Type[] getSectoralIndeces() {

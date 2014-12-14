@@ -29,9 +29,9 @@ body { font-size: 0.8em !important; }
 .files-uploaded thead { display: none; }
 .files-uploaded .ui-datatable-header { padding: 10px !important; }
 
-.data { width: 31.6em; }
+.data { width: 32.4em; }
 .data .table-cell:first-child { width: 11em; }
-.data table { width: 35em; }
+.data table { width: 36em; }
 .data .ui-panel-title { margin: 0em !important; }
 
 .inplace .ui-inplace-editor { vertical-align: super; }

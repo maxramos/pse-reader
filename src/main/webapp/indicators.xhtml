@@ -134,6 +134,16 @@
 								</p:row>
 								<p:row>
 									<p:column>
+										<h:outputText value="Index" />
+									</p:column>
+									<p:column>
+										<h:outputText value="PSEi, " rendered="#{result.stock.psei}" />
+										<h:outputText value="#{result.stock.sectoralIndex.name}, " rendered="#{result.stock.sectoralIndex ne null}" />
+										<h:outputText value="All Shares" rendered="#{result.stock.allShares}" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column>
 										<h:outputText value="Board Lot" />
 									</p:column>
 									<p:column>
