@@ -27,10 +27,10 @@ body { font-size: 0.8em !important; }
 .header .caption { font-size: 0.6em; }
 
 .files-uploaded thead { display: none; }
-.files-uploaded .ui-datatable-header { padding: 10px !important; }
+.files-uploaded .ui-datatable-header { padding: 9px !important; }
 
 .data { width: 32.4em; }
-.data .table-cell:first-child { width: 11em; }
+.data .table-cell:first-child { width: 13em; }
 .data table { width: 36em; }
 .data .ui-panel-title { margin: 0em !important; }
 
@@ -45,7 +45,7 @@ body { font-size: 0.8em !important; }
 
 .panelgrid { font-size: 0.9em !important; }
 .panelgrid td { border: 1px solid #CCCCCC !important; }
-.panelgrid td:first-child { width: 11em !important; background-color: rgba(225,225,225, 0.6); }
+.panelgrid td:first-child { width: 13em !important; background-color: rgba(225,225,225, 0.6); }
 .panelgrid .ui-panelgrid-even { background-color: #FFFFFF; }
 
 .GAIN, .UP, .STRONG_UP, .BUY, .TAKE_PROFIT, .LOW { color: #008800; }
