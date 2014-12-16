@@ -1,4 +1,4 @@
-package ph.mar.psereader.presentation.report;
+package ph.mar.psereader.presentation;
 
 import java.io.Serializable;
 import java.text.DateFormat;
@@ -21,7 +21,7 @@ import ph.mar.psereader.business.report.entity.PseReportRow;
 
 @Named
 @ViewScoped
-public class StockReportsPage implements Serializable {
+public class EndOfDayReportPage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd, yyyy");

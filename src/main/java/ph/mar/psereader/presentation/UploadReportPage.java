@@ -1,4 +1,4 @@
-package ph.mar.psereader.presentation.report;
+package ph.mar.psereader.presentation;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -23,7 +23,7 @@ import ph.mar.psereader.presentation.util.MessageUtil;
 
 @Named
 @ViewScoped
-public class UploadPage implements Serializable {
+public class UploadReportPage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

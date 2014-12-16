@@ -10,10 +10,10 @@
 		<p:panelGrid styleClass="no-border">
 			<p:row>
 				<p:column style="width: 50%; vertical-align: top;">
-					<p:fileUpload id="reportUpload" fileUploadListener="#{uploadPage.onUpload}" update="filesUploaded" allowTypes="/(\.pdf)$/" multiple="true" />
+					<p:fileUpload id="reportUpload" fileUploadListener="#{uploadReportPage.onUpload}" update="filesUploaded" allowTypes="/(\.pdf)$/" multiple="true" />
 				</p:column>
 				<p:column style="vertical-align: top; text-align: center;">
-					<p:dataTable id="filesUploaded" styleClass="files-uploaded" var="fileName" value="#{uploadPage.fileNames}">
+					<p:dataTable id="filesUploaded" styleClass="files-uploaded" var="fileName" value="#{uploadReportPage.fileNames}">
 						<f:facet name="header">
 							<h:outputText value="File/s Uploaded" />
 						</f:facet>
@@ -22,7 +22,7 @@
 						</p:column>
 					</p:dataTable>
 					<p:outputPanel style="margin-top: 0.5em;">
-						<p:commandButton id="save" value="Save" actionListener="#{uploadPage.save}" update=":uploadForm:filesUploaded" partialSubmit="true" />
+						<p:commandButton id="save" value="Save" actionListener="#{uploadReportPage.save}" update=":uploadForm:filesUploaded" partialSubmit="true" />
 					</p:outputPanel>
 				</p:column>
 			</p:row>

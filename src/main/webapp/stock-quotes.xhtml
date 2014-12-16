@@ -8,21 +8,21 @@
 
 <ui:define name="content">
 <h:form id="quotesForm">
-	<p:dataTable id="stockDataTable" widgetVar="stockDataTable" var="quote" value="#{quotesPage.quotes}">
+	<p:dataTable id="stockDataTable" widgetVar="stockDataTable" var="quote" value="#{stockQuotesPage.quotes}">
 		<f:facet name="header">
 			<p:panelGrid id="header" styleClass="header">
 				<p:row>
 					<p:column styleClass="left">
-						<p:selectOneMenu id="selectedStockSymbol" value="#{quotesPage.selectedSymbol}" filter="true">
-							<p:ajax update="title" listener="#{quotesPage.onSymbolChange}" oncomplete="PF('stockDataTable').filter();" />
-							<f:selectItems value="#{quotesPage.symbols}" />
+						<p:selectOneMenu id="selectedStockSymbol" value="#{stockQuotesPage.selectedSymbol}" filter="true">
+							<p:ajax update="title" listener="#{stockQuotesPage.onSymbolChange}" oncomplete="PF('stockDataTable').filter();" />
+							<f:selectItems value="#{stockQuotesPage.symbols}" />
 						</p:selectOneMenu>
 					</p:column>
 					<p:column styleClass="middle">
 						<p:outputPanel id="title">
-							<h:outputText value="#{quotesPage.stock.name}" />
+							<h:outputText value="#{stockQuotesPage.stock.name}" />
 							<br />
-							<h:outputText value="#{quotesPage.stock.sector.name} > #{quotesPage.stock.subSector.name}" styleClass="caption" rendered="#{not empty quotesPage.symbols}" />
+							<h:outputText value="#{stockQuotesPage.stock.sector.name} > #{stockQuotesPage.stock.subSector.name}" styleClass="caption" rendered="#{not empty stockQuotesPage.symbols}" />
 						</p:outputPanel>
 					</p:column>
 					<p:column styleClass="right">

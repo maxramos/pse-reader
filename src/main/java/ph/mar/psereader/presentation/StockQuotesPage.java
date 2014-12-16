@@ -1,4 +1,4 @@
-package ph.mar.psereader.presentation.stock;
+package ph.mar.psereader.presentation;
 
 import java.io.Serializable;
 import java.util.List;
@@ -16,7 +16,7 @@ import ph.mar.psereader.business.stock.entity.Stock;
 
 @Named
 @ViewScoped
-public class QuotesPage implements Serializable {
+public class StockQuotesPage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

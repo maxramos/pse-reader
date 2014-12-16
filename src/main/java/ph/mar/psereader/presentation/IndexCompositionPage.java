@@ -1,4 +1,4 @@
-package ph.mar.psereader.presentation.pseindex;
+package ph.mar.psereader.presentation;
 
 import java.io.Serializable;
 import java.util.List;
@@ -17,7 +17,7 @@ import ph.mar.psereader.business.stock.entity.Stock;
 
 @Named
 @ViewScoped
-public class CompositionPage implements Serializable {
+public class IndexCompositionPage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

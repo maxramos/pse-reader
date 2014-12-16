@@ -16,34 +16,15 @@
 			<h:form>
 				<p:menu id="menu" styleClass="menu">
 					<p:submenu label="Menu">
-						<p:menuitem value="Home" url="/home" async="true" styleClass="#{request.servletPath eq '/home.xhtml' ? 'selected' : ''}" />
-						<p:menuitem value="Indicators" url="/indicators" async="true" styleClass="#{request.servletPath eq '/indicators.xhtml' ? 'selected' : ''}" />
-						<p:menuitem value="Stock" url="/stock/profile" async="true" 
-							styleClass="#{request.servletPath eq '/stock/profile.xhtml' or request.servletPath eq '/stock/quotes.xhtml' ? 'selected' : ''}" />
-						<p:menuitem value="Index" url="/index/composition" async="true" 
-							styleClass="#{request.servletPath eq '/index/composition.xhtml' or request.servletPath eq '/index/index-quotes.xhtml' ? 'selected' : ''}" />
-						<p:menuitem value="Report" url="/report/stock-reports" async="true"
-							styleClass="#{request.servletPath eq '/report/stock-reports.xhtml' or request.servletPath eq '/report/upload.xhtml' ? 'selected' : ''}" />
-						<p:menuitem value="Operations" url="/operations" async="true" styleClass="#{request.servletPath eq '/operations.xhtml' ? 'selected' : ''}" />
-					</p:submenu>
-				</p:menu>
-				<p:spacer style="margin-top: 2em;" />
-				<p:menu id="stockSubmenu" styleClass="menu" rendered="#{request.servletPath eq '/stock/profile.xhtml' or request.servletPath eq '/stock/quotes.xhtml'}">
-					<p:submenu label="Sub Menu">
-						<p:menuitem value="Profile" url="/stock/profile" async="true" styleClass="#{request.servletPath eq '/stock/profile.xhtml' ? 'selected' : ''}" />
-						<p:menuitem value="Quotes" url="/stock/quotes" async="true" styleClass="#{request.servletPath eq '/stock/quotes.xhtml' ? 'selected' : ''}" />
-					</p:submenu>
-				</p:menu>
-				<p:menu id="indexSubmenu" styleClass="menu" rendered="#{request.servletPath eq '/index/composition.xhtml' or request.servletPath eq '/index/index-quotes.xhtml'}">
-					<p:submenu label="Sub Menu">
-						<p:menuitem value="Composition" url="/index/composition" async="true" styleClass="#{request.servletPath eq '/index/composition.xhtml' ? 'selected' : ''}" />
-						<p:menuitem value="Index Quotes" url="/index/index-quotes" async="true" styleClass="#{request.servletPath eq '/index/index-quotes.xhtml' ? 'selected' : ''}" />
-					</p:submenu>
-				</p:menu>
-				<p:menu id="reportSubmenu" styleClass="menu" rendered="#{request.servletPath eq '/report/stock-reports.xhtml' or request.servletPath eq '/report/upload.xhtml'}">
-					<p:submenu label="Sub Menu">
-						<p:menuitem value="Stock Reports" url="/report/stock-reports" async="true" styleClass="#{request.servletPath eq '/report/stock-reports.xhtml' ? 'selected' : ''}" />
-						<p:menuitem value="Upload" url="/report/upload" async="true" styleClass="#{request.servletPath eq '/report/upload.xhtml' ? 'selected' : ''}" />
+						<p:menuitem value="Home" url="home" async="true" styleClass="#{request.servletPath eq '/home.xhtml' ? 'selected' : ''}" />
+						<p:menuitem value="Indicators" url="indicators" async="true" styleClass="#{request.servletPath eq '/indicators.xhtml' ? 'selected' : ''}" />
+						<p:menuitem value="Stock Profile" url="stock-profile" async="true" styleClass="#{request.servletPath eq '/stock-profile.xhtml' ? 'selected' : ''}" />
+						<p:menuitem value="Stock Quotes" url="stock-quotes" async="true" styleClass="#{request.servletPath eq '/stock-quotes.xhtml' ? 'selected' : ''}" />
+						<p:menuitem value="Index Composition" url="index-composition" async="true" styleClass="#{request.servletPath eq '/index-composition.xhtml' ? 'selected' : ''}" />
+						<p:menuitem value="Index Quotes" url="index-quotes" async="true" styleClass="#{request.servletPath eq '/index-quotes.xhtml' ? 'selected' : ''}" />
+						<p:menuitem value="End of Day Report" url="end-of-day-report" async="true" styleClass="#{request.servletPath eq '/end-of-day-report.xhtml' ? 'selected' : ''}" />
+						<p:menuitem value="Upload Report" url="upload-report" async="true" styleClass="#{request.servletPath eq '/upload-report.xhtml' ? 'selected' : ''}" />
+						<p:menuitem value="Operations" url="operations" async="true" styleClass="#{request.servletPath eq '/operations.xhtml' ? 'selected' : ''}" />
 					</p:submenu>
 				</p:menu>
 			</h:form>

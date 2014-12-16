@@ -7,21 +7,21 @@
 
 <ui:define name="content">
 <h:form id="reportForm">
-	<p:dataTable id="reportDataTable" widgetVar="reportDataTable" var="row" value="#{stockReportsPage.rows}" filteredValue="#{stockReportsPage.filteredRows}">
+	<p:dataTable id="reportDataTable" widgetVar="reportDataTable" var="row" value="#{endOfDayReportPage.rows}" filteredValue="#{endOfDayReportPage.filteredRows}">
 		<f:facet name="header">
 			<p:panelGrid id="header" styleClass="header">
 				<p:row>
 					<p:column styleClass="left">
-						<p:selectOneMenu id="selectedReportDate" value="#{stockReportsPage.selectedDate}">
-							<p:ajax update="title" listener="#{stockReportsPage.onDateChange}" oncomplete="PF('reportDataTable').filter();" />
-							<f:selectItems value="#{stockReportsPage.dates}" />
+						<p:selectOneMenu id="selectedReportDate" value="#{endOfDayReportPage.selectedDate}">
+							<p:ajax update="title" listener="#{endOfDayReportPage.onDateChange}" oncomplete="PF('reportDataTable').filter();" />
+							<f:selectItems value="#{endOfDayReportPage.dates}" />
 						</p:selectOneMenu>
 					</p:column>
 					<p:column styleClass="middle">
 						<p:outputPanel id="title">
-							<h:outputText value="End of Day Quotes" rendered="#{not empty stockReportsPage.dates}" />
+							<h:outputText value="End of Day Quotes" rendered="#{not empty endOfDayReportPage.dates}" />
 							<br />
-							<h:outputText value="#{stockReportsPage.selectedDate}" styleClass="caption" />
+							<h:outputText value="#{endOfDayReportPage.selectedDate}" styleClass="caption" />
 						</p:outputPanel>
 					</p:column>
 					<p:column styleClass="right">

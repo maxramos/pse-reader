@@ -7,19 +7,19 @@
 
 <ui:define name="content">
 <h:form id="compositionForm">
-	<p:dataTable id="compositionDataTable" widgetVar="compositionDataTable" var="stock" value="#{compositionPage.stocks}" rowIndexVar="rowIndex">
+	<p:dataTable id="compositionDataTable" widgetVar="compositionDataTable" var="stock" value="#{indexCompositionPage.stocks}" rowIndexVar="rowIndex">
 		<f:facet name="header">
 			<p:panelGrid id="header" styleClass="header">
 				<p:row>
 					<p:column styleClass="left">
-						<p:selectOneMenu id="selectedIndex" value="#{compositionPage.selectedIndex}">
-							<p:ajax update="compositionDataTable" listener="#{compositionPage.onIndexChange}" />
-							<f:selectItems value="#{compositionPage.indices}" var="i" itemLabel="#{i.name}" />
+						<p:selectOneMenu id="selectedIndex" value="#{indexCompositionPage.selectedIndex}">
+							<p:ajax update="compositionDataTable" listener="#{indexCompositionPage.onIndexChange}" />
+							<f:selectItems value="#{indexCompositionPage.indices}" var="i" itemLabel="#{i.name}" />
 						</p:selectOneMenu>
 					</p:column>
 					<p:column styleClass="middle">
 						<p:outputPanel id="title">
-							<h:outputText value="#{compositionPage.selectedIndex.name}" />
+							<h:outputText value="#{indexCompositionPage.selectedIndex.name}" />
 						</p:outputPanel>
 					</p:column>
 					<p:column styleClass="right">
