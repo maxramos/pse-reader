@@ -48,6 +48,12 @@
 		<p:column headerText="Sub Sector" sortBy="#{stock.subSector}" styleClass="text">
 			<h:outputText value="#{stock.subSector.name}" />
 		</p:column>
+		
+		<p:column headerText="Indices">
+			<h:outputText value="PSEi, " rendered="#{stock.psei}" />
+			<h:outputText value="#{stock.sectoralIndex.name}, " rendered="#{stock.sectoralIndex ne null}" />
+			<h:outputText value="All Shares" rendered="#{stock.allShares}" />
+		</p:column>
 	</p:dataTable>
 </h:form>
 </ui:define>

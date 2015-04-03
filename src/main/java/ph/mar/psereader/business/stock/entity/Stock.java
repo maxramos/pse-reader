@@ -9,16 +9,19 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import ph.mar.psereader.business.fundamental.entity.Fundamental;
 import ph.mar.psereader.business.indicator.entity.IndicatorResult;
 import ph.mar.psereader.business.pseindex.entity.PseIndex;
 import ph.mar.psereader.business.report.entity.PseReportRow;
@@ -30,6 +33,8 @@ import ph.mar.psereader.business.report.entity.PseReportRow;
 	@NamedQuery(name = Stock.ALL_ALL_SHARES, query = "SELECT s FROM Stock s WHERE s.allShares = TRUE ORDER BY s.symbol"),
 	@NamedQuery(name = Stock.ALL_PSEI, query = "SELECT s FROM Stock s WHERE s.psei = TRUE ORDER BY s.symbol"),
 	@NamedQuery(name = Stock.ALL_SYMBOLS, query = "SELECT s.symbol FROM Stock s ORDER BY s.symbol"),
+	@NamedQuery(name = Stock.ALL_SYMBOLS_WO_FUNDAMENTAL, query = "SELECT s.symbol FROM Stock s WHERE s.fundamental IS NULL ORDER BY s.symbol"),
+	@NamedQuery(name = Stock.ALL_WITH_FUNDAMENTAL, query = "SELECT DISTINCT s FROM Stock s JOIN FETCH s.fundamental ORDER BY s.symbol"),
 	@NamedQuery(name = Stock.ALL_WITH_QUOTES_BY_SYMBOL, query = "SELECT DISTINCT s FROM Stock s JOIN FETCH s.quotes WHERE s.symbol = :symbol"),
 	@NamedQuery(name = Stock.ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT, query = "SELECT DISTINCT s FROM Stock s LEFT JOIN FETCH s.indicatorResults WHERE EXISTS (SELECT q FROM Quote q WHERE q.stock = s AND q.date = :date) AND (SELECT COUNT(q) FROM Quote q WHERE q.stock = s AND q.date <= :date) >= :count AND s.suspended = FALSE ORDER BY s.symbol"),
 	@NamedQuery(name = Stock.BY_SECTORAL_INDEX, query = "SELECT s FROM Stock s WHERE s.sectoralIndex = :sectoralIndex ORDER BY s.symbol"),
@@ -40,6 +45,8 @@ public class Stock implements Serializable {
 	public static final String ALL_ALL_SHARES = "Stock.ALL_ALL_SHARES";
 	public static final String ALL_PSEI = "Stock.ALL_PSEI";
 	public static final String ALL_SYMBOLS = "Stock.ALL_SYMBOLS";
+	public static final String ALL_SYMBOLS_WO_FUNDAMENTAL = "Stock.ALL_SYMBOLS_WO_FUNDAMENTAL";
+	public static final String ALL_WITH_FUNDAMENTAL = "Stock.ALL_WITH_FUNDAMENTAL";
 	public static final String ALL_WITH_QUOTES_BY_SYMBOL = "Stock.ALL_WITH_QUOTES_BY_SYMBOL";
 	// WOWO means with or without
 	public static final String ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT = "Stock.ALL_WOWO_INDICATOR_RESULTS_BY_DATE_AND_COUNT";
@@ -86,6 +93,9 @@ public class Stock implements Serializable {
 	@OrderBy("date DESC")
 	@OneToMany(mappedBy = "stock", cascade = CascadeType.ALL)
 	private List<IndicatorResult> indicatorResults;
+
+	@OneToOne(fetch = FetchType.LAZY, mappedBy = "stock", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Fundamental fundamental;
 
 	public Stock() {
 		super();
@@ -182,11 +192,19 @@ public class Stock implements Serializable {
 		return indicatorResults;
 	}
 
+	public Fundamental getFundamental() {
+		return fundamental;
+	}
+
+	public void setFundamental(Fundamental fundamental) {
+		this.fundamental = fundamental;
+	}
+
 	@Override
 	public String toString() {
 		return String
-				.format("Stock [id=%s, symbol=%s, name=%s, sector=%s, subSector=%s, suspended=%s, psei=%s, allShares=%s, sectoralIndex=%s, quotes=%s, indicatorResults=%s]",
-						id, symbol, name, sector, subSector, suspended, psei, allShares, sectoralIndex, quotes, indicatorResults);
+				.format("Stock [id=%s, symbol=%s, name=%s, sector=%s, subSector=%s, suspended=%s, psei=%s, allShares=%s, sectoralIndex=%s, quotes=%s, indicatorResults=%s, fundamental=%s]",
+						id, symbol, name, sector, subSector, suspended, psei, allShares, sectoralIndex, quotes, indicatorResults, fundamental);
 	}
 
 }

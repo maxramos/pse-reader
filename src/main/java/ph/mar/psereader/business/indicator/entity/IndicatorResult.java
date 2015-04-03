@@ -27,16 +27,22 @@ import ph.mar.psereader.business.stock.entity.Stock;
 @Entity
 @Table(name = "indicator_result", uniqueConstraints = @UniqueConstraint(columnNames = { "date", "stock_id" }), indexes = @Index(columnList = "stock_id,date"))
 @NamedQueries({
+	@NamedQuery(name = IndicatorResult.ALL_ACTIVES_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.movement, ir.pmovResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date ORDER BY q.value DESC"),
 	@NamedQuery(name = IndicatorResult.ALL_BY_STOCK_AND_DATE, query = "SELECT ir FROM IndicatorResult ir WHERE ir.stock = :stock AND ir.date BETWEEN :start AND :end ORDER BY ir.date DESC"),
+	@NamedQuery(name = IndicatorResult.ALL_GAINERS_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.movement, ir.pmovResult, ir.stock) FROM IndicatorResult ir WHERE ir.date = :date ORDER BY ir.pmovResult.pricePercentChange DESC"),
 	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.movement, ir.trend, ir.recommendation, ir.risk, ir.pmovResult, ir.emaResult, ir.fstoResult, ir.obvResult, ir.atrResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date ORDER BY ir.stock.symbol"),
 	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_RECOMMENDATION, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.movement, ir.trend, ir.recommendation, ir.risk, ir.pmovResult, ir.emaResult, ir.fstoResult, ir.obvResult, ir.atrResult, ir.stock, q) FROM IndicatorResult ir, Quote q WHERE ir.stock = q.stock AND ir.date = :date AND q.date = :date AND ir.recommendation = :recommendation ORDER BY ir.stock.symbol"),
-	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.pmovResult, ir.emaResult, ir.fstoResult, ir.obvResult, ir.atrResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC") })
+	@NamedQuery(name = IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.pmovResult, ir.emaResult, ir.fstoResult, ir.obvResult, ir.atrResult) FROM IndicatorResult ir WHERE ir.stock = :stock ORDER BY ir.date DESC"),
+	@NamedQuery(name = IndicatorResult.ALL_LOSERS_BY_DATE, query = "SELECT NEW ph.mar.psereader.business.indicator.entity.IndicatorResult(ir.movement, ir.pmovResult, ir.stock) FROM IndicatorResult ir WHERE ir.date = :date ORDER BY ir.pmovResult.pricePercentChange"), })
 public class IndicatorResult implements Serializable {
 
+	public static final String ALL_ACTIVES_BY_DATE = "IndicatorResult.ALL_ACTIVES_BY_DATE";
 	public static final String ALL_BY_STOCK_AND_DATE = "IndicatorResult.ALL_BY_STOCK_AND_DATE";
+	public static final String ALL_GAINERS_BY_DATE = "IndicatorResult.ALL_GAINERS_BY_DATE";
 	public static final String ALL_INDICATOR_DATA_BY_DATE = "IndicatorResult.ALL_INDICATOR_DATA_BY_DATE";
 	public static final String ALL_INDICATOR_DATA_BY_DATE_AND_RECOMMENDATION = "IndicatorResult.ALL_INDICATOR_DATA_BY_DATE_AND_RECOMMENDATION";
 	public static final String ALL_INDICATOR_DATA_BY_STOCK = "IndicatorResult.ALL_INDICATOR_DATA_BY_STOCK";
+	public static final String ALL_LOSERS_BY_DATE = "IndicatorResult.ALL_LOSERS_BY_DATE";
 
 	private static final long serialVersionUID = 1L;
 
@@ -122,6 +128,25 @@ public class IndicatorResult implements Serializable {
 		this.atrResult = atrResult;
 		this.stock = stock;
 		this.quote = quote;
+	}
+
+	/**
+	 * For Actives.
+	 */
+	public IndicatorResult(MovementType movement, PmovResult pmovResult, Stock stock, Quote quote) {
+		this.movement = movement;
+		this.pmovResult = pmovResult;
+		this.stock = stock;
+		this.quote = quote;
+	}
+
+	/**
+	 * For Gainers and Losers.
+	 */
+	public IndicatorResult(MovementType movement, PmovResult pmovResult, Stock stock) {
+		this.movement = movement;
+		this.pmovResult = pmovResult;
+		this.stock = stock;
 	}
 
 	public Long getId() {

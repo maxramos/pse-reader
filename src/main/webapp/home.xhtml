@@ -113,6 +113,86 @@
 		</p:row>
 	</p:panelGrid>
 </p:panel>
+
+<div class="table" style="width: 70em; margin-top: 1em;">
+<h:form id="moversForm" styleClass="table-row">
+<p:dataTable id="activesDataTable" var="result" value="#{homePage.actives}" styleClass="table-cell" style="width: 30em;">
+	<f:facet name="header">
+		<h:outputText value="Actives" />
+	</f:facet>
+	
+	<p:column headerText="Symbol" styleClass="text" >
+		<h:outputText value="#{result.stock.symbol}" />
+	</p:column>
+	
+	<p:column headerText="Value" styleClass="numeric">
+		<h:outputText value="#{result.quote.value}" styleClass="#{result.movement}">
+			<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+		</h:outputText>
+	</p:column>
+	
+	<p:column headerText="Chg" styleClass="numeric">
+		<h:outputText value="#{result.pmovResult.priceChange}" styleClass="#{result.movement}">
+			<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+		</h:outputText>
+	</p:column>
+	
+	<p:column headerText="%Chg" styleClass="numeric">
+		<h:outputText value="#{result.pmovResult.pricePercentChange}" styleClass="#{result.movement}">
+			<f:convertNumber type="percent" minFractionDigits="2" />
+		</h:outputText>
+	</p:column>
+</p:dataTable>
+
+<p:spacer width="5" />
+
+<p:dataTable id="gainersDataTable" var="result" value="#{homePage.gainers}" styleClass="table-cell" style="width: 20em;">
+	<f:facet name="header">
+		<h:outputText value="Gainers" />
+	</f:facet>
+	
+	<p:column headerText="Symbol" styleClass="text" >
+		<h:outputText value="#{result.stock.symbol}" />
+	</p:column>
+	
+	<p:column headerText="Chg" styleClass="numeric">
+		<h:outputText value="#{result.pmovResult.priceChange}" styleClass="#{result.movement}">
+			<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+		</h:outputText>
+	</p:column>
+	
+	<p:column headerText="%Chg" styleClass="numeric">
+		<h:outputText value="#{result.pmovResult.pricePercentChange}" styleClass="#{result.movement}">
+			<f:convertNumber type="percent" minFractionDigits="2" />
+		</h:outputText>
+	</p:column>
+</p:dataTable>
+
+<p:spacer width="5" />
+
+<p:dataTable id="losersDataTable" var="result" value="#{homePage.losers}" styleClass="table-cell" style="width: 20em;">
+	<f:facet name="header">
+		<h:outputText value="Losers" />
+	</f:facet>
+	
+	<p:column headerText="Symbol" styleClass="text" >
+		<h:outputText value="#{result.stock.symbol}" />
+	</p:column>
+	
+	<p:column headerText="Chg" styleClass="numeric">
+		<h:outputText value="#{result.pmovResult.priceChange}" styleClass="#{result.movement}">
+			<f:convertNumber type="number" groupingUsed="true" maxFractionDigits="4" />
+		</h:outputText>
+	</p:column>
+	
+	<p:column headerText="%Chg" styleClass="numeric">
+		<h:outputText value="#{result.pmovResult.pricePercentChange}" styleClass="#{result.movement}">
+			<f:convertNumber type="percent" minFractionDigits="2" />
+		</h:outputText>
+	</p:column>
+</p:dataTable>
+</h:form>
+</div>
 </ui:define>
 
 </ui:composition>

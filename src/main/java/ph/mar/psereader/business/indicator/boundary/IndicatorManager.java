@@ -86,6 +86,18 @@ public class IndicatorManager {
 				Quote.class);
 	}
 
+	public List<IndicatorResult> findAllActivesByDate(Date date, int maxResult) {
+		return repository.find(IndicatorResult.ALL_ACTIVES_BY_DATE, with("date", date).asParameters(), IndicatorResult.class, maxResult);
+	}
+
+	public List<IndicatorResult> findAllGainersByDate(Date date, int maxResult) {
+		return repository.find(IndicatorResult.ALL_GAINERS_BY_DATE, with("date", date).asParameters(), IndicatorResult.class, maxResult);
+	}
+
+	public List<IndicatorResult> findAllLosersByDate(Date date, int maxResult) {
+		return repository.find(IndicatorResult.ALL_LOSERS_BY_DATE, with("date", date).asParameters(), IndicatorResult.class, maxResult);
+	}
+
 	private void addIndicatorResults(Date date, List<Future<Stock>> results) {
 		for (Future<Stock> result : results) {
 			while (!result.isDone()) {
