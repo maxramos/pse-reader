@@ -1,0 +1,57 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/template/template.xhtml">
+
+<ui:define name="content">
+<h:form id="fundamentalsForm">
+	<p:dataTable id="fundamentalsDataTable" widgetVar="fundamentalsDataTable" var="stock" value="#{fundamentalsPage.stocks}" rowIndexVar="rowIndex" editable="true">
+		<p:column style="width: 2em;" styleClass="numeric">
+			<h:outputText value="#{rowIndex + 1}" />
+		</p:column>
+		
+		<p:column headerText="Symbol" sortBy="#{stock.symbol}" styleClass="text">
+			<h:outputText value="#{stock.symbol}" />
+		</p:column>
+		
+		<p:column headerText="Uptrend" styleClass="text">
+			<p:cellEditor>			
+				<f:facet name="output">
+					<h:outputText value="#{stock.fundamental.uptrend}" />
+				</f:facet>
+				<f:facet name="input">
+					<p:selectBooleanCheckbox value="#{stock.fundamental.uptrend}" />
+				</f:facet>
+			</p:cellEditor>
+		</p:column>
+		
+		<p:column style="width: 2.5em;">
+			<p:rowEditor />
+		</p:column>
+	</p:dataTable>
+	<p:outputPanel style="text-align: center;">
+		<p:commandButton type="button" value="Add" onclick="PF('addDialog').show();" style="margin-top: 0.5em;" />
+	</p:outputPanel>
+</h:form>
+
+<p:dialog id="addDialog" widgetVar="addDialog" header="Add Fundamental" modal="true" resizable="false" draggable="false" appendTo="@(body)">
+	<h:form id="addForm" styleClass="add-form">
+		<p:panelGrid columns="2">
+			<h:outputText value="Symbol" />
+			<p:selectOneMenu value="#{fundamentalsPage.selectedSymbol}">
+				<f:selectItems value="#{fundamentalsPage.symbols}" />
+			</p:selectOneMenu>
+			
+			<h:outputText value="Up Trend" />
+			<p:selectBooleanCheckbox value="#{fundamentalsPage.fundamental.uptrend}" />
+		</p:panelGrid>
+		<p:outputPanel style="text-align: center;">
+			<p:commandButton id="save" value="Save" update=":fundamentalsForm, :addForm" actionListener="#{fundamentalsPage.save}" onclick="PF('addDialog').hide();" />
+		</p:outputPanel>
+	</h:form>
+</p:dialog>
+</ui:define>
+
+</ui:composition>
